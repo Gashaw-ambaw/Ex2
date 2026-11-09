@@ -218,3 +218,9 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Real class data (names, IDs, emails): never commit
+private_data/
+
+# Secrets (API keys later)
+.env
