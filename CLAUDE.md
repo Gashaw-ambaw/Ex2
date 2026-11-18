@@ -13,4 +13,5 @@ Current phase: design only, no code.
    docs/project_plan.md.
 7. Mark AI-assisted work  in AI_USAGE.md.
 8. When coding starts: show the plan first, write tests first, small steps.
-9. The assignment text is in private_data/AssEX2.md (git-ignored). Read only this file.
+9. The assignment text is in private_data/AssEX2.md (git-ignored). Read only this file. Do not open other files in private_data/ (they may contain real student data).
+10. Prefer existing tools and libraries; build only the glue (D17).

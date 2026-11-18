@@ -1,6 +1,6 @@
 # Use Cases
 
-Status: draft. Last updated: 18/11/2026. Read with `decisions.md` (D1-D19).
+Status: draft. Last updated: 18/11/2026. Read with `decisions.md` (D1-D20).
 
 ## Conventions
 
@@ -96,7 +96,7 @@ Status: draft. Last updated: 18/11/2026. Read with `decisions.md` (D1-D19).
 2. The system checks that the code is current (this window or the previous one) and opens the mark page.
 3. The system recognizes the registered device and shows: "Hello <name>. Mark you present?"
 4. The student taps "I'm here" within about 20 seconds of the scan.
-5. The system checks that this roster entry was not marked in this class, that this device did not mark another student, and the location and network.
+5. The system checks that this roster entry was not marked in this class, that this device did not mark another student, and the location.
 6. The system records the mark and shows "Marked at HH:MM".
 
 **Alternative flows**
@@ -108,7 +108,6 @@ Status: draft. Last updated: 18/11/2026. Read with `decisions.md` (D1-D19).
 - 5b. The window is closed: "Attendance is closed; ask the lecturer."
 - 5c. This device already marked another student in this class: the attempt is blocked and flagged for the lecturer (D16).
 - 5d. Location is out of range or permission is denied: handled per D9. Block or flag is open until spike S3; for now the mark is recorded with a flag.
-- 5e. The network is not the campus network: the mark is recorded and flagged.
 
 **Postconditions:** One attendance row exists: roster entry, class, time, source "self", flags (if any). Only a yes/no location is stored.
 
@@ -132,7 +131,7 @@ flowchart TD
   I -- yes --> I1["Show earlier time"]
   I -- no --> J{"Device already marked another student?"}
   J -- yes --> J1["Block and flag for lecturer"]
-  J -- no --> K{"Location and network OK?"}
+  J -- no --> K{"Location OK?"}
   K -- no --> K1["Record mark with flag"]
   K -- yes --> L["Record mark"]
   K1 --> M(["Marked"])

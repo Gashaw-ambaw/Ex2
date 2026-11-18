@@ -4,7 +4,7 @@ Status: stage 1 (definition), design only, no code yet. Deadline: 25/11/2026.
 
 ## What it is
 
-A web app for a class, used from the students' phones with no installation. At the end of the lecture the lecturer shows a QR code on the projector. Each student scans it, confirms their name and taps once. The lecturer gets an attendance spreadsheet, and an alert if the number of marks differs from the number of people counted in a class photo. The same app lets students send anonymous comments, lets the lecturer run quick polls, summarizes a lecture from its Zoom transcript, and gives a student a critical report on their homework repository before submission.
+A web app for a class, used from the students' phones with no installation. At the end of the lecture the lecturer shows a QR code on the projector. Each student scans it, confirms their name and taps once. The lecturer gets an attendance spreadsheet, and an alert if the marks exceed the number of people counted in a class photo by more than a set tolerance. The same app lets students send anonymous comments, lets the lecturer run quick polls, summarizes a lecture from its Zoom transcript, and gives a student a critical report on their homework repository before submission.
 
 ## Problem
 
@@ -49,12 +49,12 @@ Written in English, in Markdown.
 
 | Document | Status |
 |---|---|
-| [Decisions](docs/decisions.md) | Draft |
+| [Decisions](docs/decisions.md) | In progress |
 | [Project plan](docs/project_plan.md) | Draft |
 | [Tools report](docs/tools_report.md) | TBD |
-| [SOW](docs/sow.md) | TBD |
+| [SOW](docs/sow.md) | Draft |
 | [SRS](docs/srs.md) | TBD |
-| [Use cases](docs/use_cases.md) | TBD |
+| [Use cases](docs/use_cases.md) | Draft |
 | [SDD](docs/sdd.md) | TBD |
 | [EDD](docs/edd.md) | TBD |
 | [Test plan](docs/stp.md) | TBD |
