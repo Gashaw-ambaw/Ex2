@@ -41,7 +41,7 @@ Taking attendance by hand costs lecture time, and a simple self-service tool is 
 | F4 | Lecture summary from a Zoom transcript | Thin slice |
 | F5 | Critical report on homework repos, with a class comparison | Thin slice |
 
-Implementation order: F1 to F5. Whether all five must be implemented is a pending question to the lecturer.
+All five features are implemented, in order F1 to F5. F1 is built in depth; F4 and F5 are thin slices.
 
 ## Documents
 

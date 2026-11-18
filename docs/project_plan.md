@@ -38,7 +38,6 @@ Closed decisions are in `decisions.md`. Everything below is open or a working as
 
 ## 4. Questions for the lecturer
 
-- Must all five features be implemented, or F1 in depth and the others basic?
 - What is the demo date, and the exact submission time on 25/11?
 - F5: is the report for the student, the lecturer, or both? May the class's Ex1 repos be used?
 
