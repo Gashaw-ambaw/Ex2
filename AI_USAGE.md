@@ -15,3 +15,4 @@ Real roster and class photos were shown only in the planning chat to understand 
 | 18/11 | Claude | SRS and SoW planning; SoW drafting and review | Decided scope, acceptance criteria and cut order; copied the text |
 | 18/11 | Claude Code, Claude | Comparison of a Claude Code plan with a Claude outline for the SoW | Chose which findings to apply |
 | 18/11 | Claude Code | Read-only repo inventory and analysis; D9 change (location only, no network check) | Decided D9; approved the edits |
+| 19/11 | Claude Code | Consistency fixes after the SRS: UC-05 5d, UC-08 step 3, sow.md F5 acceptance, D22, SRS notes | Decided which fixes, approved the edits |

@@ -178,7 +178,7 @@ flowchart TD
 - 5a. The student is not on the roster: the lecturer adds the student (name and email) first.
 - 5b. The student already has a mark: the system says so.
 - 5c. A student's roster email is not a Google account: the lecturer edits the email.
-- 5d. The lecturer removes ("resets") a mark so the student can mark again.
+- 5d. The lecturer removes ("resets") a mark. A reset only removes the mark; the lecturer can add one by hand (step 5).
 - 6a. The export fails: the system shows an error and the table stays.
 
 **Postconditions:** Statuses are updated and the file is downloaded. Nothing is penalized automatically.
@@ -233,7 +233,7 @@ flowchart TD
 **Main flow**
 1. The lecturer opens the Polls page, enters a question and 2-4 options, and may mark one option as correct.
 2. The lecturer taps "Start" and tells the class that a poll started.
-3. The system publishes the poll on the class page and shows the lecturer the live count per option (refreshed every few seconds while the poll is open).
+3. The system publishes the poll on the class page and shows the lecturer the live count per option (refreshed every 20 seconds while the poll is open, with a "Refresh now" button).
 4. Students answer (UC-09).
 5. The lecturer taps "Close".
 6. The system stops accepting answers and shows the final results: count and percent per option, and, if a correct option was marked, how many were right and wrong. The lecturer may project the page.

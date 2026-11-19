@@ -1,6 +1,6 @@
 # Software Requirements Specification – Ex2 Web-based Teaching Tool
 
-Status: draft. Date: 18/11/2026. Read with `decisions.md` (D1-D21).
+Status: draft. Date: 18/11/2026. Read with `decisions.md` (D1-D22).
 This SRS says WHAT the system does. `decisions.md` says why, and the SDD says how. Use cases are in `use_cases.md`.
 
 ## 1. Introduction
@@ -21,7 +21,7 @@ Problem, scope and the five features (F1 to F5): `README.md`. F1, in-class atten
 - **Device:** a browser identified by a cookie.
 
 ### 1.4 References
-`README.md`, `decisions.md` (D1-D21), `use_cases.md` (UC-00 to UC-13), `sow.md`, `project_plan.md`, and the assignment text.
+`README.md`, `decisions.md` (D1-D22), `use_cases.md` (UC-00 to UC-13), `sow.md`, `project_plan.md`, and the assignment text.
 
 ### 1.5 How requirements are written
 - IDs follow D20: `FR-nn` (functional), `NFR-nn` (non-functional). Spikes are `S1-S6`, decisions `Dn`. An ID is never reused; a removed item is marked "retired".
@@ -129,7 +129,7 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here.
 | NFR-08 | store no ID numbers, and no identity with comments and poll answers | F1, F2, F3 | Must | D8, D10, D11 | |
 | NFR-09 | apply one retention rule: everything stored is kept until the end of the semester, then deleted; uploaded files are deleted after processing; the F5 student report is not stored; F5 limit counters reset daily; the checklist is kept until changed | All | Must | D21 | |
 | NFR-10 | stay under a provider spending limit for model calls in F4 and F5 (`MODEL_SPEND_LIMIT`, **OPEN**) | F4, F5 | Must | D13; sow.md:47 | S5, S6 |
-| NFR-11 | show the user interface in English, and write summaries (F4) and reports (F5) in the language of the input (the transcript or the README) | All | Must | Decision 18/11, not yet in `decisions.md` (B14); use_cases.md (UI texts are in English) | |
+| NFR-11 | show the user interface in English, and write summaries (F4) and reports (F5) in the language of the input (the transcript or the README) | All | Must | D22; use_cases.md (UI texts are in English) | |
 | NFR-12 | run from a clean checkout with the README steps, and the tests run | All | Must | sow.md:20 | |
 
 ### 3.4 Parameters
@@ -223,8 +223,8 @@ The Test column is filled in the STP. Several test cases verify each FR. NFR-01 
 | B1 | `sow.md:15` says each SRS requirement traces to a use case. The NFRs cite a decision, the SoW or the plan instead. |
 | B2 | OPEN: `project_plan.md:67` ("show aggregates only") against `use_cases.md:303` ("3-5 remarks"). |
 | B3 | OPEN / S3: block or flag for location (FR-04). |
-| B4 | Decided: attendance statuses (normal and unverified only; source is a separate field) and the poll refresh (`REFRESH_SEC` with a manual refresh control) are not entered in `decisions.md`. `use_cases.md:236` ("every few seconds") differs from 20 s; to be fixed later. |
-| B5 | Decided: a reset only removes the mark. The lecturer can add one by hand. `use_cases.md` UC-05 5d ("so the student can mark again") is to be fixed later. |
+| B4 | Decided (no decision ID; statuses follow D16 and D18): attendance statuses (normal and unverified only; source is a separate field) and the poll refresh (`REFRESH_SEC` with a manual refresh control). `use_cases.md` UC-08 step 3 now says 20 s. |
+| B5 | Decided: a reset only removes the mark. The lecturer can add one by hand. Fixed in `use_cases.md` UC-05 5d. |
 | B6 | OPEN numbers: supported browsers, `QR_ROTATE_SEC`, `PHOTO_MAX_MB`, `F4_UPLOAD_MAX_MB`, `SUMMARY_MAX_WORDS`, `F5_DAILY_CAP`, `README_MAX_CHARS`, `MODEL_SPEND_LIMIT`, `LOGIN_ATTEMPT_LIMIT`, `LOAD_SIM_MARKS`, `JOB_TIMEOUT_SEC`. |
 | B7 | HTTPS (NFR-06): basis not verified, check in S1. The 95% and the 3-4 actions are ESTIMATE targets. |
 | B8 | `sow.md:18` accepts a transcript or a short recording. The transcript is in FR-12; the recording is Appendix C. Hebrew is in scope. |
@@ -232,8 +232,8 @@ The Test column is filled in the STP. Several test cases verify each FR. NFR-01 
 | B10 | The SoW cut order (F5 first, then F4; F1-F3 protected, `sow.md:53`) is a SoW fact; the Priority column does not encode it. |
 | B11 | The STP must cover all 72 alternative flows counted in `use_cases.md` (3, 4, 5, 8, 4, 7, 5, 5, 4, 4, 6, 9, 6, 2 for UC-00 to UC-13). |
 | B12 | "Device" means a browser (cookie); D16 and UC-09 use both words. |
-| B13 | The F5 comparison with class counts is Must (FR-13), consistent with the assignment text ("including comparisons to other students' work"), D13, `sow.md:31` and `README.md:42`. It is limited to counts: the lecturer rejected a rubric, and a similarity check needs a sandbox. The SoW acceptance (`sow.md:19`) is narrower (it does not mention the comparison) and is not edited; align it later. |
-| B14 | Decided 18/11, not yet in `decisions.md`: the user interface is in English; summaries and reports are written in the language of the input (NFR-11). |
+| B13 | The F5 comparison with class counts is Must (FR-13), consistent with the assignment text (feature 5: "including comparisons to other students' work"), D13, `sow.md:19`, `sow.md:31` and `README.md:42`. It is limited to counts: the lecturer rejected a rubric (D13), and a similarity check needs a sandbox. |
+| B14 | Decided 18/11, now D22: the user interface is in English; summaries and reports are written in the language of the input (NFR-11). |
 | B15 | OPEN: where the demo runs (S1). |
 
 ### Appendix C: optional flows (Could)

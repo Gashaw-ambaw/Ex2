@@ -1,6 +1,6 @@
 # Decisions
 
-Closed decisions only. Open items are in `project_plan.md`. Last updated: 18/11/2026.
+Closed decisions only. Open items are in `project_plan.md`. Last updated: 19/11/2026.
 
 | # | Decision | Reason (rejected alternative) | Source |
 |---|---|---|---|
@@ -25,3 +25,4 @@ Closed decisions only. Open items are in `project_plan.md`. Last updated: 18/11/
 | D19 | A class session is created automatically from the date. If attendance is opened in a session that already has a closed window, the system asks whether to start a new session (for example a tutorial) and its name. A postponed class is added manually with the wanted date. | KISS: lecture and tutorial on one day stay separate with one tap. Rejected for now: a timetable (future improvement). | Own decision, 18/11 |
 | D20 | IDs for all project documents are a flat two-digit sequence per type, like `UC-nn`: `FR-nn`, `NFR-nn`, `TC-nn` (tests), `C-nn` (components), `R-nn` (risks). Spikes stay `S1-S6`, decisions `Dn`. Parameters have a constant name (for example `ATT_WINDOW_SEC`) used identically in every document. An ID is never reused; a removed item is marked "retired". The feature (F1-F5) goes in a separate column. | Consistent with `UC-nn`; numbers do not shift while features are written one at a time. Rejected: `FR-F1-01` (longer, differs from `UC-nn`); `FR-1.01` (inconsistent with `UC-nn`). | Own decision, 18/11 |
 | D21 | Data retention, one rule. Everything stored (roster, device links, sessions, attendance rows, count and gap, comments, polls, F4 summaries, F5 overview) is kept until the end of the semester, then deleted. Uploaded files (class photo, transcript or recording, submissions list) are deleted after processing. The F5 student report is not stored. F5 limit counters reset daily. The F5 checklist is kept until the lecturer changes it. | Privacy (keep the minimum); attendance is the product and is needed through the semester; one simple rule (KISS). Rejected: deleting attendance after each class (it is the deliverable); keeping data with no end date (privacy); a different period per item (complex). | Own decision, 18/11 (Claude proposed, approved) |
+| D22 | The user interface is in English. F4 summaries and F5 reports are written in the language of the input (transcript or README). | One UI language (KISS); lectures and READMEs may be in Hebrew. | Own decision, 18/11 |
