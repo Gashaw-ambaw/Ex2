@@ -1,6 +1,6 @@
 # Project Plan – Ex2
 
-Status: draft (stage 1). Last updated: 18/11/2026. Deadline: 25/11/2026.
+Status: draft (stage 1). Last updated: 20/11/2026. Deadline: 25/11/2026.
 Closed decisions are in `decisions.md`. Everything below is open or a working assumption.
 Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
@@ -20,8 +20,8 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 - Flags for the lecturer: several identities on one device, location out of range (block or flag: S3), count gap.
 - Photo count counts people only, using a pre-trained model.
 - Late students are added by the lecturer and labelled "manual".
-- Expected load: 50-100 simultaneous marks (roster about 102).
-- Temporary data (photo, sessions) is deleted after class.
+- Expected load: up to 100 simultaneous marks (roster about 102).
+- Sessions and marks are kept to the end of the semester; the photo is deleted after counting (D21).
 - Stack candidates: Python with FastAPI or Flask, SQLite, a background job runner, one deployable app.
 
 ## 3. Open decisions
@@ -33,21 +33,21 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | 3 | Count method and tolerance | Spike S4 on class photos with manual counts |
 | 4 | Language, framework, hosting | Tools report, spike S1 |
 | 5 | If Google sign-in fails on phones, what replaces it (SoW: the lecturer takes attendance the regular way; alternative: magic link by email, proposal, not approved) | Spike S1 |
-| 6 | Export format (file, Google Sheets) | Tools report |
-| 7 | F2 refresh interval and abuse handling | Before SDD |
+| 6 | Export format (file, Google Sheets) | Resolved: a file, CSV or XLSX (FR-07); Google Sheets optional |
+| 7 | F2 refresh interval and abuse handling | Resolved: `REFRESH_SEC` and `COMMENT_MIN_INTERVAL_SEC` (FR-08, FR-09) |
 | 8 | F4 and F5 models, Hebrew support | Spikes S5, S6 |
 
 ## 4. Questions for the lecturer
 
 - What is the demo date, and the exact submission time on 25/11?
-- F5: is the report for the student, the lecturer, or both? May the class's Ex1 repos be used?
+- F5: is the report for the student, the lecturer, or both? Assumed both (D13). May the class's Ex1 repos be used?
 
 ## 5. Spikes (time-boxed, code in `spikes/`)
 
 | # | Goal | When / status |
 |---|---|---|
-| S1 | Hosting with HTTPS on Android and iPhone, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Before F1. Not started |
-| S2 | Time-based QR and 100 simultaneous marks | Before F1. Not started |
+| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Before F1. Not started |
+| S2 | Time-based QR and up to 100 simultaneous marks | Before F1. Not started |
 | S3 | Location (about 50 m) in the real hall, on a class day | On a class day (date not set). Not started |
 | S4 | Head count on class photos against manual counts | Before F1 is finished. Not started |
 | S5 | F4 summary from a Hebrew transcript | Before F4. Not started |
@@ -71,8 +71,8 @@ Also: a survey of existing tools (including NotebookLM) for the tools report.
 
 | Date | Goal | Status |
 |---|---|---|
-| 18-19/11 | SoW. Repo documents brought up to date. Tools report. | In progress |
-| 19-20/11 | SRS draft, human review, SRS closed. SDD, EDD, test plan. | Planned |
+| 18-19/11 | SoW. Repo documents brought up to date. Tools report. | SoW draft written; tools report not started |
+| 19-20/11 | SRS draft, human review, SRS closed. SDD, EDD, test plan. | SRS and SDD drafts written; human review not verified; EDD and test plan not started |
 | 21-22/11 | F1 end to end on real phones. | Planned |
 | 23/11 | F2, F3. | Planned |
 | 24/11 | F4 and F5 thin slices, README, results. | Planned |

@@ -1,6 +1,6 @@
 # Software Requirements Specification – Ex2 Web-based Teaching Tool
 
-Status: draft. Date: 18/11/2026. Read with `decisions.md` (D1-D22).
+Status: draft. Date: 20/11/2026. Read with `decisions.md` (D1-D22).
 This SRS says WHAT the system does. `decisions.md` says why, and the SDD says how. Use cases are in `use_cases.md`.
 
 ## 1. Introduction
@@ -63,7 +63,7 @@ Android phone browsers for students (iPhone is not tested and not guaranteed); a
 | Built for the live demo; where it runs is decided after S1 (**OPEN**); no production hosting, uptime or load guarantee | sow.md:22, 33 |
 
 ### 2e Assumptions
-The assumptions are in `sow.md` section 6 (line 60) and are not copied here.
+The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One more: a class takes place on its date and is not postponed (D19).
 
 ### 2f Spike dependencies (derived from the Spike column)
 
@@ -103,7 +103,7 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here.
 | FR-07 | export the attendance table as a file (CSV or XLSX) with name, email, time, source, status and flags, keeping the table if the export fails | F1 | UC-05 (s6, 6a); assignment (the spreadsheet is the main feature) | |
 | FR-08 | let a student send an anonymous comment of up to `COMMENT_MAX_CHARS` characters, at most once per `COMMENT_MIN_INTERVAL_SEC` seconds per browser, stored with time and session and no identity (in the latest session when the class ended), and see their own comments | F2 | UC-06 (including its alternative flows); D10 | |
 | FR-09 | let the lecturer read the comments of the current or latest session, newest first, refreshed every `REFRESH_SEC` seconds with a manual refresh control and an offline state | F2 | UC-07 (including its alternative flows); D10 | S1 |
-| FR-10 | let the lecturer create a poll (a question, `POLL_OPTIONS_MIN` to `POLL_OPTIONS_MAX` options, an optional correct option), publish it, see the live count, close it and see count, percent and right/wrong; starting a new poll closes an open one and keeps its results | F3 | UC-08 (including its alternative flows); D11 | |
+| FR-10 | let the lecturer create a poll (a question, `POLL_OPTIONS_MIN` to `POLL_OPTIONS_MAX` options, an optional correct option), publish it, see the live count, close it and see the number of votes per option and right/wrong; starting a new poll closes an open one and keeps its results | F3 | UC-08 (including its alternative flows); D11 | |
 | FR-11 | let a student see the active poll and give one anonymous answer per browser (random browser id, not changeable), and see the result after the poll closes | F3 | UC-09 (including its alternative flows); D11 | |
 | FR-12 | let the lecturer upload a transcript (VTT or txt, at most `F4_UPLOAD_MAX_MB`), process it in the background with a status refreshed every `REFRESH_SEC` seconds, produce a short summary of at most `SUMMARY_MAX_WORDS` words (**OPEN**) with a language model, in the language of the transcript, which may be Hebrew (NFR-11), store the summary and delete the uploaded file; a failure shows a failed status | F4 | UC-10 (including its alternative flows); D12; sow.md:18 | S1, S5 |
 | FR-13 | let a student paste a public repo link and get a report: layer 1 (code, no AI) checks file names against the checklist and the links in the README; layer 2 (a model) rates each checklist topic as absent, brief or detailed. The report marks what code checked and what a model rated, falls back to layer 1 when the model fails, and is not stored. It carries 3-5 remarks (**OPEN**, B2) and is written in the language of the README (NFR-11). When the lecturer has run the class review (FR-14), it also shows the class comparison, computed from the stored per-repo ratings; otherwise it shows none | F5 | UC-11 (including its alternative flows); UC-12 (s5, stored results); D13; sow.md:19, 31; README.md:42 | S6 |
@@ -199,12 +199,12 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here.
 
 | UC | FR | Test |
 |---|---|---|
-| UC-00 | FR-01 | |
-| UC-01 | FR-02 | |
+| UC-00 | FR-01, FR-17 | |
+| UC-01 | FR-02, FR-17 | |
 | UC-02 | FR-03 | |
 | UC-03 | FR-04 | |
-| UC-04 | FR-05 | |
-| UC-05 | FR-06, FR-07 | |
+| UC-04 | FR-05, FR-17 | |
+| UC-05 | FR-06, FR-07, FR-17 | |
 | UC-06 | FR-08, FR-16, FR-18 | |
 | UC-07 | FR-09, FR-17 | |
 | UC-08 | FR-10, FR-17 | |

@@ -1,6 +1,6 @@
 # Rules for Claude Code
 
-Project: Ex2, a web-based teaching tool (attendance first). Phase: design (SRS done, SDD next).
+Project: Ex2, a web-based teaching tool (attendance first). Phase: design (SDD draft done, EDD next).
 
 1. The full assignment text is in private_data/AssEX2.md (git-ignored). Read it when a requirement is unclear.
    You may quote short lines from it in chat only. Do not open other files in private_data/.

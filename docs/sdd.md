@@ -56,7 +56,7 @@ Other calls: C-05 uses C-04 (FR-04) and C-03 (FR-06, roster); C-04 uses C-03 (FR
 | All state in the database; the QR token is stateless (time-based, signed) | Memory is lost on restart (state in server memory) | proposal; project_plan.md:18, 63 |
 | Lecturer pages poll; no push | Enough for a 20 s refresh, works on any host (WebSockets) | D10, D11; SRS B4 |
 | LLM calls only through C-09 | One place for the spending limit and for treating README text as data (direct calls per feature) | proposal; FR-20, NFR-10 |
-| F4 and F5 class review: a job row and a background thread | Required by FR-12, FR-14 (a separate queue system, e.g. Celery + Redis) | decided 20/11; FR-12, FR-14 |
+| F4 and F5 class review: a job row and a background thread | Required by FR-12, FR-14 (a separate queue system, e.g. Celery + Redis) | FR-12, FR-14 |
 | Reuse libraries, build only the glue | Time; the assignment prefers other code (own code) | D17 |
 | Secrets in environment variables | Public repo (secrets in code or config files) | D14, NFR-07 |
 | One service class per component as its public interface; entity classes in the EDD | Testable per component (one class for everything) | proposal |
@@ -129,6 +129,7 @@ Every FR-01 to FR-20 appears in section 3. FR-16 to FR-20 are cross-cutting or s
 
 Details are in `project_plan.md`.
 - S1: stack and hosting.
-- S2: QR timing; 100 simultaneous marks (database write load).
+- S2: QR timing; up to 100 simultaneous marks (database write load).
+- S3: block or flag (FR-04); no structural impact.
 - S4: count method. (A) an open-source detector on our server by default; (B) a hosted service only if A is not accurate enough, and only after checking that the provider does not keep the photo or after blurring faces first. Accuracy and library size: not verified, checked in S4.
 - S5, S6: provider, timings, GitHub limits.

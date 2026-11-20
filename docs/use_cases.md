@@ -1,10 +1,10 @@
 # Use Cases
 
-Status: draft. Last updated: 18/11/2026. Read with `decisions.md` (D1-D20).
+Status: draft. Last updated: 20/11/2026. Read with `decisions.md` (D1-D22).
 
 ## Conventions
 
-- **Lecturer** actions need the lecturer password (D14). **Student** pages for comments and polls need no sign-in (D7, D10, D11).
+- **Lecturer** actions need the lecturer password (D14). **Student** pages for comments and polls need no sign-in (D7, D10, D11), and the repo check (D13).
 - Numbers marked "initial" are starting values, to be calibrated: 2-minute window, QR rotation 5-10 s, 20 s to submit, 5% count gap, 300 characters, 10 s between comments, refresh 20 s.
 - A class session is created automatically from the date (D19).
 
@@ -78,7 +78,7 @@ Status: draft. Last updated: 18/11/2026. Read with `decisions.md` (D1-D20).
 4. The student continues with UC-03, step 3.
 
 **Alternative flows**
-- 1a. Google sign-in is blocked in this browser (an in-app browser): the page says "Open in Chrome or Safari". To be verified in spike S1.
+- 1a. Google sign-in is blocked in this browser (an in-app browser): the page says "Open in Chrome". To be verified in spike S1.
 - 1b. The student cancels: no registration.
 - 2a. The email is not on the roster: the student is told to contact the lecturer. No registration.
 - 3a. This browser was already linked to another student: it is linked to the new one and the lecturer gets a flag "one device, two identities".
@@ -236,7 +236,7 @@ flowchart TD
 3. The system publishes the poll on the class page and shows the lecturer the live count per option (refreshed every 20 seconds while the poll is open, with a "Refresh now" button).
 4. Students answer (UC-09).
 5. The lecturer taps "Close".
-6. The system stops accepting answers and shows the final results: count and percent per option, and, if a correct option was marked, how many were right and wrong. The lecturer may project the page.
+6. The system stops accepting answers and shows the final results: the number of votes per option, and, if a correct option was marked, how many were right and wrong. The lecturer may project the page.
 
 **Alternative flows**
 - 1a. The question is empty, or there are fewer than 2 or more than 4 options: the system shows an error.

@@ -15,7 +15,7 @@ Taking attendance by hand costs lecture time, and a simple self-service tool is 
 ## Users
 
 - **Lecturer:** opens and closes attendance, takes a class photo, gets a spreadsheet and alerts, reads comments, runs polls, uploads transcripts.
-- **Student in class:** scans a QR code with a smartphone.
+- **Student in class:** scans a QR code with an Android phone.
 
 ## Scope
 
@@ -53,7 +53,7 @@ Written in English, in Markdown.
 | [Project plan](docs/project_plan.md) | Draft |
 | [Tools report](docs/tools_report.md) | TBD |
 | [SOW](docs/sow.md) | Draft |
-| [SRS](docs/srs.md) | TBD |
+| [SRS](docs/srs.md) | Draft |
 | [Use cases](docs/use_cases.md) | Draft |
 | [SDD](docs/sdd.md) | Draft |
 | [EDD](docs/edd.md) | TBD |
