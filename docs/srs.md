@@ -34,7 +34,7 @@ Problem, scope and the five features (F1 to F5): `README.md`. F1, in-class atten
 ## 2. Overall description
 
 ### 2a Product perspective
-A web application for in-class teaching. Students use their phone browser with no installation. The lecturer uses a page on a laptop, often projected. The external interfaces are in section 3.1.
+A web application for in-class teaching. Students use an Android phone browser with no installation. The lecturer uses a page in any browser; the main assumption is a laptop, often projected. The external interfaces are in section 3.1.
 
 ### 2b User classes
 
@@ -46,7 +46,7 @@ A web application for in-class teaching. Students use their phone browser with n
 | Student (F5) | none | D13; UC-11 |
 
 ### 2c Operating environment
-Phone browsers (Android and iPhone) for students; a laptop browser for the lecturer. Where the system runs is decided after spike S1 (OPEN).
+Android phone browsers for students (iPhone is not tested and not guaranteed); any browser for the lecturer, mainly a laptop. Where the system runs is decided after spike S1 (OPEN).
 
 ### 2d Constraints (not requirements)
 
@@ -83,7 +83,7 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here.
 | Interface | Used for | Source |
 |---|---|---|
 | Google sign-in | identify a student | D8; UC-02 |
-| Phone browser location | presence check | D9; UC-03 |
+| Android phone browser location | presence check | D9; UC-03 |
 | Language-model API | F4 summary, F5 topic ratings | D12, D13, D17 |
 | Audio extraction and transcription tool (for example ffmpeg) | F4 recording input (optional, Appendix C) | D12, D17; UC-10 |
 | GitHub (public repos, read-only) | F5 repo check | D13; UC-11 |
@@ -119,7 +119,7 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here.
 
 | ID | The system shall… | Feature | Priority | Source | Spike |
 |---|---|---|---|---|---|
-| NFR-01 | run in a phone browser (Android and iPhone) with no installation; supported browsers list **OPEN** | All | Must | D4; assignment | S1 |
+| NFR-01 | run in an Android phone browser with no installation (iPhone not tested, not guaranteed); supported browsers list **OPEN** | All | Must | D4; assignment; lecturer (B17) | S1 |
 | NFR-02 | let a registered student mark with a scan and one tap after the one-time registration | F1 | Must | D8; README | S1 |
 | NFR-03 | **TARGET (ESTIMATE, not a guarantee):** at least 95% of present students are marked within the window | F1 | Should | project_plan.md:11; sow.md:33 | S2 |
 | NFR-04 | **TARGET (ESTIMATE, not a guarantee):** the lecturer needs 3-4 actions per class (open, photo, close, export), done through FR-02, FR-05 and FR-07 | F1 | Should | project_plan.md:12; sow.md:33; FR-02, FR-05, FR-07 | |
@@ -235,6 +235,8 @@ The Test column is filled in the STP. Several test cases verify each FR. NFR-01 
 | B13 | The F5 comparison with class counts is Must (FR-13), consistent with the assignment text (feature 5: "including comparisons to other students' work"), D13, `sow.md:19`, `sow.md:31` and `README.md:42`. It is limited to counts: the lecturer rejected a rubric (D13), and a similarity check needs a sandbox. |
 | B14 | Decided 18/11, now D22: the user interface is in English; summaries and reports are written in the language of the input (NFR-11). |
 | B15 | OPEN: where the demo runs (S1). |
+| B16 | Decided 20/11: the lecturer may use any device with a browser; a laptop is the main assumption (2a, 2c). |
+| B17 | Decided 20/11 (said by the lecturer): students use Android phone browsers. iPhone is not tested and not guaranteed (2a, 2c, 3.1, NFR-01). |
 
 ### Appendix C: optional flows (Could)
 

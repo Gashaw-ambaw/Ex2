@@ -55,7 +55,7 @@ Written in English, in Markdown.
 | [SOW](docs/sow.md) | Draft |
 | [SRS](docs/srs.md) | TBD |
 | [Use cases](docs/use_cases.md) | Draft |
-| [SDD](docs/sdd.md) | TBD |
+| [SDD](docs/sdd.md) | Draft |
 | [EDD](docs/edd.md) | TBD |
 | [Test plan](docs/stp.md) | TBD |
 | [Results](docs/results.md) | TBD |
