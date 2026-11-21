@@ -1,5 +1,8 @@
 import os
 import sqlite3
+import threading
+import time
+import urllib.request
 from contextlib import closing
 import secrets
 from datetime import datetime, timezone
@@ -220,4 +223,127 @@ def db_list():
         '<p><a href="/db/write">Add a row</a> | <a href="/db/info">Info</a></p>'
     )
     return _page("DB rows", body)
+
+
+# ----- S1 step 7: background job test (temporary, delete after S1) -----
+# Step time in seconds. Default 10 (9 steps = about 90 s). Tests set it lower.
+JOB_STEP_SEC = float(os.environ.get("JOB_STEP_SEC", "10"))
+JOB_STEPS = 9
+# One outbound HTTPS call at the end of the job (checks that the host can reach the internet).
+JOB_URL = "https://accounts.google.com/.well-known/openid-configuration"
+
+
+def _now() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
+
+
+def _jobs_db():
+    # Open the DB and create the jobs table if it does not exist yet.
+    conn = _db()
+    conn.execute(
+        "CREATE TABLE IF NOT EXISTS s1_jobs ("
+        "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+        "status TEXT NOT NULL, "
+        "progress INTEGER NOT NULL, "
+        "boot_id TEXT NOT NULL, "
+        "created_at TEXT NOT NULL, "
+        "finished_at TEXT, "
+        "error TEXT)"
+    )
+    # At most one job can have the status "running" (stops a double start).
+    conn.execute(
+        "CREATE UNIQUE INDEX IF NOT EXISTS s1_one_running "
+        "ON s1_jobs(status) WHERE status = 'running'"
+    )
+    return conn
+
+
+def _fail_dead_jobs(conn):
+    # A "running" job from another boot id belongs to a dead process: mark it failed.
+    conn.execute(
+        "UPDATE s1_jobs SET status = 'failed', error = 'server restarted', finished_at = ? "
+        "WHERE status = 'running' AND boot_id != ?",
+        (_now(), BOOT_ID),
+    )
+
+
+def _job_update(job_id, progress=None, status="running", error=None):
+    # Used by the job thread, with its own connection. Only a running job can change.
+    finished = None if status == "running" else _now()
+    with closing(_jobs_db()) as conn, conn:
+        conn.execute(
+            "UPDATE s1_jobs SET progress = COALESCE(?, progress), status = ?, "
+            "error = ?, finished_at = ? WHERE id = ? AND status = 'running'",
+            (progress, status, error, finished, job_id),
+        )
+
+
+def _run_job(job_id):
+    # The job: 9 slow steps, then one outbound HTTPS request.
+    try:
+        for step in range(1, JOB_STEPS + 1):
+            time.sleep(JOB_STEP_SEC)
+            _job_update(job_id, progress=step)
+        with urllib.request.urlopen(JOB_URL, timeout=10) as reply:
+            if reply.status != 200:
+                raise RuntimeError(f"HTTP {reply.status}")
+        _job_update(job_id, status="done")
+    except Exception as error:
+        # Any problem: keep the progress, save a short error text.
+        _job_update(job_id, status="failed", error=str(error)[:200])
+
+
+# Creates a job row and starts the thread. Returns at once, then shows the status page.
+@app.get("/job/start")
+def job_start():
+    try:
+        with closing(_jobs_db()) as conn, conn:
+            _fail_dead_jobs(conn)
+            cursor = conn.execute(
+                "INSERT INTO s1_jobs (status, progress, boot_id, created_at) "
+                "VALUES ('running', 0, ?, ?)",
+                (BOOT_ID, _now()),
+            )
+            job_id = cursor.lastrowid
+    except sqlite3.IntegrityError:
+        # A job is already running: do not start a second one.
+        return RedirectResponse("/job/status")
+    except sqlite3.Error as error:
+        return _db_error_page(error)
+    threading.Thread(target=_run_job, args=(job_id,), daemon=True).start()
+    return RedirectResponse("/job/status")
+
+
+# Shows the latest job. Reloads itself every 5 seconds while the job is running.
+@app.get("/job/status", response_class=HTMLResponse)
+def job_status():
+    try:
+        with closing(_jobs_db()) as conn, conn:
+            _fail_dead_jobs(conn)
+            row = conn.execute(
+                "SELECT id, status, progress, boot_id, created_at, finished_at, error "
+                "FROM s1_jobs ORDER BY id DESC LIMIT 1"
+            ).fetchone()
+    except sqlite3.Error as error:
+        return _db_error_page(error)
+    if row is None:
+        return _page("Job status", '<p>No job yet.</p><p><a href="/job/start">Start a job</a></p>')
+    job_id, status, progress, boot_id, created_at, finished_at, error = row
+    lines = [
+        f"Job: #{job_id}",
+        f"Status: {status}",
+        f"Progress: {progress} / {JOB_STEPS}",
+        f"Started: {created_at}",
+        f"Finished: {finished_at or '-'}",
+        f"Job run (boot id): {boot_id}",
+        f"This server run (boot id): {BOOT_ID}",
+    ]
+    if error:
+        lines.append(f"Error: {error}")
+    body = "".join(f"<p>{escape(line)}</p>" for line in lines)
+    body += '<p><a href="/job/status">Refresh now</a> | <a href="/job/start">Start a job</a></p>'
+    page = _page("Job status", body)
+    if status == "running":
+        page = page.replace("</head>", '<meta http-equiv="refresh" content="5"></head>')
+    return page
 
