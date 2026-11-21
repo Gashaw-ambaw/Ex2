@@ -56,7 +56,7 @@ Written in English, in Markdown.
 | [SRS](docs/srs.md) | Draft |
 | [Use cases](docs/use_cases.md) | Draft |
 | [SDD](docs/sdd.md) | Draft |
-| [EDD](docs/edd.md) | TBD |
+| [EDD](docs/edd.md) | Draft |
 | [Test plan](docs/stp.md) | TBD |
 | [Results](docs/results.md) | TBD |
 | [AI usage](AI_USAGE.md) | In progress |

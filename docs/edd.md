@@ -1,6 +1,6 @@
 # Engineering Design Document
 
-Status: draft. Date: 21/11/2026. Read with `sdd.md`, `srs.md` and `decisions.md` (D1-D22). IDs follow D20.
+Status: draft. Date: 21/11/2026. Read with `sdd.md`, `srs.md` and `decisions.md` (D1-D28). IDs follow D20.
 Tags: [A] assignment, [SRS], [SDD], [UC] `use_cases.md`, [Dn] decision, [U21] my answer 21/11/2026, [S1] spike S1 (`results.md`), [code] checked in the installed library, [P] proposal (not a decision).
 
 ## 1. Scope and stack
@@ -453,7 +453,7 @@ sequenceDiagram
 
 | Cookie | Holds | Lifetime | Source |
 |---|---|---|---|
-| `session` (Starlette, signed with `SECRET_KEY`, https_only, SameSite Lax) | lecturer flag; Google sign-in state; verified email until Confirm registration; scan ticket | 8 hours, `max_age` set explicitly (the default is 14 days) | U21; S1; code |
+| `session` (Starlette, signed with `SECRET_KEY`, https_only, SameSite Lax) | lecturer flag; Google sign-in state; verified email until Confirm registration; scan ticket | `LECTURER_SESSION_HOURS` = 8, `max_age` set explicitly (the default is 14 days) | U21; S1; code; name P |
 | `device` | random id linked to a roster entry | `BROWSER_COOKIE_DAYS` = 120 | U21; name P |
 | `anon` | random id for comments, polls and F5 limits; never stored with a device id or roster id | `BROWSER_COOKIE_DAYS` = 120 | U21 |
 
@@ -471,7 +471,7 @@ sequenceDiagram
 ## 8. Configuration
 
 - Parameter names and marks: SRS 3.4. `QR_ROTATE_SEC`, `PHOTO_MAX_MB` and the other OPEN values stay OPEN.
-- Changed or added here [U21]: `ATT_WINDOW_SEC` 300 and `SUBMIT_SEC` 60 (initial values, proposals); `LOGIN_ATTEMPT_LIMIT` 5; `LOGIN_LOCKOUT_SEC` 300 and `BROWSER_COOKIE_DAYS` 120 (names P).
+- Set on 21/11 and now in SRS 3.4 [U21]: `ATT_WINDOW_SEC` 300 and `SUBMIT_SEC` 60 (initial values, proposals); `LOGIN_ATTEMPT_LIMIT` 5; `LOGIN_LOCKOUT_SEC` 300, `LECTURER_SESSION_HOURS` 8 and `BROWSER_COOKIE_DAYS` 120 (names P). Decisions: D23-D28.
 - Env vars, names only: `LECTURER_PASSWORD`, `SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `LLM_API_KEY`, `GITHUB_TOKEN` [SDD:107]; `BASE_URL`, `DB_PATH` [S1].
 - The class location is a database setting, not an env var [U21].
 
@@ -512,21 +512,3 @@ F2-F5 in short: FR-08/09 CommentService, `comments`; FR-10/11 PollService, `poll
 - S3: block or flag when out of range (FR-04). The "no class location set" rule is a proposal. **Risk:** laptop geolocation can be inaccurate when the lecturer uses "Use my current location" (not verified, test in S3).
 - S4: the `PeopleCounter` implementation. S5, S6: the model provider and the F4 and F5 limits.
 - Not verified: `segno`, the 120-day cookies, the WhatsApp in-app browser and the 100 test-user cap [S1].
-- The 8-hour session lifetime has no constant name yet (D20).
-
-### Doc fixes after the EDD (not edited now)
-
-1. D19 (decisions.md:25). Old: "A class session is created automatically from the date." Proposed: "The lecturer taps Start class, which creates today's session (one per date); before that, student pages show 'class has not started'." This drags use_cases.md:9, 54, 62, 189, 199, 231 and srs.md:16, 98.
-2. D21 (decisions.md:27): the exceptions to the end-of-semester delete become the F5 checklist and the class location, both kept until the lecturer changes them. This drags srs.md:130 (NFR-09) and needs a class location row near srs.md:179.
-3. Class location setting: a step in UC-01 (near use_cases.md:54); FR-04 (srs.md:100) should measure from "the class location set by the lecturer"; a note near srs.md:142. No new use case: it is a once-per-room setting on the Start class page, so one step is enough.
-4. `SUBMIT_SEC` 20 -> 60: srs.md:141; use_cases.md:8, 98, 106, 126; project_plan.md:18.
-5. `ATT_WINDOW_SEC` 120 -> 300: srs.md:139; use_cases.md:8, 55; project_plan.md:11, 17.
-6. Login (5 attempts, 300 s, in memory): srs.md:113, 155, a new `LOGIN_LOCKOUT_SEC` row after srs.md:155, srs.md:193, 228; sdd.md:69, 90.
-7. A new `BROWSER_COOKIE_DAYS` row at the end of SRS 3.4 (after srs.md:156).
-8. Comment anon id: srs.md:171 ("no identity" -> "random browser id, no identity").
-9. Jobs: one shared `JobRunner` (sdd.md:77-78, 90); a job row in SRS 3.5 (after srs.md:178).
-10. A `flags` row in SRS 3.5 (near srs.md:167).
-11. C-01 as controllers, not a service class: sdd.md:62.
-12. Env vars `DATABASE_URL` vs `DB_PATH`, and `BASE_URL` missing: sdd.md:107.
-13. Hosting is still OPEN in sdd.md:94 and srs.md:49, 63, 237.
-14. Live count per option: use_cases.md:236 against srs.md:106.

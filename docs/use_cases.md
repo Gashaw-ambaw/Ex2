@@ -1,12 +1,12 @@
 # Use Cases
 
-Status: draft. Last updated: 20/11/2026. Read with `decisions.md` (D1-D22).
+Status: draft. Last updated: 21/11/2026. Read with `decisions.md` (D1-D28).
 
 ## Conventions
 
 - **Lecturer** actions need the lecturer password (D14). **Student** pages for comments and polls need no sign-in (D7, D10, D11), and the repo check (D13).
-- Numbers marked "initial" are starting values, to be calibrated: 2-minute window, QR rotation 5-10 s, 20 s to submit, 5% count gap, 300 characters, 10 s between comments, refresh 20 s.
-- A class session is created automatically from the date (D19).
+- Numbers marked "initial" are starting values, to be calibrated: 5-minute window, QR rotation 5-10 s, 60 s to submit, 5% count gap, 300 characters, 10 s between comments, refresh 20 s.
+- The lecturer taps "Start class", which creates today's session if none exists yet (D19). Attendance, comments and polls belong to today's session. With no session today, student pages say "Class has not started".
 
 ## Use cases
 
@@ -48,18 +48,20 @@ Status: draft. Last updated: 20/11/2026. Read with `decisions.md` (D1-D22).
 ## UC-01 Run an attendance window
 
 **Actor:** Lecturer
-**Preconditions:** The roster is loaded. The projector shows the lecturer page.
+**Preconditions:** The roster is loaded. The lecturer tapped "Start class" for today. The projector shows the lecturer page.
+
+**Setup, once per room:** on the Start class page the lecturer sets the class location: "Use my current location" (browser location) or a "lat, lon" pasted from Google Maps. It is kept until the lecturer changes it. If no class location is set, the lecturer page warns and the location check is skipped (D28).
 
 **Main flow**
 1. At the end of the class the lecturer opens today's session and taps "Open attendance".
-2. The system starts a 2-minute window and shows a full-screen QR that changes every 5-10 s, with a countdown and a live count of marks.
+2. The system starts a 5-minute window and shows a full-screen QR that changes every 5-10 s, with a countdown and a live count of marks.
 3. Students mark attendance (UC-03).
 4. The window ends by itself, or the lecturer taps "Close".
 5. The system rejects further scans ("Attendance is closed") and shows the totals: marks and flags.
 6. The lecturer continues with UC-04 and UC-05.
 
 **Alternative flows**
-- 1a. No session exists for today: the system creates one with today's date.
+- 1a. The class has not started (no session today): the system says "Start class first" and opens no window.
 - 1b. The session already has a closed window: the system asks whether to start a new session (for example a tutorial) and its name (D19).
 - 2a. The page loses its connection: it reconnects and the QR resumes.
 - 4a. The lecturer closes early.
@@ -73,16 +75,18 @@ Status: draft. Last updated: 20/11/2026. Read with `decisions.md` (D1-D22).
 
 **Main flow**
 1. The student taps "Sign in with Google" and chooses an account.
-2. The system receives the verified email and finds it on the roster.
-3. The system links this browser to the roster entry and shows "Hello <name>, you are registered".
-4. The student continues with UC-03, step 3.
+2. The system receives the verified email, keeps it only in the signed session cookie, and shows "Confirm registration".
+3. The student taps "Confirm registration".
+4. The system finds the email on the roster (active entries only), links this browser to the roster entry and shows "Hello <name>, you are registered".
+5. The student continues with UC-03, step 3.
 
 **Alternative flows**
 - 1a. Google sign-in is blocked in this browser (an in-app browser): the page says "Open in Chrome". To be verified in spike S1.
 - 1b. The student cancels: no registration.
-- 2a. The email is not on the roster: the student is told to contact the lecturer. No registration.
-- 3a. This browser was already linked to another student: it is linked to the new one and the lecturer gets a flag "one device, two identities".
-- 3b. The student already has another device: this device is added and the lecturer gets a "new device" flag (D16).
+- 4a. The email is not on the roster: the student is told to contact the lecturer. No registration.
+- 4b. This browser was already linked to another student: it is linked to the new one and the lecturer gets a flag "one device, two identities".
+- 4c. The student already has another device: this device is added and the lecturer gets a "new device" flag (D16).
+- 5a. The scan expired during the sign-in (more than 60 seconds): the student scans again. This happens once per device.
 
 **Postconditions:** The browser is linked to one roster entry. No ID number is stored.
 
@@ -95,15 +99,15 @@ Status: draft. Last updated: 20/11/2026. Read with `decisions.md` (D1-D22).
 1. The student scans the rotating QR code on the projector.
 2. The system checks that the code is current (this window or the previous one) and opens the mark page.
 3. The system recognizes the registered device and shows: "Hello <name>. Mark you present?"
-4. The student taps "I'm here" within about 20 seconds of the scan.
+4. The student taps "I'm here" within about 60 seconds of the scan.
 5. The system checks that this roster entry was not marked in this class, that this device did not mark another student, and the location.
 6. The system records the mark and shows "Marked at HH:MM".
 
 **Alternative flows**
 - 2a. The code is expired: the page asks the student to scan again.
-- 3a. The device is not registered: the student signs in with Google (UC-02), then continues at step 3.
+- 3a. The device is not registered: the student signs in with Google (UC-02), then continues at step 3 if the scan is still valid; otherwise the student scans again (once per device).
 - 3b. The email is not on the roster: the student is told to contact the lecturer. No mark. The lecturer can add or edit the entry (UC-05).
-- 4a. More than 20 seconds passed: scan again.
+- 4a. More than 60 seconds passed since the scan (also when the sign-in used them up): scan again.
 - 5a. Already marked: the system shows the earlier time. No second mark.
 - 5b. The window is closed: "Attendance is closed; ask the lecturer."
 - 5c. This device already marked another student in this class: the attempt is blocked and flagged for the lecturer (D16).
@@ -123,7 +127,7 @@ flowchart TD
   E -- no --> E1["Contact lecturer, no mark"]
   E -- yes --> F
   C -- yes --> F["Show: Hello name, mark you present?"]
-  F --> G{"Tapped within 20 s?"}
+  F --> G{"Tapped within 60 s?"}
   G -- no --> B1
   G -- yes --> H{"Window open?"}
   H -- no --> H1["Attendance is closed"]
@@ -186,7 +190,7 @@ flowchart TD
 ## UC-06 Send a comment
 
 **Actor:** Student
-**Preconditions:** The student has the class link (the fixed QR or the link). A class session exists (today's, or the latest one).
+**Preconditions:** The student has the class link (the fixed QR or the link). The lecturer started today's class (today's session exists).
 
 **Main flow**
 1. The student opens the class page.
@@ -196,11 +200,11 @@ flowchart TD
 5. The system shows "Sent" and adds the comment to the student's list.
 
 **Alternative flows**
-- 2a. No class session exists yet: the page says "No class yet".
+- 2a. No session exists today: the page says "Class has not started".
 - 3a. The comment is empty or longer than 300 characters: the system shows an error and keeps the text.
 - 4a. The last comment from this browser was less than 10 seconds ago: the system says "Wait a moment" and keeps the text.
 - 4b. There is no connection: the text is kept in the browser with a "Retry" button, and is sent when the student taps it, also after class.
-- 4c. No session is active (the class ended): the comment is stored in the latest session.
+- 4c. No window is active (the class ended): the comment is stored in today's latest session (for example a tutorial session after D19 1b), never in a session of an earlier date.
 
 **Postconditions:** The comment is stored anonymously with its time and session. It appears on the lecturer's page.
 
@@ -228,7 +232,7 @@ flowchart TD
 ## UC-08 Run a poll
 
 **Actor:** Lecturer
-**Preconditions:** The lecturer is signed in. A class session exists (today's).
+**Preconditions:** The lecturer is signed in. The lecturer started today's class (today's session exists).
 
 **Main flow**
 1. The lecturer opens the Polls page, enters a question and 2-4 options, and may mark one option as correct.

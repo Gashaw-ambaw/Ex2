@@ -8,14 +8,14 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
 | Metric | Target |
 |---|---|
-| Speed | At least 95% of present students are marked within the 2-minute window |
+| Speed | At least 95% of present students are marked within the 5-minute window |
 | Plausibility | The lecturer is alerted when marks exceed the photo count by more than a tolerance (initial: 5%) |
 | Lecturer effort | 3-4 actions per class (open, photo, close, export) |
 
 ## 2. Working assumptions (to verify in spikes)
 
-- Marking happens once, at the end of the class, in a 2-minute window.
-- The attendance QR rotates every 5-10 s. The code is time-based and stateless (secret on the server, current and previous window accepted). A student has about 20 s after scanning to submit.
+- Marking happens once, at the end of the class, in a 5-minute window.
+- The attendance QR rotates every 5-10 s. The code is time-based and stateless (secret on the server, current and previous window accepted). A student has about 60 s after scanning to submit.
 - Each roster entry is marked once per class. The device is registered once; later classes are scan, confirm the name, one tap.
 - Flags for the lecturer: several identities on one device, location out of range (block or flag: S3), count gap.
 - Photo count counts people only, using a pre-trained model.
@@ -31,7 +31,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | 1 | Location: block or flag only | Spike S3 in the real hall |
 | 2 | QR rotation and window timing | Measure with several phones |
 | 3 | Count method and tolerance | Spike S4 on class photos with manual counts |
-| 4 | Language, framework, hosting | Tools report, spike S1 |
+| 4 | Language, framework, hosting | Resolved: Python, FastAPI, SQLite; Railway (D23). Railway plan and budget OPEN |
 | 5 | If Google sign-in fails on phones, what replaces it (SoW: the lecturer takes attendance the regular way; alternative: magic link by email, proposal, not approved) | Spike S1 |
 | 6 | Export format (file, Google Sheets) | Resolved: a file, CSV or XLSX (FR-07); Google Sheets optional |
 | 7 | F2 refresh interval and abuse handling | Resolved: `REFRESH_SEC` and `COMMENT_MIN_INTERVAL_SEC` (FR-08, FR-09) |
@@ -46,7 +46,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
 | # | Goal | When / status |
 |---|---|---|
-| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Before F1. Not started |
+| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`results.md`): Railway; plan and budget OPEN |
 | S2 | Time-based QR and up to 100 simultaneous marks | Before F1. Not started |
 | S3 | Location (about 50 m) in the real hall, on a class day | On a class day (date not set). Not started |
 | S4 | Head count on class photos against manual counts | Before F1 is finished. Not started |

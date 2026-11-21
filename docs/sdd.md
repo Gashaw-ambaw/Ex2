@@ -1,6 +1,6 @@
 # Software Design Document
 
-Status: draft. Date: 20/11/2026. Read with `srs.md` and `decisions.md` (D1-D22). IDs follow D20.
+Status: draft. Date: 21/11/2026. Read with `srs.md` and `decisions.md` (D1-D28). IDs follow D20.
 This SDD says how the system is split into components and how they connect. Requirements are in the SRS. Classes, sequences, schema and session details are in the EDD.
 
 ## 1. Context
@@ -59,14 +59,14 @@ Other calls: C-05 uses C-04 (FR-04) and C-03 (FR-06, roster); C-04 uses C-03 (FR
 | F4 and F5 class review: a job row and a background thread | Required by FR-12, FR-14 (a separate queue system, e.g. Celery + Redis) | FR-12, FR-14 |
 | Reuse libraries, build only the glue | Time; the assignment prefers other code (own code) | D17 |
 | Secrets in environment variables | Public repo (secrets in code or config files) | D14, NFR-07 |
-| One service class per component as its public interface; entity classes in the EDD | Testable per component (one class for everything) | proposal |
+| One service class per component as its public interface, except C-01 (thin controllers with routes only); entity classes in the EDD | Testable per component (one class for everything) | proposal; C-01: own decision 21/11 |
 
 ## 3. Components
 
 | ID | Component | Responsibility | FRs | Data owned |
 |---|---|---|---|---|
 | C-01 | Web pages | student class page, fixed QR, lecturer pages; routes requests | FR-16, FR-18 | none |
-| C-02 | Lecturer access | one password (D14), attempt limit; session details: EDD | FR-17 | attempt counter |
+| C-02 | Lecturer access | one password (D14), attempt limit; session details: EDD | FR-17 | none (attempt counter in memory only, D26) |
 | C-03 | Roster | load, validate and edit the roster | FR-01, FR-06 (roster edits) | roster entries |
 | C-04 | Student identity | Google sign-in, browser-to-roster link, device flags | FR-03 | device links |
 | C-05 | Attendance | sessions, window, rotating QR, marks, location yes/no, review, export | FR-02, FR-04, FR-06, FR-07 | sessions, attendance rows |
@@ -74,8 +74,8 @@ Other calls: C-05 uses C-04 (FR-04) and C-03 (FR-06, roster); C-04 uses C-03 (FR
 | C-07 | Comments | send, rate limit, list | FR-08, FR-09 | comments |
 | C-08 | Polls | create, answer, close, results | FR-10, FR-11 | polls, answers |
 | C-09 | LLM gateway | all LLM calls; input text is data; output in the input language | FR-20 | none |
-| C-10 | Lecture summary | transcript job, summary | FR-12 | summaries, jobs |
-| C-11 | Repo review | layer 1, layer 2 through C-09, class review job, checklist, limits, README cut | FR-13, FR-14, FR-15, FR-19, FR-20 (cut) | checklist, F5 overview, F5 counters, jobs |
+| C-10 | Lecture summary | transcript job, summary | FR-12 | summaries (job rows: shared `JobRunner`, D25) |
+| C-11 | Repo review | layer 1, layer 2 through C-09, class review job, checklist, limits, README cut | FR-13, FR-14, FR-15, FR-19, FR-20 (cut) | checklist, F5 overview, F5 counters (job rows: shared `JobRunner`, D25) |
 
 Replacing Google sign-in after S1 changes only C-04.
 
@@ -87,24 +87,24 @@ Long-running work: F4 summary (FR-12) and F5 class review (FR-14) save a job row
 
 ## 5. Data
 
-Entities and retention follow SRS 3.5 and D21; the owner is the component in section 3. The end-of-semester delete is one documented script (proposal). F5 counters are keyed by date, so no reset job is needed (NFR-09). Uploaded files are deleted after processing, also on failure. Job rows and the login attempt counter are not in SRS 3.5; proposal: keep them like D21. Fields and schema: EDD.
+Entities and retention follow SRS 3.5 and D21; the owner is the component in section 3. The end-of-semester delete is one documented script (proposal). F5 counters are keyed by date, so no reset job is needed (NFR-09). Uploaded files are deleted after processing, also on failure. Job rows are kept like D21 (SRS 3.5, D25); the login attempt counter is in memory only (D26). Fields and schema: EDD.
 
 ## 6. Deployment
 
-**OPEN until S1.** Default option: an always-on host with SQLite.
+Railway, an always-on host with SQLite on a Volume (S1 done, D23); the plan and budget are OPEN.
 
 ```mermaid
 flowchart LR
   U([Android phones and lecturer browser]) -->|HTTPS, one fixed URL| A
-  subgraph H["Always-on host (OPEN until S1)"]
+  subgraph H["Railway, always-on host"]
     A[App process: C-01 to C-11, job threads] --> F[(SQLite file)]
   end
   A --> X[Google, LLM API, GitHub]
 ```
 
-Alternative: serverless with a hosted database. It changes the database and needs another way to run background jobs (re-decide after S1). Cloud service models: lecture 04a.
+Alternative: serverless with a hosted database. It changes the database and needs another way to run background jobs (rejected after S1, D23). Cloud service models: lecture 04a.
 One fixed URL is needed: the Google redirect and the fixed class QR (FR-16) depend on it.
-Environment variable names only: `LECTURER_PASSWORD`, `SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `LLM_API_KEY`, `DATABASE_URL`, `GITHUB_TOKEN` (required unless S6 shows otherwise; about 60 unauthenticated requests per hour, not verified).
+Environment variable names only: `LECTURER_PASSWORD`, `SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `LLM_API_KEY`, `BASE_URL`, `DB_PATH`, `GITHUB_TOKEN` (required unless S6 shows otherwise; about 60 unauthenticated requests per hour, not verified).
 
 ## 7. Traceability
 
@@ -128,7 +128,7 @@ Every FR-01 to FR-20 appears in section 3. FR-16 to FR-20 are cross-cutting or s
 ## 8. Open items
 
 Details are in `project_plan.md`.
-- S1: stack and hosting.
+- S1: done (`results.md`, D23); the Railway plan and budget are OPEN.
 - S2: QR timing; up to 100 simultaneous marks (database write load).
 - S3: block or flag (FR-04); no structural impact.
 - S4: count method. (A) an open-source detector on our server by default; (B) a hosted service only if A is not accurate enough, and only after checking that the provider does not keep the photo or after blurring faces first. Accuracy and library size: not verified, checked in S4.
