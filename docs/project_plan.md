@@ -1,6 +1,6 @@
 # Project Plan – Ex2
 
-Status: draft (stage 1). Last updated: 20/11/2026. Deadline: 25/11/2026.
+Status: draft (stage 1). Last updated: 22/11/2026. Deadline: Thursday 26/11/2026, 23:59.
 Closed decisions are in `decisions.md`. Everything below is open or a working assumption.
 Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
@@ -29,24 +29,26 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | # | Question | How we decide |
 |---|---|---|
 | 1 | Location: block or flag only | Spike S3 in the real hall |
-| 2 | QR rotation and window timing | Measure with several phones |
+| 2 | QR rotation and window timing | Initial values set (SRS 3.4): `QR_ROTATE_SEC` 10, `ATT_WINDOW_SEC` 300, `SUBMIT_SEC` 60; calibrate in S2 |
 | 3 | Count method and tolerance | Spike S4 on class photos with manual counts |
-| 4 | Language, framework, hosting | Resolved: Python, FastAPI, SQLite; Railway (D23). Railway plan and budget OPEN |
+| 4 | Language, framework, hosting | Resolved: Python, FastAPI, SQLite; Railway Hobby, usage limit $10 (D23) |
 | 5 | If Google sign-in fails on phones, what replaces it (SoW: the lecturer takes attendance the regular way; alternative: magic link by email, proposal, not approved) | Spike S1 |
 | 6 | Export format (file, Google Sheets) | Resolved: a file, CSV or XLSX (FR-07); Google Sheets optional |
 | 7 | F2 refresh interval and abuse handling | Resolved: `REFRESH_SEC` and `COMMENT_MIN_INTERVAL_SEC` (FR-08, FR-09) |
 | 8 | F4 and F5 models, Hebrew support | Spikes S5, S6 |
+| 9 | UC-01 1b (new session, for example a tutorial): deferred, not in the F1 core | Build if time remains; otherwise the gap goes to `results.md` |
+| 10 | Google OAuth stays in Testing mode (S1 client): only listed test users can sign in; a whole-class demo meets the cap of about 100 (not verified) | Before the rehearsal and the demo: add the testers' and the lecturer's emails; decide for the demo |
 
 ## 4. Questions for the lecturer
 
-- What is the demo date, and the exact submission time on 25/11?
+- What is the demo date?
 - F5: is the report for the student, the lecturer, or both? Assumed both (D13). May the class's Ex1 repos be used?
 
 ## 5. Spikes (time-boxed, code in `spikes/`)
 
 | # | Goal | When / status |
 |---|---|---|
-| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`results.md`): Railway; plan and budget OPEN |
+| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`results.md`): Railway; Hobby plan (D23) |
 | S2 | Time-based QR and up to 100 simultaneous marks | Before F1. Not started |
 | S3 | Location (about 50 m) in the real hall, on a class day | On a class day (date not set). Not started |
 | S4 | Head count on class photos against manual counts | Before F1 is finished. Not started |
@@ -76,6 +78,6 @@ Also: a survey of existing tools (including NotebookLM) for the tools report.
 | 21-22/11 | F1 end to end on real phones. | Planned |
 | 23/11 | F2, F3. | Planned |
 | 24/11 | F4 and F5 thin slices, README, results. | Planned |
-| 25/11 | Final check and submission (hour to confirm). | Planned |
+| 26/11 | Final check and submission (by 23:59). | Planned |
 
-S3 happens on the next class day. A rehearsal with 5-10 friends is planned before submission; the in-class demo follows submission.
+S3 happens on the next class day. A rehearsal with 2-3 people is planned on 25/11; the in-class demo follows submission.

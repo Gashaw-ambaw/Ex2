@@ -1,6 +1,6 @@
 # Ex2 – Web-based Teaching Tool
 
-Status: stage 1 (definition), design only, no code yet. Deadline: 25/11/2026.
+Status: design (EDD draft done, STP next), no app code yet. Deadline: Thursday 26/11/2026, 23:59.
 
 ## What it is
 
@@ -57,8 +57,8 @@ Written in English, in Markdown.
 | [Use cases](docs/use_cases.md) | Draft |
 | [SDD](docs/sdd.md) | Draft |
 | [EDD](docs/edd.md) | Draft |
-| [Test plan](docs/stp.md) | TBD |
-| [Results](docs/results.md) | TBD |
+| [Test plan](docs/stp.md) | Draft (F1) |
+| [Results](docs/results.md) | In progress |
 | [AI usage](AI_USAGE.md) | In progress |
 
 ## Quick start, usage, tests

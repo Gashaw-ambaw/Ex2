@@ -1,14 +1,14 @@
 # Engineering Design Document
 
 Status: draft. Date: 21/11/2026. Read with `sdd.md`, `srs.md` and `decisions.md` (D1-D28). IDs follow D20.
-Tags: [A] assignment, [SRS], [SDD], [UC] `use_cases.md`, [Dn] decision, [U21] my answer 21/11/2026, [S1] spike S1 (`results.md`), [code] checked in the installed library, [P] proposal (not a decision).
+Tags: [A] assignment, [SRS], [SDD], [UC] `use_cases.md`, [Dn] decision, [U21] my answer 21/11/2026, [S1] spike S1 (`results.md`), [code] checked in the installed library, [P] proposal (not a decision), [U22] my answer 22/11/2026.
 
 ## 1. Scope and stack
 
 - This EDD gives the low-level class and sequence diagrams [A], the schema and the session details that the SDD leaves to it (sdd.md:4). F1 (FR-01 to FR-07) is in depth; F2-F3 are short; F4-F5 are thin [D6].
-- Stack: Python 3.13, FastAPI, uvicorn with one worker, SQLite through plain `sqlite3` (no ORM), Jinja2 pages with a little JS for polling, Authlib for Google sign-in, `segno` for the QR (not verified) [U21, S1]. Host: Railway; the plan and budget are OPEN [U21].
+- Stack: Python 3.13, FastAPI, uvicorn with one worker, SQLite through plain `sqlite3` (no ORM), Jinja2 pages with a little JS for polling, Authlib for Google sign-in, `segno` for the QR (not verified) [U21, S1]. Host: Railway Hobby with a usage limit [U21, U22].
 - One worker is required, because the job boot-id rule and the in-memory login counter depend on it [U21, S1]. Every data-changing action is a POST, and no GET writes to the database [U21, S1].
-- C-01 is five thin controllers with routes only and no logic [U21]. Each other component is one service class with its SQL in private methods [U21]. One package per component [P].
+- C-01 is five thin controllers with routes only and no logic [U21]. Each other component is one service class with its SQL in private methods [U21]. One `app/` package with one module per component (for example `roster.py`, `attendance.py`); tests in `tests/` [U22].
 - Infrastructure classes (not components) [U21]: `Settings` (env vars and parameters), `Db` (one sqlite3 connection per call; creates the tables), `Clock` (UTC now, Israel time for display; set in tests), `JobRunner` (the S1 job design).
 - Times are stored in UTC and shown in Israel time [U21]. A session date is the Israel date [P].
 
@@ -470,7 +470,7 @@ sequenceDiagram
 
 ## 8. Configuration
 
-- Parameter names and marks: SRS 3.4. `QR_ROTATE_SEC`, `PHOTO_MAX_MB` and the other OPEN values stay OPEN.
+- Parameter names and marks: SRS 3.4. Set on 22/11 [U22]: `QR_ROTATE_SEC` 10, `PHOTO_MAX_MB` 10, `LOAD_SIM_MARKS` 100 (initial values). The other OPEN values stay OPEN.
 - Set on 21/11 and now in SRS 3.4 [U21]: `ATT_WINDOW_SEC` 300 and `SUBMIT_SEC` 60 (initial values, proposals); `LOGIN_ATTEMPT_LIMIT` 5; `LOGIN_LOCKOUT_SEC` 300, `LECTURER_SESSION_HOURS` 8 and `BROWSER_COOKIE_DAYS` 120 (names P). Decisions: D23-D28.
 - Env vars, names only: `LECTURER_PASSWORD`, `SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `LLM_API_KEY`, `GITHUB_TOKEN` [SDD:107]; `BASE_URL`, `DB_PATH` [S1].
 - The class location is a database setting, not an env var [U21].

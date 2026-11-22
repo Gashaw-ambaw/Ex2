@@ -81,7 +81,7 @@ Status: draft. Last updated: 21/11/2026. Read with `decisions.md` (D1-D28).
 5. The student continues with UC-03, step 3.
 
 **Alternative flows**
-- 1a. Google sign-in is blocked in this browser (an in-app browser): the page says "Open in Chrome". To be verified in spike S1.
+- 1a. Google sign-in is blocked in this browser (an in-app browser): the page says "Open in Chrome". S1 is done; the WhatsApp in-app browser is not verified.
 - 1b. The student cancels: no registration.
 - 4a. The email is not on the roster: the student is told to contact the lecturer. No registration.
 - 4b. This browser was already linked to another student: it is linked to the new one and the lecturer gets a flag "one device, two identities".

@@ -46,7 +46,7 @@ A web application for in-class teaching. Students use an Android phone browser w
 | Student (F5) | none | D13; UC-11 |
 
 ### 2c Operating environment
-Android phone browsers for students (iPhone is not tested and not guaranteed); any browser for the lecturer, mainly a laptop. The system runs on Railway, an always-on host (S1 done, D23); the plan and budget are OPEN.
+Android phone browsers for students (iPhone is not tested and not guaranteed); any browser for the lecturer, mainly a laptop. The system runs on Railway, an always-on host, Hobby plan with a usage limit (S1 done, D23).
 
 ### 2d Constraints (not requirements)
 
@@ -60,7 +60,7 @@ Android phone browsers for students (iPhone is not tested and not guaranteed); a
 | No network (IP) check for presence | D9 |
 | F5 gives no grade; no code-similarity check; others' code is not run | D13 |
 | Prefer existing tools and libraries | D17 |
-| Built for the live demo; runs on Railway (D23; plan and budget **OPEN**); no production hosting, uptime or load guarantee | sow.md:22, 33 |
+| Built for the live demo; runs on Railway Hobby (D23); no production hosting, uptime or load guarantee | sow.md:22, 33 |
 
 ### 2e Assumptions
 The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One more: a class takes place on its date and is not postponed (D19).
@@ -137,11 +137,11 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One
 | Name | Initial value | Mark | Source | Spike |
 |---|---|---|---|---|
 | `ATT_WINDOW_SEC` | 300 | initial value: proposal (changed 21/11) | use_cases.md:57 | S2 |
-| `QR_ROTATE_SEC` | range 5-10 | **OPEN** | D7; use_cases.md:57 | S2 |
+| `QR_ROTATE_SEC` | 10 | initial value, decided 22/11 | D7; use_cases.md:57 | S2 |
 | `SUBMIT_SEC` | 60 | initial value: proposal (changed 21/11) | use_cases.md:102 | S2 |
 | `LOC_RADIUS_M` | 50 | initial value: proposal; measured from the class location set by the lecturer in the app (no env var; value OPEN until S3) | D9, D28 | S3 |
 | `GAP_TOLERANCE_PCT` | 5 | initial value: proposal | D18 | S4 |
-| `PHOTO_MAX_MB` | none | **OPEN** | use_cases.md:159 | S4 |
+| `PHOTO_MAX_MB` | 10 | initial value, decided 22/11 | use_cases.md:159 | S4 |
 | `COMMENT_MAX_CHARS` | 300 | initial value: proposal | use_cases.md:204 | |
 | `COMMENT_MIN_INTERVAL_SEC` | 10 | initial value: proposal | use_cases.md:205 | |
 | `REFRESH_SEC` (lecturer pages, F4 and F5 status) | 20 | initial value: proposal | use_cases.md:218, 281, 332 | |
@@ -153,7 +153,7 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One
 | `README_MAX_CHARS` | none | **OPEN** | use_cases.md:320 | S6 |
 | `MODEL_SPEND_LIMIT` | none | **OPEN** | D13; sow.md:47 | S5, S6 |
 | `LOGIN_ATTEMPT_LIMIT` | 5 | decided 21/11 | D26; use_cases.md:224 | |
-| `LOAD_SIM_MARKS` | none | **OPEN** | NFR-05 | S2 |
+| `LOAD_SIM_MARKS` | 100 | initial value, decided 22/11 | NFR-05 | S2 |
 | `LOGIN_LOCKOUT_SEC` | 300 | decided 21/11 (name: proposal) | D26 | |
 | `LECTURER_SESSION_HOURS` | 8 | decided 21/11 (name: proposal) | D26 | |
 | `BROWSER_COOKIE_DAYS` | 120 | decided 21/11 (name: proposal); device and anonymous cookies | D27 | |
@@ -231,7 +231,7 @@ The Test column is filled in the STP. Several test cases verify each FR. NFR-01 
 | B3 | OPEN / S3: block or flag for location (FR-04). |
 | B4 | Decided (no decision ID; statuses follow D16 and D18): attendance statuses (normal and unverified only; source is a separate field) and the poll refresh (`REFRESH_SEC` with a manual refresh control). `use_cases.md` UC-08 step 3 now says 20 s. |
 | B5 | Decided: a reset only removes the mark. The lecturer can add one by hand. Fixed in `use_cases.md` UC-05 5d. |
-| B6 | OPEN numbers: supported browsers, `QR_ROTATE_SEC`, `PHOTO_MAX_MB`, `F4_UPLOAD_MAX_MB`, `SUMMARY_MAX_WORDS`, `F5_DAILY_CAP`, `README_MAX_CHARS`, `MODEL_SPEND_LIMIT`, `LOAD_SIM_MARKS`, `JOB_TIMEOUT_SEC`. |
+| B6 | OPEN numbers: supported browsers, `F4_UPLOAD_MAX_MB`, `SUMMARY_MAX_WORDS`, `F5_DAILY_CAP`, `README_MAX_CHARS`, `MODEL_SPEND_LIMIT`, `JOB_TIMEOUT_SEC`. |
 | B7 | HTTPS (NFR-06): basis not verified, check in S1. The 95% and the 3-4 actions are ESTIMATE targets. |
 | B8 | `sow.md:18` accepts a transcript or a short recording. The transcript is in FR-12; the recording is Appendix C. Hebrew is in scope. |
 | B9 | D10 and D11 describe hide, delete and retry as part of the feature. They are optional (Appendix C), as decided. |
@@ -240,7 +240,7 @@ The Test column is filled in the STP. Several test cases verify each FR. NFR-01 
 | B12 | "Device" means a browser (cookie); D16 and UC-09 use both words. |
 | B13 | The F5 comparison with class counts is Must (FR-13), consistent with the assignment text (feature 5: "including comparisons to other students' work"), D13, `sow.md:19`, `sow.md:31` and `README.md:42`. It is limited to counts: the lecturer rejected a rubric (D13), and a similarity check needs a sandbox. |
 | B14 | Decided 18/11, now D22: the user interface is in English; summaries and reports are written in the language of the input (NFR-11). |
-| B15 | Decided 21/11 (D23): the demo runs on Railway, an always-on host (S1 done); the plan and budget are OPEN. |
+| B15 | Decided 21/11 (D23): the demo runs on Railway, an always-on host (S1 done); Hobby plan with a usage limit (decided 22/11). |
 | B16 | Decided 20/11: the lecturer may use any device with a browser; a laptop is the main assumption (2a, 2c). |
 | B17 | Decided 20/11 (said by the lecturer): students use Android phone browsers. iPhone is not tested and not guaranteed (2a, 2c, 3.1, NFR-01). |
 

@@ -91,7 +91,7 @@ Entities and retention follow SRS 3.5 and D21; the owner is the component in sec
 
 ## 6. Deployment
 
-Railway, an always-on host with SQLite on a Volume (S1 done, D23); the plan and budget are OPEN.
+Railway Hobby, an always-on host with SQLite on a Volume, with a usage limit (S1 done, D23).
 
 ```mermaid
 flowchart LR
@@ -128,7 +128,7 @@ Every FR-01 to FR-20 appears in section 3. FR-16 to FR-20 are cross-cutting or s
 ## 8. Open items
 
 Details are in `project_plan.md`.
-- S1: done (`results.md`, D23); the Railway plan and budget are OPEN.
+- S1: done (`results.md`, D23); Railway Hobby.
 - S2: QR timing; up to 100 simultaneous marks (database write load).
 - S3: block or flag (FR-04); no structural impact.
 - S4: count method. (A) an open-source detector on our server by default; (B) a hosted service only if A is not accurate enough, and only after checking that the provider does not keep the photo or after blurring faces first. Accuracy and library size: not verified, checked in S4.

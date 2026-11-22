@@ -15,3 +15,13 @@ Project: Ex2, a web-based teaching tool (attendance first). Phase: design (EDD d
 9. docs/decisions.md holds settled decisions only. Open questions go to docs/project_plan.md.
 10. Record AI-assisted work in AI_USAGE.md.
 11. When coding starts: show the plan first, write tests first, small steps.
+12. Change propagation rule: when a decision changes, first list every
+document and file that mentions it (docs/*.md, README.md, CLAUDE.md,
+AI_USAGE.md, code, tests). Go in order: SoW, SRS, SDD, EDD, code, tests.
+Start from the earliest document where it appears. For each file, say
+whether it is affected and what changes. Show me this list as a short
+plan. Apply the edits only after I approve. Mark proposals [P] and
+closed decisions differently, and tell me which one this is.
+
+13. Decision entries (decisions.md): short and focused,
+two lines at most. Put what, why, rejected and who in those two lines.

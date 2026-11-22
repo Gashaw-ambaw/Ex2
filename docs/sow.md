@@ -41,7 +41,7 @@ Problem, scope and features: `README.md`. Requirements: SRS and `use_cases.md`.
 | 21-22/11 | F1 end to end on real phones. |
 | 23/11 | F2, F3. |
 | 24/11 | F4 and F5 thin slices, README, results. |
-| 25/11 | Final check and submission (hour to confirm). |
+| 26/11 | Final check and submission (by 23:59). |
 
 Spikes S1 to S6 are inputs, not deliverables. S3 (location) needs a real class day (date to confirm). The demo date is to confirm.
 There are no payment points. The cost is the supplier's time and the LLM API usage, measured in spikes S5 and S6, under a spending limit (D13).
@@ -52,10 +52,10 @@ There are no payment points. The cost is the supplier's time and the LLM API usa
 - A deliverable is done when its criterion is met, or the gap is written in `results.md`.
 - If time runs out, F5 is cut first, then F4. F1 to F3 are protected.
 - A change to the scope is requested in writing by the lecturer and accepted by the supplier.
-- A rehearsal with 5-10 volunteers is planned before submission, with synthetic or consented data only.
+- A rehearsal with 2-3 people is planned on 25/11, before submission, with synthetic or consented data only.
 
 ## 6. Roles, assumptions, dependencies
 
 - **Roles:** the lecturer accepts the work and supplies the roster export. The student designs, builds and documents, with AI assistance recorded in `AI_USAGE.md`.
 - **Assumptions:** a Moodle roster export with name and email; every student has a smartphone and a Google account; Google sign-in works on phones (S1); the location check works in the hall (S3); an LLM API is available for F4 and F5 (provider and price: tools report).
-- **Dependencies on the lecturer:** the demo date, the submission hour, the audience of the F5 report, permission to use the Ex1 repos as samples.
+- **Dependencies on the lecturer:** the demo date, the audience of the F5 report, permission to use the Ex1 repos as samples.
