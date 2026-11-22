@@ -59,6 +59,7 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 | TC-42 | FR-17 | UC-00, 01, 04, 05 | API | Lecturer pages need the password; after `LOGIN_ATTEMPT_LIMIT` wrong attempts, login is locked for `LOGIN_LOCKOUT_SEC` |
 | TC-43 | NFR-02, NFR-04 | F1 end to end | manual | 2-3 Android phones on the deployed app: register once, scan, one tap, review, export; the lecturer needs the 3-4 actions |
 | TC-44 | NFR-03, NFR-05 | S2 | API (load) | `LOAD_SIM_MARKS` marks at once on the real endpoint: each roster entry is recorded once; the time to finish is noted |
+| TC-45 | FR-02 | UC-01 1b (deferred, D31) | API | Open attendance when today's session already has a closed window: "Attendance already closed for this session"; no window is opened |
 
 ## 3. B11 coverage: F1 alternative flows (32)
 
@@ -68,7 +69,7 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 | UC-00 | 2b | TC-03 |
 | UC-00 | 4a | TC-04 |
 | UC-01 | 1a | TC-06 |
-| UC-01 | 1b | **not tested**: deferred, not built (decided 22/11); if built, add a TC |
+| UC-01 | 1b | **not tested**: deferred, not built (D31); TC-45 covers the message shown instead. If 1b is built, add a TC |
 | UC-01 | 2a | TC-07 |
 | UC-01 | 4a | TC-08 |
 | UC-02 | 1a | TC-15 |

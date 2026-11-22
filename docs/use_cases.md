@@ -30,7 +30,7 @@ Status: draft. Last updated: 21/11/2026. Read with `decisions.md` (D1-D28).
 ## UC-00 Load the course roster
 
 **Actor:** Lecturer
-**Preconditions:** The lecturer has the Moodle participants export (CSV or XLSX).
+**Preconditions:** The lecturer has the Moodle participants export, saved as CSV (UTF-8).
 
 **Main flow**
 1. The lecturer opens the Roster page and uploads the file.
