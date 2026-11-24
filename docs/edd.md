@@ -66,6 +66,7 @@ classDiagram
     +close_window(session_id)
     +window_state(session_id) WindowState
     +current_qr(session_id) str
+    +class_location() tuple
     +check_scan(s, w, t) ScanTicket
     +mark(device_id, ticket, location) MarkResult
     +add_flags(session_id, events)
@@ -170,6 +171,7 @@ classDiagram
 - `PeopleCounter` hides the count method. Option A or B stays OPEN until S4 [SDD:134].
 - `RegisterResult` carries the roster entry and the events (`new_device`, `relinked`). The controller passes them to `add_flags()`, so C-04 never calls C-05 [P].
 - `new_session(name)` is deferred (1b, D31).
+- `WindowState` = open, seconds_left, marks, flags. `class_location()` returns (lat, lon) or None.
 - `RosterService.add_entry` and `edit_email` come in step 5 (UC-02 1a).
 
 ### 2.2 F2-F5 (C-07 to C-11, Must methods only)
@@ -446,6 +448,7 @@ sequenceDiagram
 ## 5. Algorithms
 
 - **QR token** [U21; details P]: w = floor(now / `QR_ROTATE_SEC`); t = HMAC-SHA256(`SECRET_KEY`, "session_id:w"), first 16 hex characters. A scan is accepted when t matches (constant-time compare), w is the current or previous window, and the window is open.
+- **Window state** [P]: window closed = `window_closed_at` set or now >= `window_ends_at`; expiry writes nothing.
 - **Scan ticket** [U21]: {session_id, scanned_at} in the signed session cookie. A mark is accepted while now - scanned_at is at most `SUBMIT_SEC` (60, initial value, proposal). If the ticket expires during the first Google sign-in, the student scans again, once per device.
 - **Distance** [U21; formula P]: haversine distance from the browser location to the class location; location_ok = distance at most `LOC_RADIUS_M`. Location denied gives 0 and a flag (UC-03 5d). No class location set: no check, location_ok null, and a warning on the lecturer page [P, approved 21/11, to confirm in S3].
 - **Count gap** [P]: marks = all marks of the session when the count is made; gap = marks - count; alert when marks > count x (1 + `GAP_TOLERANCE_PCT` / 100). Example (UC-04): 104 marks, 97 counted, limit 101.85, so the alert fires.

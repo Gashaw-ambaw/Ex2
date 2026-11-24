@@ -61,6 +61,8 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 | TC-44 | NFR-03, NFR-05 | S2 | API (load) | `LOAD_SIM_MARKS` marks at once on the real endpoint: each roster entry is recorded once; the time to finish is noted |
 | TC-45 | FR-02 | UC-01 1b (deferred, D31) | API | Open attendance when today's session already has a closed window: "Attendance already closed for this session"; no window is opened |
 
+TC-08 and TC-09 run in two parts: the window side (state, close, expiry) in step 4; the scan side ("Attendance is closed", `check_scan`) in step 6.
+
 ## 3. B11 coverage: F1 alternative flows (32)
 
 | UC | Flow | TC |
