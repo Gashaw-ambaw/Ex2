@@ -24,4 +24,5 @@ Real roster and class photos were shown only in the planning chat to understand 
 | 22/11 | Claude Code | F1 start: deadline fix, parameter values, D23 (Railway Hobby), code layout, rehearsal, UC-02 1a | Answered the 21 items and the open questions; approved the edits |
 | 22/11 | Claude Code | Synthetic roster files in `sample_data/` (102 fake students, bad and duplicate files) | Specified headers and counts; no real data |
 | 22/11 | Claude Code | D30-D31 propagation (FR-01, FR-02, UC-00, D19, EDD 4.1 note) and TC-45 | Approved the edits and the closed-window message |
+| 24/11 | Claude Code | F1 step 1: `app/` skeleton (Settings, Db with 15 tables, Clock, /health, Google client), 26 tests, requirements; code comments | Approved the plan; ran the Railway steps; review of the code later |
 | 22/11 | Claude Code | STP draft (F1): strategy, 44 test cases, B11 table for the 32 F1 flows | Approved the plan; review of the STP text later |
