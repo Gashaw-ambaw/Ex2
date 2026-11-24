@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Roster preview{% endblock %}
+{% block content %}
+<h1>Roster preview</h1>
+<p>{{ rows|length }} rows in the file. Untick rows that are not students (for example staff), then confirm.</p>
+{# The rows travel in this form, so the server keeps no state between preview and confirm. #}
+<form method="post" action="/roster/confirm">
+  <table>
+    <tr><th>Keep</th><th>First name</th><th>Last name</th><th>Email</th></tr>
+    {% for row in rows %}
+    <tr>
+      <td>
+        <input type="checkbox" name="keep" value="{{ loop.index0 }}" checked>
+        <input type="hidden" name="first_name" value="{{ row.first_name }}">
+        <input type="hidden" name="last_name" value="{{ row.last_name }}">
+        <input type="hidden" name="email" value="{{ row.email }}">
+      </td>
+      <td dir="auto">{{ row.first_name }}</td>
+      <td dir="auto">{{ row.last_name }}</td>
+      <td>{{ row.email }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  <p><button type="submit">Confirm and save</button></p>
+</form>
+<p><a href="/roster">Cancel</a></p>
+{% endblock %}

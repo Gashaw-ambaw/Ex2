@@ -26,4 +26,5 @@ Real roster and class photos were shown only in the planning chat to understand 
 | 22/11 | Claude Code | D30-D31 propagation (FR-01, FR-02, UC-00, D19, EDD 4.1 note) and TC-45 | Approved the edits and the closed-window message |
 | 24/11 | Claude Code | F1 step 1: `app/` skeleton (Settings, Db with 15 tables, Clock, /health, Google client), 26 tests, requirements; code comments | Approved the plan; ran the Railway steps; review of the code later |
 | 24/11 | Claude Code | F1 step 2: `QrTokens` (`app/qr_tokens.py`), 9 tests written first (TC-10..13 + 5 extra); deadline 30/11 and schedule edits in the documents | Approved the plan and the edits; review of the code later |
+| 24/11 | Claude Code | F1 step 3: `RosterService`, `LecturerAccess`, login and roster pages (`app/templates/`), 39 tests written first; D32, D30 header names, EDD 2.1 edits | Approved the plan and the answers Q1-Q3; chose the D32 text; review of the code later |
 | 22/11 | Claude Code | STP draft (F1): strategy, 44 test cases, B11 table for the 32 F1 flows | Approved the plan; review of the STP text later |

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Roster{% endblock %}
+{% block content %}
+<h1>Roster</h1>
+{% if saved %}<p class="ok">Roster saved: {{ saved }} students.</p>{% endif %}
+{% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}
+<p>Active students: <strong>{{ active_count }}</strong></p>
+<p>Upload the Moodle participants export (CSV, UTF-8). A new file replaces the roster.</p>
+<form method="post" action="/roster/upload" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".csv,text/csv" required>
+  <button type="submit">Upload and preview</button>
+</form>
+{% endblock %}

@@ -1,5 +1,7 @@
 import pytest
 
+from app.clock import Clock
+from app.db import Db
 from app.settings import Settings
 
 
@@ -22,3 +24,17 @@ def env(tmp_path):
 @pytest.fixture
 def settings(env):
     return Settings.from_env(env)
+
+
+# A real SQLite file in the test's own folder, with all tables made.
+@pytest.fixture
+def db(settings):
+    database = Db(settings.db_path)
+    database.create_tables()
+    return database
+
+
+# The clock tests can set to any time.
+@pytest.fixture
+def clock():
+    return Clock()

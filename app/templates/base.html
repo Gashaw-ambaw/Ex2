@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Ex2{% endblock %}</title>
+  <style>
+    body { font-family: sans-serif; max-width: 52rem; margin: 1rem auto; padding: 0 1rem; }
+    header { display: flex; justify-content: space-between; align-items: center; }
+    table { border-collapse: collapse; }
+    td, th { border: 1px solid #ccc; padding: 0.25rem 0.5rem; text-align: left; }
+    .error { color: #b00020; }
+    .ok { color: #0a6b2b; }
+    button { padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <strong>Ex2</strong>
+    {# Logout is a POST button on every lecturer page (EDD 6, D24). #}
+    {% if lecturer %}
+    <form method="post" action="/logout"><button type="submit">Log out</button></form>
+    {% endif %}
+  </header>
+  {% block content %}{% endblock %}
+</body>
+</html>
