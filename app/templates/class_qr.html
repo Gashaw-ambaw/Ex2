@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Attendance QR</title>
+  <style>
+    body { font-family: sans-serif; margin: 0; min-height: 100vh; display: flex; flex-direction: column;
+           align-items: center; justify-content: center; gap: 1rem; background: #fff; color: #000; }
+    #info { font-size: 2rem; }
+    #qr svg { width: min(75vh, 90vw); height: min(75vh, 90vw); background: #fff; }
+    #offline { color: #b00020; min-height: 1.5rem; }
+    button { padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <div id="info">Time left: <strong id="left">-</strong> s &middot; Marks: <strong id="marks">0</strong></div>
+  <div id="qr"></div>
+  <div id="offline"></div>
+  <form method="post" action="/class/close"><button type="submit">Close attendance</button></form>
+<script>
+  // The page asks the server every few seconds. If a request fails, it keeps the old QR and tries again.
+  var endsAt = 0;
+  function show() {
+    document.getElementById("left").textContent = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+  }
+  function poll() {
+    fetch("/class/state", { cache: "no-store" }).then(function (r) {
+      if (!r.ok) { throw new Error("status " + r.status); }
+      return r.json();
+    }).then(function (s) {
+      document.getElementById("offline").textContent = "";
+      if (!s.open) { window.location.href = "/class"; return; }
+      endsAt = Date.now() + s.seconds_left * 1000;
+      document.getElementById("marks").textContent = s.marks;
+      document.getElementById("qr").innerHTML = s.qr_svg;  // SVG made by our own server
+      show();
+    }).catch(function () {
+      document.getElementById("offline").textContent = "Connection lost. Trying again...";
+    });
+  }
+  poll();
+  setInterval(poll, {{ refresh_ms }});
+  setInterval(show, 1000);
+</script>
+</body>
+</html>

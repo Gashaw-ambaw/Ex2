@@ -1,14 +1,18 @@
 from pathlib import Path
 
+import segno
+
 from fastapi import Depends, FastAPI, Form, Request, UploadFile
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
+from app.attendance import AttendanceService, parse_location
 from app.clock import Clock
 from app.db import Db
 from app.google import make_oauth
 from app.lecturer import LecturerAccess
+from app.qr_tokens import QrTokens
 from app.roster import RosterService
 from app.settings import Settings
 
@@ -32,6 +36,9 @@ def create_app(settings=None):
     app.state.oauth = make_oauth(settings)
     app.state.access = LecturerAccess(settings, clock)
     app.state.roster = RosterService(db, clock)
+    app.state.attendance = AttendanceService(
+        db, clock, settings, QrTokens(settings.secret_key, settings.qr_rotate_sec, clock)
+    )
     templates = Jinja2Templates(directory=str(TEMPLATES))
 
     # The lecturer session is a signed cookie. max_age is set explicitly (EDD 6).
@@ -62,6 +69,22 @@ def create_app(settings=None):
             status_code=status_code,
         )
 
+    def class_page(request, status_code=200, errors=()):
+        attendance = app.state.attendance
+        session = attendance.session_for_today()
+        return templates.TemplateResponse(
+            request,
+            "class.html",
+            {
+                "lecturer": True,
+                "errors": list(errors),
+                "session": session,
+                "state": attendance.window_state(session["id"]) if session else None,
+                "location": attendance.class_location(),
+            },
+            status_code=status_code,
+        )
+
     # Simple check that the server is running. No database access.
     @app.get("/health")
     def health():
@@ -69,8 +92,7 @@ def create_app(settings=None):
 
     @app.get("/")
     def home():
-        # Step 4 will put the class page here.
-        return RedirectResponse("/roster", status_code=303)
+        return RedirectResponse("/class", status_code=303)
 
     @app.get("/login")
     def login_form(request: Request):
@@ -81,7 +103,7 @@ def create_app(settings=None):
         result = app.state.access.login(password)
         if result == "ok":
             request.session["lecturer"] = True
-            return RedirectResponse("/roster", status_code=303)
+            return RedirectResponse("/class", status_code=303)
         if result == "locked":
             message = "Login locked. Try again in a few minutes."
         else:
@@ -92,6 +114,68 @@ def create_app(settings=None):
     def logout(request: Request):
         app.state.access.logout(request)
         return RedirectResponse("/login", status_code=303)
+
+    @app.get("/class", dependencies=guard)
+    def class_home(request: Request):
+        return class_page(request)
+
+    @app.post("/class/start", dependencies=guard)
+    def class_start():
+        app.state.attendance.start_class()
+        return RedirectResponse("/class", status_code=303)
+
+    @app.post("/class/location", dependencies=guard)
+    def class_location(request: Request, location: str = Form("")):
+        try:
+            lat, lon = parse_location(location)
+            app.state.attendance.set_class_location(lat, lon)
+        except ValueError as error:
+            return class_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/class", status_code=303)
+
+    @app.post("/class/open", dependencies=guard)
+    def class_open(request: Request):
+        session = app.state.attendance.session_for_today()
+        if session is None:
+            return class_page(request, 400, errors=["Start class first."])
+        try:
+            app.state.attendance.open_window(session["id"])
+        except ValueError as error:
+            return class_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/class/qr", status_code=303)
+
+    @app.post("/class/close", dependencies=guard)
+    def class_close():
+        session = app.state.attendance.session_for_today()
+        if session is not None:
+            app.state.attendance.close_window(session["id"])
+        return RedirectResponse("/class", status_code=303)
+
+    @app.get("/class/qr", dependencies=guard)
+    def class_qr(request: Request):
+        attendance = app.state.attendance
+        session = attendance.session_for_today()
+        if session is None or not attendance.window_state(session["id"]).open:
+            return RedirectResponse("/class", status_code=303)
+        return templates.TemplateResponse(
+            request, "class_qr.html", {"lecturer": True, "refresh_ms": settings.qr_rotate_sec * 1000}
+        )
+
+    @app.get("/class/state", dependencies=guard)
+    def class_state():
+        # Read only. The QR page asks this every QR_ROTATE_SEC seconds.
+        attendance = app.state.attendance
+        session = attendance.session_for_today()
+        if session is None:
+            return JSONResponse({"open": False, "seconds_left": 0, "marks": 0, "flags": 0, "qr_svg": None})
+        state = attendance.window_state(session["id"])
+        address = attendance.current_qr(session["id"])
+        # omitsize gives a viewBox, so CSS can scale the QR to the screen.
+        svg = segno.make(address, error="m").svg_inline(omitsize=True, border=2) if address else None
+        return JSONResponse(
+            {"open": state.open, "seconds_left": state.seconds_left, "marks": state.marks,
+             "flags": state.flags, "qr_svg": svg}
+        )
 
     @app.get("/roster", dependencies=guard)
     def roster(request: Request, saved: int | None = None):

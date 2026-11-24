@@ -149,6 +149,6 @@ def test_names_are_escaped_in_the_preview(logged_in):
     assert "&lt;b&gt;x&lt;/b&gt;" in reply.text
 
 
-def test_home_goes_to_the_roster_page(client):
+def test_home_goes_to_the_class_page(client):
     reply = client.get("/")
-    assert reply.status_code == 303 and reply.headers["location"] == "/roster"
+    assert reply.status_code == 303 and reply.headers["location"] == "/class"

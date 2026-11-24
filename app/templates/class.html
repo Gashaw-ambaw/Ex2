@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Class{% endblock %}
+{% block content %}
+<h1>Class</h1>
+{% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}
+
+<h2>Class location</h2>
+{% if location %}
+<p>Set: {{ location[0] }}, {{ location[1] }}</p>
+{% else %}
+<p class="error">No class location set: the location check is skipped.</p>
+{% endif %}
+{# One field. The button fills it from the browser location; then press Save. #}
+<form method="post" action="/class/location">
+  <input type="text" id="location" name="location" placeholder="lat, lon" size="24" required>
+  <button type="button" id="here">Use my current location</button>
+  <button type="submit">Save location</button>
+</form>
+<p id="here-status"></p>
+
+<h2>Today</h2>
+{% if not session %}
+<p>Class has not started.</p>
+<form method="post" action="/class/start"><button type="submit">Start class</button></form>
+{% else %}
+<p>Class started: {{ session["date"] }}.</p>
+{% if state.open %}
+<p class="ok">Attendance is open ({{ state.seconds_left }} s left). Marks: <strong>{{ state.marks }}</strong>.</p>
+<p><a href="/class/qr">Show the QR</a></p>
+<form method="post" action="/class/close"><button type="submit">Close attendance</button></form>
+{% elif session["window_opened_at"] %}
+<p>Attendance is closed. Marks: <strong>{{ state.marks }}</strong>. Flags: <strong>{{ state.flags }}</strong>.</p>
+{% endif %}
+{# Shown in every state: on a closed window it answers with the closed message (D31). #}
+<form method="post" action="/class/open"><button type="submit">Open attendance</button></form>
+{% endif %}
+
+<script>
+  document.getElementById("here").addEventListener("click", function () {
+    var status = document.getElementById("here-status");
+    if (!navigator.geolocation) { status.textContent = "This browser has no location."; return; }
+    status.textContent = "Asking the browser for the location...";
+    navigator.geolocation.getCurrentPosition(function (p) {
+      document.getElementById("location").value = p.coords.latitude.toFixed(6) + ", " + p.coords.longitude.toFixed(6);
+      status.textContent = "Location filled in. Press Save location.";
+    }, function (e) { status.textContent = "Location not available: " + e.message; });
+  });
+</script>
+{% endblock %}
