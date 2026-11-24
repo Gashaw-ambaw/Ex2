@@ -38,10 +38,11 @@ Problem, scope and features: `README.md`. Requirements: SRS and `use_cases.md`.
 |---|---|
 | 18-19/11 | SoW. Repo documents brought up to date. Tools report. |
 | 19-20/11 | SRS draft, human review, SRS closed. SDD, EDD, test plan. |
-| 21-22/11 | F1 end to end on real phones. |
-| 23/11 | F2, F3. |
-| 24/11 | F4 and F5 thin slices, README, results. |
-| 26/11 | Final check and submission (by 23:59). |
+| 24-26/11 | F1 end to end on real phones, S2 load check, rehearsal. |
+| 27/11 | F2, F3. |
+| 28/11 | F4 thin slice; S4 if F1 is stable. |
+| 29/11 | F5 thin slice, tools report, results, README. |
+| 30/11 | Final check and submission (by 23:59). |
 
 Spikes S1 to S6 are inputs, not deliverables. S3 (location) needs a real class day (date to confirm). The demo date is to confirm.
 There are no payment points. The cost is the supplier's time and the LLM API usage, measured in spikes S5 and S6, under a spending limit (D13).
@@ -52,7 +53,7 @@ There are no payment points. The cost is the supplier's time and the LLM API usa
 - A deliverable is done when its criterion is met, or the gap is written in `results.md`.
 - If time runs out, F5 is cut first, then F4. F1 to F3 are protected.
 - A change to the scope is requested in writing by the lecturer and accepted by the supplier.
-- A rehearsal with 2-3 people is planned on 25/11, before submission, with synthetic or consented data only.
+- A rehearsal with 2-3 people is planned on 26/11, before submission, with synthetic or consented data only.
 
 ## 6. Roles, assumptions, dependencies
 

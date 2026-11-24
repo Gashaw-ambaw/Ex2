@@ -1,6 +1,6 @@
 # Ex2 – Web-based Teaching Tool
 
-Status: design (EDD draft done, STP next), no app code yet. Deadline: Thursday 26/11/2026, 23:59.
+Status: F1 build in progress (step 1 done). Deadline: Monday 30/11/2026, 23:59.
 
 ## What it is
 
