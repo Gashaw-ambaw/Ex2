@@ -77,6 +77,7 @@ classDiagram
     +export_csv(session_id) bytes
   }
   class QrTokens {
+    +window() int
     +make(session_id, window) str
     +verify(session_id, window, token) bool
   }
@@ -169,6 +170,7 @@ classDiagram
 - `PeopleCounter` hides the count method. Option A or B stays OPEN until S4 [SDD:134].
 - `RegisterResult` carries the roster entry and the events (`new_device`, `relinked`). The controller passes them to `add_flags()`, so C-04 never calls C-05 [P].
 - `new_session(name)` is deferred (1b, D31).
+- `RosterService.add_entry` and `edit_email` come in step 5 (UC-02 1a).
 
 ### 2.2 F2-F5 (C-07 to C-11, Must methods only)
 
@@ -465,7 +467,7 @@ sequenceDiagram
 
 ## 7. Errors
 
-- A database error gives a short error page with status 500 [S1]. A wrong type or a file that is too large gives an error, and nothing is stored (UC-00 2a, UC-04 1a, UC-10 2a).
+- A database error gives a short error page with status 500 [S1]. A wrong type, or a photo or transcript that is too large, gives an error, and nothing is stored (UC-00 2a, UC-04 1a, UC-10 2a).
 - A model failure makes the F4 job "failed"; F5 falls back to layer 1 (FR-13). A GitHub limit gives "Try again later" (UC-11 3b).
 - Unique-key conflicts are normal answers, not errors: already marked, device reuse, second running job, second poll answer [P].
 

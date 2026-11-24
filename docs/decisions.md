@@ -1,6 +1,6 @@
 # Decisions
 
-Closed decisions only. Open items are in `project_plan.md`. Last updated: 22/11/2026.
+Closed decisions only. Open items are in `project_plan.md`. Last updated: 24/11/2026.
 
 | # | Decision | Reason (rejected alternative) | Source |
 |---|---|---|---|
@@ -33,5 +33,6 @@ Closed decisions only. Open items are in `project_plan.md`. Last updated: 22/11/
 | D27 | Student browsers get two separate random cookies, each for 120 days: a device cookie (linked to the roster entry after Google sign-in, F1) and an anonymous id (comments, polls, F5 limits). The anonymous id is never stored with the device id or a roster entry. A cleared device cookie means signing in again and a "new device" flag (D16). | One semester with one sign-in; comments and answers stay anonymous (D10, D11). The 120-day lifetime is not verified. | Own decision, 21/11 |
 | D28 | The lecturer sets the class location in the app, on the Start class page: "Use my current location" or a "lat, lon" pasted from Google Maps. It is stored in the database and kept until the lecturer changes it. If none is set, the location check is skipped and the lecturer page warns (proposal, to confirm in S3). | A place, not personal data; no code change when the room changes. Rejected: environment variables for the location. Laptop location may be inaccurate (check in S3). | Own decision, 21/11 |
 | D29 | Code layout: one `app/` package with one module per component (for example `roster.py`, `attendance.py`); tests in `tests/`; classes as in the EDD. | KISS, 4 days left. Rejected: one package per component (more files). | Own decision, 22/11 |
-| D30 | Roster input is a CSV file (UTF-8), read by header name: first name, last name, email. Other columns, such as the class group number, are ignored. | No extra library; matches FR-01, D8 and UC-00. Rejected: XLSX or Google Sheet as input; using the groups column. | Own decision, 22/11 |
+| D30 | Roster input is a CSV file (UTF-8), read by header name: first name, last name, email (`שם פרטי`, `שם משפחה`, `דוא"ל`). Other columns, such as the class group number, are ignored. | No extra library; matches FR-01, D8 and UC-00. Rejected: XLSX or Google Sheet as input; using the groups column. | Own decision, 22/11 |
 | D31 | UC-01 1b (a new session, for example a tutorial) is deferred: not in the F1 core, built only if time remains. The STP row says "not tested, deferred". Meanwhile "Open attendance" on a closed window shows "Attendance already closed for this session" and opens nothing. | KISS, deadline 30/11. If it is not built, the gap is written in `results.md`. | Own decision, 22/11 |
+| D32 | Roster re-upload: match by email; entries missing from the new file become inactive but are kept, so old marks keep their name. | Keeps attendance history. Rejected: deleting them. | Own decision, 24/11 |
