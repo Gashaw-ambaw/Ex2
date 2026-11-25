@@ -29,7 +29,7 @@ Source: my test runs. Screenshots for steps 1-6a, my report for the rest.
 - The 100 test-user cap (one extra account tested).
 - Google OAuth app: Publishing status was not checked in Google Cloud Console (Audience). The 100 test-user cap applies only in Testing mode (not verified), so the result of the extra-account test depends on it.
 - Concurrent writes (S2).
-- Railway Trial limits and cost. The old Google secret is not yet disabled.
+- Railway Trial limits and cost.
 
 ## Open (my decision)
 

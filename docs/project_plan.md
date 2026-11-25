@@ -54,7 +54,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | S5 | F4 summary from a Hebrew transcript | Before F4. Not started |
 | S6 | F5 report on 2-3 repos | Before F5. Not started |
 
-Also: a survey of existing tools (including NotebookLM) for the tools report.
+Also: a survey of existing tools for the tools report.
 
 ## 6. Risks
 

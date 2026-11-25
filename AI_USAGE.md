@@ -32,4 +32,5 @@ Real roster and class photos were shown only in the planning chat to understand 
 | 25/11 | Claude Code | F1 step 5: `StudentIdentity` (Google sign-in, device link, flags), minimal `/scan`, `check_scan`, `add_flags`, roster `add_entry` and `edit_email` with forms, 79 tests written first (fake Google) | Approved the plan and the answers Q1-Q6; review of the code later |
 | 25/11 | Claude Code | Updated README and results with the step 5 live check results | Ran the live checks on the laptop and two phones; gave the results |
 | 25/11 | Claude Code | Searched the docs for the demo date; set 8/12/2026 in sow.md and project_plan.md | Gave the date; approved the 4 edits |
+| 25/11 | Claude Code | Tools report skeleton (`docs/tools_report.md`): tested tools with pointers to results.md, "[fill]" cells for the rest | Chose the rows and the format; checked the Mermaid render; writes the missing cells |
 | 22/11 | Claude Code | STP draft (F1): strategy, 44 test cases, B11 table for the 32 F1 flows | Approved the plan; review of the STP text later |
