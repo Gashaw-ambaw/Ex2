@@ -25,3 +25,8 @@ closed decisions differently, and tell me which one this is.
 
 13. Decision entries (decisions.md): short and focused,
 two lines at most. Put what, why, rejected and who in those two lines.
+
+14. At the end of each step, list the decisions I made or approved in this step
+that are not in decisions.md. Propose a two-line entry for each. Only
+decisions that change behavior, scope, cost or a document; not technical
+details marked [P]. I decide what goes in.

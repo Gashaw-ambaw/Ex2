@@ -170,7 +170,7 @@ classDiagram
 - C-06 calls C-05 `count_marks()`. C-05 never calls C-06 [SDD:48, U21]. For "flagged first", the controller asks `HeadCountService.result()` and passes the alert to `review_table()`.
 - `PeopleCounter` hides the count method. Option A or B stays OPEN until S4 [SDD:134].
 - `RegisterResult` carries the roster entry and the events (`new_device`, `relinked`). The controller passes them to `add_flags()`, so C-04 never calls C-05 [P].
-- `new_session(name)` is deferred (1b, D31).
+- `new_session(name)` (1b, D31) is refused while a window is open.
 - `WindowState` = open, seconds_left, marks, flags. `class_location()` returns (lat, lon) or None.
 - `RosterService.add_entry` and `edit_email` come in step 5 (UC-02 1a).
 
@@ -293,7 +293,7 @@ sequenceDiagram
   end
   L->>AC: POST Open attendance
   AC->>AS: open_window(session_id)
-  Note over AS: No started session gives Start class first. A closed window shows "Attendance already closed for this session" (D19 1b, deferred, D31).
+  Note over AS: No started session gives Start class first. A closed window shows "Attendance already closed for this session" (D19 1b, D31). After a closed window, the lecturer starts a new session.
   AS->>DB: window_ends_at = now + ATT_WINDOW_SEC
   loop every QR_ROTATE_SEC until the window ends
     L->>AC: GET window state (JSON)

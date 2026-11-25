@@ -36,7 +36,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | 6 | Export format (file, Google Sheets) | Resolved: a file, CSV or XLSX (FR-07); Google Sheets optional |
 | 7 | F2 refresh interval and abuse handling | Resolved: `REFRESH_SEC` and `COMMENT_MIN_INTERVAL_SEC` (FR-08, FR-09) |
 | 8 | F4 and F5 models, Hebrew support | Spikes S5, S6 |
-| 9 | UC-01 1b (new session, for example a tutorial): deferred, not in the F1 core | Build if time remains; otherwise the gap goes to `results.md` |
+| 9 | UC-01 1b (new session, for example a tutorial): decided, built 25/11 (D31) | Done; the known limit is in `results.md` |
 | 10 | Google OAuth stays in Testing mode (S1 client): only listed test users can sign in; a whole-class demo meets the cap of about 100 (not verified) | Before the rehearsal and the demo: add the testers' and the lecturer's emails; decide for the demo |
 
 ## 4. Questions for the lecturer

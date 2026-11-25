@@ -34,3 +34,7 @@ Source: my test runs. Screenshots for steps 1-6a, my report for the rest.
 ## Open (my decision)
 
 - Railway Hobby or Render paid, and the budget. Python + FastAPI + SQLite stays a candidate stack until I approve it.
+
+## F1 known limits
+
+- After a new session is started (UC-01 1b), review and export show the latest session only. A lecturer who starts a new session by mistake does not see the first session's marks there.
