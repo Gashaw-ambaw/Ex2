@@ -3,11 +3,28 @@
 {% block content %}
 <h1>Roster</h1>
 {% if saved %}<p class="ok">Roster saved: {{ saved }} students.</p>{% endif %}
+{% if done %}<p class="ok">{{ done }}</p>{% endif %}
 {% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}
 <p>Active students: <strong>{{ active_count }}</strong></p>
 <p>Upload the Moodle participants export (CSV, UTF-8). A new file replaces the roster.</p>
 <form method="post" action="/roster/upload" enctype="multipart/form-data">
   <input type="file" name="file" accept=".csv,text/csv" required>
   <button type="submit">Upload and preview</button>
+</form>
+
+<h2>Add a student</h2>
+<form method="post" action="/roster/add">
+  <input type="text" name="first_name" placeholder="First name" required>
+  <input type="text" name="last_name" placeholder="Last name" required>
+  <input type="email" name="email" placeholder="Email" required>
+  <button type="submit">Add student</button>
+</form>
+
+<h2>Change an email</h2>
+<p>For a student whose roster email is not a Google account.</p>
+<form method="post" action="/roster/email">
+  <input type="email" name="current_email" placeholder="Current email" required>
+  <input type="email" name="new_email" placeholder="New email" required>
+  <button type="submit">Change email</button>
 </form>
 {% endblock %}

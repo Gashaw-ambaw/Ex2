@@ -279,3 +279,132 @@ def test_new_session_is_refused_while_the_window_is_open(service, db):
 def test_new_session_before_any_session_is_allowed(service):
     assert service.session_for_today() is None
     assert service.new_session(None)["id"] == service.session_for_today()["id"]
+
+
+# ---- check_scan (UC-03 steps 1-2, TC-08 and TC-09 scan side) ----
+
+def scan_parts(service, session_id):
+    query = parse_qs(urlparse(service.current_qr(session_id)).query)
+    return query["s"][0], query["w"][0], query["t"][0]
+
+
+def test_check_scan_accepts_the_current_qr(service, clock):
+    session = service.start_class()
+    service.open_window(session["id"])
+    ticket = service.check_scan(*scan_parts(service, session["id"]))
+    assert ticket.session_id == session["id"]
+    assert ticket.scanned_at == int(clock.now().timestamp())
+
+
+def test_check_scan_accepts_the_previous_window(service, clock, settings):
+    session = service.start_class()
+    service.open_window(session["id"])
+    parts = scan_parts(service, session["id"])
+    clock.set(NOON + timedelta(seconds=settings.qr_rotate_sec))
+    assert service.check_scan(*parts).session_id == session["id"]
+
+
+def test_check_scan_refuses_an_older_window_tc12(service, clock, settings):
+    session = service.start_class()
+    service.open_window(session["id"])
+    parts = scan_parts(service, session["id"])
+    clock.set(NOON + timedelta(seconds=2 * settings.qr_rotate_sec))
+    with pytest.raises(ValueError, match="Scan again"):
+        service.check_scan(*parts)
+
+
+def test_check_scan_refuses_a_wrong_token(service):
+    session = service.start_class()
+    service.open_window(session["id"])
+    s, w, _ = scan_parts(service, session["id"])
+    with pytest.raises(ValueError, match="Scan again"):
+        service.check_scan(s, w, "0" * 16)
+
+
+def test_check_scan_refuses_a_token_of_another_session_tc13(service, settings, clock):
+    session = service.start_class()
+    service.open_window(session["id"])
+    _, w, _ = scan_parts(service, session["id"])
+    other = QrTokens(settings.secret_key, settings.qr_rotate_sec, clock).make(session["id"] + 1, int(w))
+    with pytest.raises(ValueError, match="Scan again"):
+        service.check_scan(str(session["id"]), w, other)
+    # A session number that does not exist is also "scan again".
+    with pytest.raises(ValueError, match="Scan again"):
+        service.check_scan(str(session["id"] + 1), w, other)
+
+
+@pytest.mark.parametrize("s,w,t", [("", "", ""), ("x", "1", "abc"), ("1", "y", "abc"), ("1", "1", "")])
+def test_check_scan_refuses_missing_or_bad_values(service, s, w, t):
+    session = service.start_class()
+    service.open_window(session["id"])
+    with pytest.raises(ValueError, match="Scan again"):
+        service.check_scan(s, w, t)
+
+
+def test_check_scan_before_the_class_starts(service):
+    with pytest.raises(ValueError, match="Class has not started"):
+        service.check_scan("1", "1", "abc")
+
+
+# TC-08 (scan side): after Close, the next scan gets "Attendance is closed".
+def test_check_scan_after_close_tc08(service):
+    session = service.start_class()
+    service.open_window(session["id"])
+    parts = scan_parts(service, session["id"])
+    service.close_window(session["id"])
+    with pytest.raises(ValueError, match="Attendance is closed"):
+        service.check_scan(*parts)
+
+
+# TC-09 (scan side): after ATT_WINDOW_SEC no QR is valid.
+def test_check_scan_after_the_window_ends_tc09(service, clock):
+    session = service.start_class()
+    service.open_window(session["id"])
+    parts = scan_parts(service, session["id"])
+    clock.set(NOON + timedelta(seconds=300))
+    with pytest.raises(ValueError, match="Attendance is closed"):
+        service.check_scan(*parts)
+
+
+def test_check_scan_when_the_window_was_never_opened(service):
+    session = service.start_class()
+    with pytest.raises(ValueError, match="Attendance is closed"):
+        service.check_scan(str(session["id"]), "1", "abc")
+
+
+# ---- The ticket (EDD 5: valid for SUBMIT_SEC) ----
+
+def test_ticket_is_fresh_for_submit_sec(service, clock, settings):
+    scanned = int(clock.now().timestamp())
+    assert service.ticket_is_fresh(scanned) is True
+    clock.set(NOON + timedelta(seconds=settings.submit_sec))
+    assert service.ticket_is_fresh(scanned) is True
+    clock.set(NOON + timedelta(seconds=settings.submit_sec + 1))
+    assert service.ticket_is_fresh(scanned) is False
+
+
+# ---- add_flags ----
+
+def test_add_flags_writes_one_row_per_event(service, db):
+    session = service.start_class()
+    with closing(db.connect()) as conn, conn:
+        conn.execute("INSERT INTO roster_entries (first_name, last_name, email, created_at) VALUES ('A', 'B', 'a@example.com', 'x')")
+    service.add_flags(session["id"], 1, "dev-1", ["new_device", "relinked"])
+    assert rows(db, "SELECT session_id, roster_id, device_id, kind FROM flags ORDER BY id") == [
+        (session["id"], 1, "dev-1", "new_device"),
+        (session["id"], 1, "dev-1", "relinked"),
+    ]
+    assert service.window_state(session["id"]).flags == 2
+
+
+def test_add_flags_with_no_events_writes_nothing(service, db):
+    session = service.start_class()
+    service.add_flags(session["id"], 1, "dev-1", [])
+    assert rows(db, "SELECT COUNT(*) FROM flags") == [(0,)]
+
+
+def test_add_flags_refuses_an_unknown_kind(service, db):
+    session = service.start_class()
+    with pytest.raises(ValueError):
+        service.add_flags(session["id"], 1, "dev-1", ["bogus"])
+    assert rows(db, "SELECT COUNT(*) FROM flags") == [(0,)]

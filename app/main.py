@@ -1,3 +1,4 @@
+import secrets
 from pathlib import Path
 
 import segno
@@ -11,6 +12,7 @@ from app.attendance import AttendanceService, parse_location
 from app.clock import Clock
 from app.db import Db
 from app.google import make_oauth
+from app.identity import StudentIdentity
 from app.lecturer import LecturerAccess
 from app.qr_tokens import QrTokens
 from app.roster import RosterService
@@ -19,8 +21,9 @@ from app.settings import Settings
 TEMPLATES = Path(__file__).parent / "templates"
 
 
-def create_app(settings=None):
-    """Build the app. Run it with: uvicorn app.main:create_app --factory"""
+def create_app(settings=None, google=None):
+    """Build the app. Run it with: uvicorn app.main:create_app --factory
+    Tests pass a fake google; the real run uses the Google client."""
     # Tests pass their own settings; the real run reads the environment.
     settings = settings or Settings.from_env()
     # Create the tables at start (safe to repeat).
@@ -36,6 +39,7 @@ def create_app(settings=None):
     app.state.oauth = make_oauth(settings)
     app.state.access = LecturerAccess(settings, clock)
     app.state.roster = RosterService(db, clock)
+    app.state.identity = StudentIdentity(db, clock, app.state.roster, google or app.state.oauth.google)
     app.state.attendance = AttendanceService(
         db, clock, settings, QrTokens(settings.secret_key, settings.qr_rotate_sec, clock)
     )
@@ -56,7 +60,10 @@ def create_app(settings=None):
 
     guard = [Depends(lecturer_only)]
 
-    def roster_page(request, status_code=200, errors=(), saved=None):
+    # Fixed texts for the ?done= address, so the address cannot put text on the page.
+    done_messages = {"added": "Student added.", "email": "Email changed."}
+
+    def roster_page(request, status_code=200, errors=(), saved=None, done=None):
         return templates.TemplateResponse(
             request,
             "roster.html",
@@ -64,6 +71,7 @@ def create_app(settings=None):
                 "lecturer": True,
                 "errors": list(errors),
                 "saved": saved,
+                "done": done_messages.get(done),
                 "active_count": len(app.state.roster.list_active()),
             },
             status_code=status_code,
@@ -114,6 +122,81 @@ def create_app(settings=None):
     def logout(request: Request):
         app.state.access.logout(request)
         return RedirectResponse("/login", status_code=303)
+
+    # ---- Student pages: scan, Google sign-in, registration (UC-02, UC-03 steps 1-3) ----
+
+    def student_page(request, message, status_code=200, link=None, button=None):
+        return templates.TemplateResponse(
+            request,
+            "student.html",
+            {"message": message, "link": link, "button": button},
+            status_code=status_code,
+        )
+
+    def hello_page(request, entry, registered=False):
+        # Step 6 replaces the note with the "I'm here" button.
+        greeting = f"Hello {entry['first_name']}, you are registered." if registered else f"Hello {entry['first_name']}."
+        return student_page(request, f"{greeting} Marking opens in the next version.")
+
+    @app.get("/scan")
+    def scan(request: Request, s: str = "", w: str = "", t: str = ""):
+        try:
+            ticket = app.state.attendance.check_scan(s, w, t)
+        except ValueError as error:
+            return student_page(request, str(error), 400)
+        # The ticket lives in the signed session cookie (EDD 5). No database write.
+        request.session["ticket"] = {"session_id": ticket.session_id, "scanned_at": ticket.scanned_at}
+        owner = app.state.identity.device_owner(request.cookies.get("device"))
+        if owner is not None:
+            return hello_page(request, owner)
+        return student_page(
+            request, "To mark attendance, sign in once with Google.", link=("Sign in with Google", "/auth/start")
+        )
+
+    @app.get("/auth/start")
+    async def auth_start(request: Request):
+        if not request.session.get("ticket"):
+            return student_page(request, "Scan the QR in class first.", 400)
+        return await app.state.identity.start_sign_in(request, settings.redirect_uri)
+
+    @app.get("/auth/callback")
+    async def auth_callback(request: Request):
+        # Only checks the sign-in. The email is kept in the signed cookie; nothing is written (D24).
+        try:
+            email = await app.state.identity.verify_google(request)
+        except ValueError as error:
+            return student_page(request, str(error), 400)
+        request.session["email"] = email
+        return student_page(
+            request, f"Signed in as {email}.", button=("Confirm registration", "/register")
+        )
+
+    @app.post("/register")
+    def register(request: Request):
+        email = request.session.get("email")
+        ticket = request.session.get("ticket")
+        if not email or not ticket:
+            return student_page(request, "Scan the QR in class first.", 400)
+        device_id = request.cookies.get("device") or secrets.token_urlsafe(32)
+        result = app.state.identity.confirm_registration(device_id, email)
+        request.session.pop("email", None)
+        if result.entry is None:
+            return student_page(request, "Your email is not on the roster. Contact the lecturer.", 400)
+        app.state.attendance.add_flags(ticket["session_id"], result.entry["id"], device_id, result.events)
+        if app.state.attendance.ticket_is_fresh(ticket["scanned_at"]):
+            reply = hello_page(request, result.entry, registered=True)
+        else:
+            request.session.pop("ticket", None)
+            reply = student_page(request, "You are registered. Scan the QR again.")
+        reply.set_cookie(
+            "device",
+            device_id,
+            max_age=settings.browser_cookie_days * 86400,
+            httponly=True,
+            secure=settings.https_only,
+            samesite="lax",
+        )
+        return reply
 
     @app.get("/class", dependencies=guard)
     def class_home(request: Request):
@@ -186,8 +269,27 @@ def create_app(settings=None):
         )
 
     @app.get("/roster", dependencies=guard)
-    def roster(request: Request, saved: int | None = None):
-        return roster_page(request, saved=saved)
+    def roster(request: Request, saved: int | None = None, done: str | None = None):
+        return roster_page(request, saved=saved, done=done)
+
+    @app.post("/roster/add", dependencies=guard)
+    def roster_add(request: Request, first_name: str = Form(""), last_name: str = Form(""), email: str = Form("")):
+        try:
+            app.state.roster.add_entry(first_name, last_name, email)
+        except ValueError as error:
+            return roster_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/roster?done=added", status_code=303)
+
+    @app.post("/roster/email", dependencies=guard)
+    def roster_email(request: Request, current_email: str = Form(""), new_email: str = Form("")):
+        entry = app.state.roster.find_by_email(current_email)
+        if entry is None:
+            return roster_page(request, 400, errors=["No roster entry has that email."])
+        try:
+            app.state.roster.edit_email(entry["id"], new_email)
+        except ValueError as error:
+            return roster_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/roster?done=email", status_code=303)
 
     @app.post("/roster/upload", dependencies=guard)
     async def roster_upload(request: Request, file: UploadFile):

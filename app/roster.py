@@ -1,5 +1,6 @@
 import csv
 import io
+import sqlite3
 from collections import Counter
 from contextlib import closing
 from dataclasses import dataclass, field
@@ -35,6 +36,12 @@ def _clean(rows):
 def _duplicates(rows):
     counts = Counter(r["email"] for r in rows)
     return sorted(email for email, n in counts.items() if n > 1)
+
+
+def _valid_email(email):
+    # Simple check only: one "@" with text on both sides. Google does the real check.
+    name, at, domain = email.partition("@")
+    return bool(name) and bool(at) and bool(domain) and "@" not in domain
 
 
 class RosterService:
@@ -110,3 +117,40 @@ class RosterService:
             return conn.execute(
                 "SELECT * FROM roster_entries WHERE email = ?", (email.strip().lower(),)
             ).fetchone()
+
+    def add_entry(self, first_name, last_name, email):
+        """Add one student by hand (UC-05 5a). An inactive entry with the same email comes back (D32)."""
+        first, last, email = first_name.strip(), last_name.strip(), email.strip().lower()
+        if not first or not last or not email:
+            raise ValueError("First name, last name and email are required.")
+        if not _valid_email(email):
+            raise ValueError("The email is not valid.")
+        with closing(self._db.connect()) as conn, conn:
+            row = conn.execute("SELECT * FROM roster_entries WHERE email = ?", (email,)).fetchone()
+            if row is not None and row["active"]:
+                raise ValueError("This email is already on the roster.")
+            if row is not None:
+                conn.execute(
+                    "UPDATE roster_entries SET first_name = ?, last_name = ?, active = 1 WHERE id = ?",
+                    (first, last, row["id"]),
+                )
+            else:
+                conn.execute(
+                    "INSERT INTO roster_entries (first_name, last_name, email, active, source, created_at) "
+                    "VALUES (?, ?, ?, 1, 'manual', ?)",
+                    (first, last, email, self._clock.now_iso()),
+                )
+            return conn.execute("SELECT * FROM roster_entries WHERE email = ?", (email,)).fetchone()
+
+    def edit_email(self, entry_id, email):
+        """Change the email of one entry (UC-05 5c), for example when the roster email is not a Google account."""
+        email = email.strip().lower()
+        if not _valid_email(email):
+            raise ValueError("The email is not valid.")
+        with closing(self._db.connect()) as conn, conn:
+            if conn.execute("SELECT 1 FROM roster_entries WHERE id = ?", (entry_id,)).fetchone() is None:
+                raise ValueError("No such roster entry.")
+            try:
+                conn.execute("UPDATE roster_entries SET email = ? WHERE id = ?", (email, entry_id))
+            except sqlite3.IntegrityError:
+                raise ValueError("This email belongs to another roster entry.") from None

@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block content %}
+<h1>Attendance</h1>
+<p>{{ message }}</p>
+{% if link %}<p><a href="{{ link[1] }}">{{ link[0] }}</a></p>{% endif %}
+{% if button %}
+{# Confirm is a POST, because it writes the device link (D24). #}
+<form method="post" action="{{ button[1] }}"><button type="submit">{{ button[0] }}</button></form>
+{% endif %}
+{% endblock %}

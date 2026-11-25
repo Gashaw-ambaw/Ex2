@@ -166,3 +166,77 @@ def test_find_by_email(roster):
     roster.save(roster.parse_upload(csv_bytes("א,ב,a@example.com,1")).rows)
     assert roster.find_by_email("A@Example.com")["first_name"] == "א"
     assert roster.find_by_email("nobody@example.com") is None
+
+
+# ---- Add and edit one entry by hand (UC-05 5a, 5c) ----
+
+def test_add_entry_creates_a_manual_active_entry(roster, db):
+    entry = roster.add_entry("  Dana ", "Levi", " Dana@Example.com ")
+    assert entry["source"] == "manual" and entry["active"] == 1
+    assert entries(db) == {"dana@example.com": ("Dana", "Levi", 1)}
+
+
+def test_add_entry_refuses_an_active_duplicate(roster, db):
+    roster.add_entry("Dana", "Levi", "dana@example.com")
+    with pytest.raises(ValueError, match="already"):
+        roster.add_entry("Other", "Name", "DANA@example.com")
+    assert entries(db) == {"dana@example.com": ("Dana", "Levi", 1)}
+
+
+def test_add_entry_brings_back_an_inactive_entry_with_the_new_names(roster, db):
+    # D32: an inactive entry returns when the same email is added again.
+    roster.save([{"first_name": "Old", "last_name": "Name", "email": "a@example.com"}])
+    roster.save([{"first_name": "B", "last_name": "B", "email": "b@example.com"}])
+    assert entries(db)["a@example.com"][2] == 0
+    back = roster.add_entry("New", "Name", "a@example.com")
+    assert entries(db)["a@example.com"] == ("New", "Name", 1)
+    assert back["id"] == 1  # the same row, so old marks keep their entry
+
+
+@pytest.mark.parametrize("first,last,email", [
+    ("", "Levi", "a@example.com"),
+    ("Dana", "  ", "a@example.com"),
+    ("Dana", "Levi", ""),
+    ("Dana", "Levi", "no-at-sign"),
+    ("Dana", "Levi", "@example.com"),
+    ("Dana", "Levi", "a@"),
+])
+def test_add_entry_refuses_missing_or_bad_values(roster, db, first, last, email):
+    with pytest.raises(ValueError):
+        roster.add_entry(first, last, email)
+    assert entries(db) == {}
+
+
+# TC-38 (service part): after the email is edited, the new email finds the entry.
+def test_edit_email_changes_the_email(roster, db):
+    entry = roster.add_entry("Dana", "Levi", "dana@example.com")
+    roster.edit_email(entry["id"], " Dana.Real@Gmail.com ")
+    assert roster.find_by_email("dana.real@gmail.com")["id"] == entry["id"]
+    assert roster.find_by_email("dana@example.com") is None
+
+
+def test_edit_email_to_the_same_email_is_fine(roster):
+    entry = roster.add_entry("Dana", "Levi", "dana@example.com")
+    roster.edit_email(entry["id"], "DANA@example.com")
+    assert roster.find_by_email("dana@example.com")["id"] == entry["id"]
+
+
+def test_edit_email_refuses_an_email_of_another_entry(roster):
+    roster.add_entry("A", "A", "a@example.com")
+    b = roster.add_entry("B", "B", "b@example.com")
+    with pytest.raises(ValueError, match="another"):
+        roster.edit_email(b["id"], "a@example.com")
+    assert roster.find_by_email("b@example.com")["id"] == b["id"]
+
+
+@pytest.mark.parametrize("email", ["", "nope", "@x.com", "a@"])
+def test_edit_email_refuses_a_bad_email(roster, email):
+    entry = roster.add_entry("Dana", "Levi", "dana@example.com")
+    with pytest.raises(ValueError):
+        roster.edit_email(entry["id"], email)
+    assert roster.find_by_email("dana@example.com") is not None
+
+
+def test_edit_email_of_an_unknown_entry_fails(roster):
+    with pytest.raises(ValueError, match="No such"):
+        roster.edit_email(999, "a@example.com")
