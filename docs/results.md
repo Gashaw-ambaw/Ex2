@@ -35,6 +35,19 @@ Source: my test runs. Screenshots for steps 1-6a, my report for the rest.
 
 - Railway Hobby or Render paid, and the budget. Python + FastAPI + SQLite stays a candidate stack until I approve it.
 
+## F1 live checks (25/11/2026)
+
+- MEASURED [TC-05] After login the app lands on /class; Open attendance shows the QR page; the countdown ran from 300 s; the QR changed about every 10 s.
+- MEASURED [no TC; D28] "Use my current location" saved the class location, and the warning disappeared.
+- MEASURED [TC-45] Close, then Open again: "Attendance already closed for this session".
+- MEASURED [no TC; UC-03 s1] A phone camera scanned the QR and opened /scan?s=..&w=..&t=.. (a 404 before step 5).
+- MEASURED [TC-46] After an expired window, "Start a new session" (name "Test") created a second session for today; Open attendance worked, the countdown started at 300 s; the button was not shown while the window was open.
+- MEASURED [TC-14] On a laptop and two real phones: tester A registered with Google sign-in; the second scan went straight to "Hello" without Google.
+- MEASURED [TC-17] Tester B, not on the roster, got "Contact the lecturer"; after the roster form added B, B registered.
+- MEASURED [TC-20] More than 60 s on the Google account screen gave "Registered. Scan again."
+- MEASURED [TC-19] After clearing the site data and registering again, the class page showed Flags: 1 (new_device).
+- NOT VERIFIED: scan from about 3 m on a projector; the Wi-Fi off and on check [TC-07] (I did not report it); opening the scan link inside WhatsApp [TC-15]; the 120-day cookie; the 100 test-user cap; real class location in the hall (S3); iPhone.
+
 ## F1 known limits
 
 - After a new session is started (UC-01 1b), review and export show the latest session only. A lecturer who starts a new session by mistake does not see the first session's marks there.

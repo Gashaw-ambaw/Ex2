@@ -30,4 +30,5 @@ Real roster and class photos were shown only in the planning chat to understand 
 | 24/11 | Claude Code | F1 step 4: `AttendanceService` (Start class, class location, 300 s window), class page and QR page (`segno`), 60 tests written first; EDD and STP lines | Approved the plan and the 7 answers; review of the code later |
 | 25/11 | Claude Code | F1 step 4b: `new_session` (UC-01 1b) and the "Start a new session" button, 16 tests written first; D31 changed to built; doc edits | Found the expired-window problem and approved the fix; approved the plan and the answers |
 | 25/11 | Claude Code | F1 step 5: `StudentIdentity` (Google sign-in, device link, flags), minimal `/scan`, `check_scan`, `add_flags`, roster `add_entry` and `edit_email` with forms, 79 tests written first (fake Google) | Approved the plan and the answers Q1-Q6; review of the code later |
+| 25/11 | Claude Code | Updated README and results with the step 5 live check results | Ran the live checks on the laptop and two phones; gave the results |
 | 22/11 | Claude Code | STP draft (F1): strategy, 44 test cases, B11 table for the 32 F1 flows | Approved the plan; review of the STP text later |
