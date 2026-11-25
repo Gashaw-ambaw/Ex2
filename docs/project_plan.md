@@ -41,7 +41,6 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
 ## 4. Questions for the lecturer
 
-- What is the demo date?
 - F5: is the report for the student, the lecturer, or both? Assumed both (D13). May the class's Ex1 repos be used?
 
 ## 5. Spikes (time-boxed, code in `spikes/`)
@@ -81,4 +80,4 @@ Also: a survey of existing tools (including NotebookLM) for the tools report.
 | 29/11 | F5 thin slice, tools report, results, README. | Planned |
 | 30/11 | Final check and submission (by 23:59). | Planned |
 
-S3 happens on the next class day. A rehearsal with 2-3 people is planned on 26/11; the in-class demo follows submission.
+S3 happens on the next class day. A rehearsal with 2-3 people is planned on 26/11; the in-class demo is on 8/12/2026.
