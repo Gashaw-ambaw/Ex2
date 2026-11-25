@@ -38,8 +38,8 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 | TC-21 | FR-04 | UC-03 main | unit | Registered device, valid ticket, open window: one mark, source `self`, only a yes/no location stored |
 | TC-22 | FR-04 | UC-03 4a | unit | The tap comes after `SUBMIT_SEC`: rejected, "scan again" |
 | TC-23 | FR-04 | UC-03 5a | unit | A second mark for the same roster entry: the earlier time is shown; still one row |
-| TC-24 | FR-02, FR-04 | UC-03 5b | unit | The window is closed: "Attendance is closed"; no mark |
-| TC-25 | FR-04 | UC-03 5c | unit | A device that marked A tries B: blocked; flag `device_reuse` |
+| TC-24 | FR-02, FR-04 | UC-03 5b | unit | The window is closed: "Attendance is closed; ask the lecturer."; no mark |
+| TC-25 | FR-04 | UC-03 5c | unit | A device that marked A tries B: blocked; flag `device_reuse` on the entry of the student who tapped |
 | TC-26 | FR-04 | UC-03 5d | unit | Location out of range or denied: mark recorded with a flag. No class location set: check skipped, warning on the lecturer page |
 | TC-27 | FR-05 | UC-04 main | API | Fake counter returns 97 for 104 marks: alert "gap 7", flagged marks first; count and gap stored; photo deleted |
 | TC-28 | FR-05 | UC-04 s4 | unit | Count gap: alert when marks > count x 1.05. 104 marks / 97: alert; 101 / 97: no alert; 102 / 97: alert |

@@ -173,7 +173,7 @@ classDiagram
 - `RegisterResult` carries the roster entry and the events (`new_device`, `relinked`). The controller passes them to `add_flags()`, so C-04 never calls C-05 [P].
 - `new_session(name)` (1b, D31) is refused while a window is open.
 - `WindowState` = open, seconds_left, marks, flags. `class_location()` returns (lat, lon) or None.
-- `RosterService.add_entry` and `edit_email` were built in step 5 (UC-05 5a, 5c). Step 5 also builds a minimal `/scan` (verify the token, keep the ticket); marking is step 6.
+- `RosterService.add_entry` and `edit_email` were built in step 5 (UC-05 5a, 5c). Step 5 also builds a minimal `/scan` (verify the token, keep the ticket). Step 6 builds `mark()` and `POST /mark`; `MarkResult` has the outcome (marked, already or blocked) and the time (HH:MM, Israel).
 
 ### 2.2 F2-F5 (C-07 to C-11, Must methods only)
 
@@ -453,6 +453,7 @@ sequenceDiagram
 - **Scan check order** [P]: no session today, unknown session, window closed, then the token.
 - **Scan ticket** [U21]: {session_id, scanned_at} in the signed session cookie. A mark is accepted while now - scanned_at is at most `SUBMIT_SEC` (60, initial value, proposal). If the ticket expires during the first Google sign-in, the student scans again, once per device.
 - **Distance** [U21; formula P]: haversine distance from the browser location to the class location; location_ok = distance at most `LOC_RADIUS_M`. Location denied gives 0 and a flag (UC-03 5d). No class location set: no check, location_ok null, and a warning on the lecturer page [P, approved 21/11, to confirm in S3].
+- **Mark page** [P, 25/11]: the location is asked on the tap (10 s timeout); denied, a timeout or an error sends no location (location_ok 0, flag). The ticket stays valid after a mark until `SUBMIT_SEC`, so a second tap shows the earlier time. A `device_reuse` flag goes to the entry of the student who tapped.
 - **Count gap** [P]: marks = all marks of the session when the count is made; gap = marks - count; alert when marks > count x (1 + `GAP_TOLERANCE_PCT` / 100). Example (UC-04): 104 marks, 97 counted, limit 101.85, so the alert fires.
 - **Roster replace** [P]: entries are matched by lower-case email. Entries missing from the new file become inactive and are kept, so old marks keep their name (FR-01).
 - **Export** [U21]: CSV, UTF-8 with BOM; columns name, email, time, source, status, flags (FR-07).
