@@ -47,12 +47,12 @@ classDiagram
     +parse_upload(file) RosterPreview
     +save(entries)
     +find_by_email(email) RosterEntry
-    +add_entry(name, email)
+    +add_entry(first_name, last_name, email)
     +edit_email(entry_id, email)
     +list_active() list
   }
   class StudentIdentity {
-    +start_sign_in(request)
+    +start_sign_in(request, redirect_uri)
     +verify_google(request) str
     +confirm_registration(device_id, email) RegisterResult
     +device_owner(device_id) RosterEntry
@@ -68,8 +68,9 @@ classDiagram
     +current_qr(session_id) str
     +class_location() tuple
     +check_scan(s, w, t) ScanTicket
+    +ticket_is_fresh(scanned_at) bool
     +mark(device_id, ticket, location) MarkResult
-    +add_flags(session_id, events)
+    +add_flags(session_id, roster_id, device_id, kinds)
     +count_marks(session_id) int
     +review_table(session_id, flagged_first) list
     +set_status(mark_id, status)
@@ -172,7 +173,7 @@ classDiagram
 - `RegisterResult` carries the roster entry and the events (`new_device`, `relinked`). The controller passes them to `add_flags()`, so C-04 never calls C-05 [P].
 - `new_session(name)` (1b, D31) is refused while a window is open.
 - `WindowState` = open, seconds_left, marks, flags. `class_location()` returns (lat, lon) or None.
-- `RosterService.add_entry` and `edit_email` come in step 5 (UC-02 1a).
+- `RosterService.add_entry` and `edit_email` were built in step 5 (UC-05 5a, 5c). Step 5 also builds a minimal `/scan` (verify the token, keep the ticket); marking is step 6.
 
 ### 2.2 F2-F5 (C-07 to C-11, Must methods only)
 
@@ -321,7 +322,7 @@ sequenceDiagram
   participant DB as Db
   Note over S,AC: Reached only from UC-03 step 3, when the mark page finds no device cookie
   S->>AC: GET Sign in with Google
-  AC->>SI: start_sign_in(request)
+  AC->>SI: start_sign_in(request, redirect_uri)
   SI-->>S: redirect to Google
   S->>G: choose an account
   G-->>S: redirect to the callback with a code
@@ -338,7 +339,7 @@ sequenceDiagram
   else entry found
     SI->>DB: insert or re-link the device
     SI-->>AC: RegisterResult (entry, events new_device or relinked)
-    AC->>AS: add_flags(session_id, events)
+    AC->>AS: add_flags(session_id, roster_id, device_id, events)
     alt scan ticket still valid (at most SUBMIT_SEC)
       AC-->>S: set the device cookie, continue at UC-03 step 3
     else ticket expired
@@ -449,6 +450,7 @@ sequenceDiagram
 
 - **QR token** [U21; details P]: w = floor(now / `QR_ROTATE_SEC`); t = HMAC-SHA256(`SECRET_KEY`, "session_id:w"), first 16 hex characters. A scan is accepted when t matches (constant-time compare), w is the current or previous window, and the window is open.
 - **Window state** [P]: window closed = `window_closed_at` set or now >= `window_ends_at`; expiry writes nothing.
+- **Scan check order** [P]: no session today, unknown session, window closed, then the token.
 - **Scan ticket** [U21]: {session_id, scanned_at} in the signed session cookie. A mark is accepted while now - scanned_at is at most `SUBMIT_SEC` (60, initial value, proposal). If the ticket expires during the first Google sign-in, the student scans again, once per device.
 - **Distance** [U21; formula P]: haversine distance from the browser location to the class location; location_ok = distance at most `LOC_RADIUS_M`. Location denied gives 0 and a flag (UC-03 5d). No class location set: no check, location_ok null, and a warning on the lecturer page [P, approved 21/11, to confirm in S3].
 - **Count gap** [P]: marks = all marks of the session when the count is made; gap = marks - count; alert when marks > count x (1 + `GAP_TOLERANCE_PCT` / 100). Example (UC-04): 104 marks, 97 counted, limit 101.85, so the alert fires.

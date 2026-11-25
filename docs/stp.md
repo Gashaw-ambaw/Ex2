@@ -62,7 +62,7 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 | TC-45 | FR-02 | UC-01 1b (D31) | API | Open attendance when today's session already has a closed window: "Attendance already closed for this session"; no window is opened |
 | TC-46 | FR-02 | UC-01 1b | API | After a closed or expired window, Start a new session (optional name) creates a second session for today; Open attendance works; the old session keeps its marks |
 
-TC-08 and TC-09 run in two parts: the window side (state, close, expiry) in step 4; the scan side ("Attendance is closed", `check_scan`) in step 6.
+TC-08 and TC-09 run in two parts: the window side (state, close, expiry) in step 4; the scan side ("Attendance is closed", `check_scan`) in step 5.
 
 ## 3. B11 coverage: F1 alternative flows (32)
 
