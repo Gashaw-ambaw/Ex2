@@ -222,3 +222,60 @@ def test_parse_location():
 def test_parse_location_bad_text(text):
     with pytest.raises(ValueError):
         parse_location(text)
+
+
+# ---- A new session on the same day (UC-01 1b, D31) ----
+
+def test_new_session_adds_a_second_session_today(service, db):
+    first = service.start_class()
+    service.open_window(first["id"])
+    service.close_window(first["id"])
+    second = service.new_session("Tutorial")
+    assert second["id"] != first["id"]
+    assert second["date"] == first["date"]
+    assert second["name"] == "Tutorial"
+    # The page and Start class now use the latest session.
+    assert service.session_for_today()["id"] == second["id"]
+    assert service.start_class()["id"] == second["id"]
+    assert rows(db, "SELECT COUNT(*) FROM class_sessions") == [(2,)]
+
+
+@pytest.mark.parametrize("name", [None, "", "   "])
+def test_new_session_without_a_name_stores_null(service, name):
+    service.start_class()
+    assert service.new_session(name)["name"] is None
+
+
+def test_new_session_trims_the_name(service):
+    assert service.new_session("  Lab 2  ")["name"] == "Lab 2"
+
+
+def test_new_session_can_open_a_window_and_the_old_one_stays(service, db, clock):
+    first = service.start_class()
+    service.open_window(first["id"])
+    clock.set(NOON + timedelta(seconds=301))  # the first window expired
+    old = session_row(db, first["id"])
+    second = service.new_session(None)
+    service.open_window(second["id"])
+    assert service.window_state(second["id"]).open is True
+    assert service.window_state(first["id"]).open is False
+    assert session_row(db, first["id"]) == old
+    # The old session keeps its marks.
+    with closing(db.connect()) as conn, conn:
+        conn.execute("INSERT INTO roster_entries (first_name, last_name, email, created_at) VALUES ('A', 'B', 'a@example.com', 'x')")
+        conn.execute("INSERT INTO marks (session_id, roster_id, marked_at, source) VALUES (?, 1, 'x', 'manual')", (first["id"],))
+    assert service.count_marks(first["id"]) == 1
+    assert service.count_marks(second["id"]) == 0
+
+
+def test_new_session_is_refused_while_the_window_is_open(service, db):
+    session = service.start_class()
+    service.open_window(session["id"])
+    with pytest.raises(ValueError, match="Close attendance first"):
+        service.new_session("Oops")
+    assert rows(db, "SELECT COUNT(*) FROM class_sessions") == [(1,)]
+
+
+def test_new_session_before_any_session_is_allowed(service):
+    assert service.session_for_today() is None
+    assert service.new_session(None)["id"] == service.session_for_today()["id"]

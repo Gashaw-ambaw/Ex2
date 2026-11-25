@@ -49,7 +49,7 @@ class AttendanceService:
             ).fetchone()
 
     def start_class(self):
-        # One session per date: if there is one already, it is returned and nothing is added.
+        # Start class reuses today's latest session; new_session() adds another one (D31).
         # BEGIN IMMEDIATE blocks a second request until this one has finished.
         with closing(self._db.connect()) as conn:
             conn.execute("BEGIN IMMEDIATE")
@@ -60,6 +60,23 @@ class AttendanceService:
             if row is None:
                 conn.execute("INSERT INTO class_sessions (date) VALUES (?)", (today,))
                 row = conn.execute("SELECT * FROM class_sessions WHERE id = last_insert_rowid()").fetchone()
+            conn.commit()
+            return row
+
+    def new_session(self, name=None):
+        """UC-01 1b (D31): a new session for today, for example after a closed window.
+        The old session and its marks stay. Refused while today's window is open."""
+        name = (name or "").strip() or None
+        with closing(self._db.connect()) as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            today = self._clock.today().isoformat()
+            latest = conn.execute(
+                "SELECT * FROM class_sessions WHERE date = ? ORDER BY id DESC LIMIT 1", (today,)
+            ).fetchone()
+            if latest is not None and self._is_open(latest, self._clock.now()):
+                raise ValueError("Close attendance first.")
+            conn.execute("INSERT INTO class_sessions (date, name) VALUES (?, ?)", (today, name))
+            row = conn.execute("SELECT * FROM class_sessions WHERE id = last_insert_rowid()").fetchone()
             conn.commit()
             return row
 

@@ -124,6 +124,14 @@ def create_app(settings=None):
         app.state.attendance.start_class()
         return RedirectResponse("/class", status_code=303)
 
+    @app.post("/class/new", dependencies=guard)
+    def class_new(request: Request, name: str = Form("")):
+        try:
+            app.state.attendance.new_session(name)
+        except ValueError as error:
+            return class_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/class", status_code=303)
+
     @app.post("/class/location", dependencies=guard)
     def class_location(request: Request, location: str = Form("")):
         try:

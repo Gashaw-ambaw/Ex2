@@ -168,3 +168,71 @@ def test_bad_location_is_refused(logged_in, text):
     assert reply.status_code == 400
     assert 'class="error"' in reply.text
     assert snapshot(logged_in)[1] == []
+
+
+# UC-01 1b (D31): after a closed or expired window, the lecturer starts a new session.
+def expire_or_close(client, how):
+    client.post("/class/start")
+    client.post("/class/open")
+    if how == "close":
+        client.post("/class/close")
+    else:
+        client.app.state.clock.set(NOON + timedelta(seconds=301))
+
+
+@pytest.mark.parametrize("how", ["close", "expire"])
+def test_new_session_after_a_closed_window_uc01_1b(logged_in, how):
+    expire_or_close(logged_in, how)
+    assert "Start a new session" in logged_in.get("/class").text
+    reply = logged_in.post("/class/new", data={"name": "Tutorial"})
+    assert reply.status_code == 303 and reply.headers["location"] == "/class"
+    page = logged_in.get("/class").text
+    assert "Tutorial" in page
+    # The new session has no window yet, so Open attendance works again.
+    reply = logged_in.post("/class/open")
+    assert reply.status_code == 303 and reply.headers["location"] == "/class/qr"
+    assert logged_in.get("/class/state").json()["open"] is True
+
+
+def test_new_session_keeps_the_old_one(logged_in):
+    expire_or_close(logged_in, "close")
+    logged_in.post("/class/new", data={"name": ""})
+    with closing(logged_in.app.state.db.connect()) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM class_sessions").fetchone()[0] == 2
+
+
+def test_new_session_button_is_not_always_shown(logged_in):
+    assert "Start a new session" not in logged_in.get("/class").text  # no session
+    logged_in.post("/class/start")
+    assert "Start a new session" not in logged_in.get("/class").text  # never opened
+    logged_in.post("/class/open")
+    assert "Start a new session" not in logged_in.get("/class").text  # open now
+
+
+def test_tc45_page_offers_the_new_session_button(logged_in):
+    expire_or_close(logged_in, "close")
+    reply = logged_in.post("/class/open")
+    assert reply.status_code == 400 and CLOSED_MESSAGE in reply.text
+    assert "Start a new session" in reply.text
+
+
+def test_new_session_is_refused_while_open(logged_in):
+    logged_in.post("/class/start")
+    logged_in.post("/class/open")
+    reply = logged_in.post("/class/new", data={"name": "x"})
+    assert reply.status_code == 400
+    assert "Close attendance first" in reply.text
+    with closing(logged_in.app.state.db.connect()) as conn:
+        assert conn.execute("SELECT COUNT(*) FROM class_sessions").fetchone()[0] == 1
+
+
+def test_new_session_name_is_escaped(logged_in):
+    expire_or_close(logged_in, "close")
+    logged_in.post("/class/new", data={"name": "<b>x</b>"})
+    page = logged_in.get("/class").text
+    assert "<b>x</b>" not in page and "&lt;b&gt;x&lt;/b&gt;" in page
+
+
+def test_new_session_needs_login(client):
+    reply = client.post("/class/new", data={"name": "x"})
+    assert reply.status_code == 303 and reply.headers["location"] == "/login"

@@ -23,7 +23,7 @@
 <p>Class has not started.</p>
 <form method="post" action="/class/start"><button type="submit">Start class</button></form>
 {% else %}
-<p>Class started: {{ session["date"] }}.</p>
+<p>Class started: {{ session["date"] }}{% if session["name"] %}, session: {{ session["name"] }}{% endif %}.</p>
 {% if state.open %}
 <p class="ok">Attendance is open ({{ state.seconds_left }} s left). Marks: <strong>{{ state.marks }}</strong>.</p>
 <p><a href="/class/qr">Show the QR</a></p>
@@ -33,6 +33,14 @@
 {% endif %}
 {# Shown in every state: on a closed window it answers with the closed message (D31). #}
 <form method="post" action="/class/open"><button type="submit">Open attendance</button></form>
+{# UC-01 1b: when the window was used and is over, a new session can start (the old one and its marks stay). #}
+{% if session["window_opened_at"] and not state.open %}
+<h2>New session</h2>
+<form method="post" action="/class/new">
+  <input type="text" name="name" placeholder="Name (optional), for example Tutorial" size="32">
+  <button type="submit">Start a new session</button>
+</form>
+{% endif %}
 {% endif %}
 
 <script>
