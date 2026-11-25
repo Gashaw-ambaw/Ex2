@@ -335,3 +335,87 @@ def test_edit_email_errors(lecturer):
 def test_roster_page_has_the_two_forms(lecturer):
     page = lecturer.get("/roster").text
     assert 'action="/roster/add"' in page and 'action="/roster/email"' in page
+
+
+# ---- Marking (UC-03 steps 3-6, step 6) ----
+
+def registered_scan(app, client):
+    # A registered phone that has just scanned. Returns the scan page.
+    sid = open_class(app)
+    register(client, app, sid)
+    return client.get(scan_path(app, sid)), sid
+
+
+def test_scan_of_a_registered_phone_shows_the_mark_button_tc14(app, student):
+    page, _ = registered_scan(app, student)
+    assert "Hello Dana" in page.text and "Mark you present?" in page.text
+    assert 'action="/mark"' in page.text and 'method="post"' in page.text
+
+
+def test_registration_page_also_shows_the_mark_button_tc14(app, student):
+    reply = register(student, app, open_class(app))
+    assert "you are registered" in reply.text and "Mark you present?" in reply.text
+
+
+def test_mark_with_a_location_tc21(app, student):
+    registered_scan(app, student)
+    app.state.attendance.set_class_location(32.0853, 34.7818)
+    reply = student.post("/mark", data={"lat": "32.0853", "lon": "34.7818"})
+    assert reply.status_code == 200 and "Marked at 14:00" in reply.text
+    (row,) = table(app, "marks")
+    assert (row[2], row[5], row[7]) == (1, "self", 1)  # roster entry, source, location_ok
+
+
+def test_mark_with_no_location_still_marks_tc26(app, student):
+    registered_scan(app, student)
+    reply = student.post("/mark", data={"lat": "", "lon": ""})
+    assert "Marked at" in reply.text and len(table(app, "marks")) == 1
+
+
+def test_second_tap_shows_the_earlier_time_tc23(app, student):
+    registered_scan(app, student)
+    student.post("/mark", data={})
+    again = student.post("/mark", data={})
+    assert again.status_code == 200 and "Already marked at 14:00" in again.text
+    assert len(table(app, "marks")) == 1
+
+
+def test_mark_needs_a_scan_first(student):
+    reply = student.post("/mark", data={})
+    assert reply.status_code == 400 and "Scan the QR in class first" in reply.text
+
+
+def test_mark_after_close_says_closed_tc24(app, student):
+    _, sid = registered_scan(app, student)
+    app.state.attendance.close_window(sid)
+    reply = student.post("/mark", data={})
+    assert reply.status_code == 400 and "Attendance is closed; ask the lecturer." in reply.text
+    assert table(app, "marks") == []
+
+
+def test_scan_after_close_has_the_same_closed_text_tc24(app, student):
+    sid = open_class(app)
+    path = scan_path(app, sid)
+    app.state.attendance.close_window(sid)
+    assert "Attendance is closed; ask the lecturer." in student.get(path).text
+
+
+def test_mark_after_the_ticket_is_old_tc22(app, student, settings):
+    registered_scan(app, student)
+    app.state.clock.set(NOON + timedelta(seconds=settings.submit_sec + 1))
+    reply = student.post("/mark", data={})
+    assert reply.status_code == 400 and "Scan the QR again" in reply.text
+
+
+def test_blocked_phone_sees_why_tc25(app, student, google):
+    registered_scan(app, student)
+    student.post("/mark", data={})
+    google.email = "ron@example.com"
+    student.get("/auth/start")
+    student.get("/auth/callback")
+    student.post("/register")  # the phone is now linked to Ron (flag relinked)
+    reply = student.post("/mark", data={})
+    assert reply.status_code == 400
+    assert "This phone already marked another student in this class. Ask the lecturer." in reply.text
+    assert len(table(app, "marks")) == 1
+    assert [row[4] for row in table(app, "flags")] == ["relinked", "device_reuse"]

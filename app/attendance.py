@@ -3,6 +3,8 @@ from contextlib import closing
 from dataclasses import dataclass
 from datetime import datetime
 
+from app.clock import ISRAEL
+
 # D31: shown when "Open attendance" is used on a session whose window was already open.
 CLOSED_MESSAGE = "Attendance already closed for this session"
 
@@ -16,6 +18,24 @@ class ScanTicket:
 
 
 FLAG_KINDS = ("new_device", "relinked", "device_reuse", "location")
+
+# UC-03 5b: the same text for a scan and a tap on a closed window.
+ATTENDANCE_CLOSED = "Attendance is closed; ask the lecturer."
+
+
+@dataclass(frozen=True)
+class MarkResult:
+    """outcome: "marked", "already" or "blocked". time: HH:MM in Israel time (the mark, or the earlier one)."""
+
+    outcome: str
+    time: str = ""
+
+
+def distance_m(lat1, lon1, lat2, lon2):
+    """Haversine distance in metres (EDD 5)."""
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    a = math.sin((p2 - p1) / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(math.radians(lon2 - lon1) / 2) ** 2
+    return 2 * 6371000 * math.asin(math.sqrt(a))
 
 
 @dataclass(frozen=True)
@@ -185,7 +205,7 @@ class AttendanceService:
             raise ValueError("Scan again.")
         # The closed check comes first: after Close, a live scan must hear "closed", not "scan again".
         if not self._is_open(row, self._clock.now()):
-            raise ValueError("Attendance is closed.")
+            raise ValueError(ATTENDANCE_CLOSED)
         if not self._qr.verify(session_id, window, t):
             raise ValueError("Scan again.")
         return ScanTicket(session_id, int(self._clock.now().timestamp()))
@@ -199,11 +219,65 @@ class AttendanceService:
         if any(kind not in FLAG_KINDS for kind in kinds):
             raise ValueError("Unknown flag kind.")
         with closing(self._db.connect()) as conn, conn:
-            for kind in kinds:
-                conn.execute(
-                    "INSERT INTO flags (session_id, roster_id, device_id, kind, created_at) VALUES (?, ?, ?, ?, ?)",
-                    (session_id, roster_id, device_id, kind, self._clock.now_iso()),
+            self._insert_flags(conn, session_id, roster_id, device_id, kinds)
+
+    def _insert_flags(self, conn, session_id, roster_id, device_id, kinds):
+        for kind in kinds:
+            conn.execute(
+                "INSERT INTO flags (session_id, roster_id, device_id, kind, created_at) VALUES (?, ?, ?, ?, ?)",
+                (session_id, roster_id, device_id, kind, self._clock.now_iso()),
+            )
+
+    def mark(self, device_id, ticket, location):
+        """UC-03 steps 5-6. location is (lat, lon), or None when the browser did not send one.
+        Raises ValueError with the text for the student; otherwise returns a MarkResult."""
+        if not self.ticket_is_fresh(ticket.scanned_at):
+            raise ValueError("Scan the QR again.")
+        with closing(self._db.connect()) as conn:
+            conn.execute("BEGIN IMMEDIATE")  # one writer at a time: two taps cannot both insert
+            session = self._session(conn, ticket.session_id)
+            if not self._is_open(session, self._clock.now()):
+                raise ValueError(ATTENDANCE_CLOSED)
+            # Marking checks only the device link (EDD 3).
+            student = conn.execute(
+                "SELECT r.id FROM devices d JOIN roster_entries r ON r.id = d.roster_id WHERE d.id = ?",
+                (device_id or "",),
+            ).fetchone()
+            if student is None:
+                raise ValueError("Scan the QR in class first.")
+            roster_id = student["id"]
+            earlier = conn.execute(
+                "SELECT marked_at FROM marks WHERE session_id = ? AND roster_id = ?", (ticket.session_id, roster_id)
+            ).fetchone()
+            if earlier is not None:
+                return MarkResult("already", self._israel_hhmm(earlier["marked_at"]))
+            used = conn.execute(
+                "SELECT 1 FROM marks WHERE session_id = ? AND device_id = ?", (ticket.session_id, device_id)
+            ).fetchone()
+            if used is not None:
+                self._insert_flags(conn, ticket.session_id, roster_id, device_id, ["device_reuse"])
+                conn.commit()
+                return MarkResult("blocked")
+            hall = conn.execute("SELECT lat, lon FROM class_location WHERE id = 1").fetchone()
+            location_ok = None
+            if hall is not None:
+                location_ok = int(
+                    location is not None
+                    and distance_m(*location, hall["lat"], hall["lon"]) <= self._settings.loc_radius_m
                 )
+            conn.execute(
+                "INSERT INTO marks (session_id, roster_id, device_id, marked_at, source, location_ok) "
+                "VALUES (?, ?, ?, ?, 'self', ?)",
+                (ticket.session_id, roster_id, device_id, self._clock.now_iso(), location_ok),
+            )
+            if location_ok == 0:
+                self._insert_flags(conn, ticket.session_id, roster_id, device_id, ["location"])
+            conn.commit()
+            return MarkResult("marked", self._israel_hhmm(self._clock.now_iso()))
+
+    @staticmethod
+    def _israel_hhmm(iso):
+        return datetime.fromisoformat(iso).astimezone(ISRAEL).strftime("%H:%M")
 
     def count_marks(self, session_id):
         with closing(self._db.connect()) as conn:

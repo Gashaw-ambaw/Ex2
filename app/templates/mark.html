@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block content %}
+<h1>Attendance</h1>
+<p>{{ greeting }} Mark you present?</p>
+{# Marking is a POST (D24). The browser location goes in the two hidden fields; empty means denied. #}
+<form id="mark" method="post" action="/mark">
+  <input type="hidden" name="lat" id="lat">
+  <input type="hidden" name="lon" id="lon">
+  <button type="submit" id="go">I'm here</button>
+</form>
+<script>
+  var form = document.getElementById("mark");
+  form.addEventListener("submit", function (event) {
+    // The first tap asks for the location (10 s at most); then the form is sent.
+    if (!navigator.geolocation || form.dataset.ready) { return; }
+    event.preventDefault();
+    var go = document.getElementById("go");
+    go.disabled = true;
+    go.textContent = "Checking location...";
+    function send() { form.dataset.ready = "1"; form.submit(); }
+    navigator.geolocation.getCurrentPosition(function (position) {
+      document.getElementById("lat").value = position.coords.latitude;
+      document.getElementById("lon").value = position.coords.longitude;
+      send();
+    }, send, {enableHighAccuracy: true, timeout: 10000, maximumAge: 0});
+  });
+</script>
+{% endblock %}

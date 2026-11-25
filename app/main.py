@@ -8,7 +8,7 @@ from fastapi.responses import JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
-from app.attendance import AttendanceService, parse_location
+from app.attendance import AttendanceService, ScanTicket, parse_location
 from app.clock import Clock
 from app.db import Db
 from app.google import make_oauth
@@ -134,9 +134,37 @@ def create_app(settings=None, google=None):
         )
 
     def hello_page(request, entry, registered=False):
-        # Step 6 replaces the note with the "I'm here" button.
         greeting = f"Hello {entry['first_name']}, you are registered." if registered else f"Hello {entry['first_name']}."
-        return student_page(request, f"{greeting} Marking opens in the next version.")
+        return templates.TemplateResponse(request, "mark.html", {"greeting": greeting})
+
+    def read_location(lat, lon):
+        # Empty, not a number or out of range all mean "denied" (UC-03 5d).
+        try:
+            lat, lon = float(lat), float(lon)
+        except ValueError:
+            return None
+        return (lat, lon) if -90 <= lat <= 90 and -180 <= lon <= 180 else None
+
+    @app.post("/mark")
+    def mark(request: Request, lat: str = Form(""), lon: str = Form("")):
+        ticket = request.session.get("ticket")
+        if not ticket:
+            return student_page(request, "Scan the QR in class first.", 400)
+        try:
+            result = app.state.attendance.mark(
+                request.cookies.get("device"),
+                ScanTicket(ticket["session_id"], ticket["scanned_at"]),
+                read_location(lat, lon),
+            )
+        except ValueError as error:
+            return student_page(request, str(error), 400)
+        if result.outcome == "blocked":
+            return student_page(
+                request, "This phone already marked another student in this class. Ask the lecturer.", 400
+            )
+        if result.outcome == "already":
+            return student_page(request, f"Already marked at {result.time}.")
+        return student_page(request, f"Marked at {result.time}.")
 
     @app.get("/scan")
     def scan(request: Request, s: str = "", w: str = "", t: str = ""):

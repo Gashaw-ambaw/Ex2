@@ -4,7 +4,7 @@ from urllib.parse import parse_qs, urlparse
 
 import pytest
 
-from app.attendance import CLOSED_MESSAGE, AttendanceService, parse_location
+from app.attendance import CLOSED_MESSAGE, AttendanceService, ScanTicket, distance_m, parse_location
 from app.qr_tokens import QrTokens
 
 NOON = datetime(2026, 11, 24, 12, 0, 0, tzinfo=timezone.utc)
@@ -408,3 +408,134 @@ def test_add_flags_refuses_an_unknown_kind(service, db):
     with pytest.raises(ValueError):
         service.add_flags(session["id"], 1, "dev-1", ["bogus"])
     assert rows(db, "SELECT COUNT(*) FROM flags") == [(0,)]
+
+
+# ---- mark (UC-03 steps 5-6, TC-21 to TC-26) ----
+
+HALL = (32.0853, 34.7818)
+FAR = (32.1853, 34.7818)  # about 11 km north
+
+
+@pytest.fixture
+def marking(service, db, clock):
+    """An open window, two roster entries (1 and 2) and two linked devices. Returns the ticket."""
+    session = service.start_class()
+    service.open_window(session["id"])
+    with closing(db.connect()) as conn, conn:
+        for first, email in (("A", "a@example.com"), ("B", "b@example.com")):
+            conn.execute(
+                "INSERT INTO roster_entries (first_name, last_name, email, created_at) VALUES (?, 'X', ?, 'x')",
+                (first, email),
+            )
+        conn.execute("INSERT INTO devices (id, roster_id, created_at) VALUES ('dev-a', 1, 'x')")
+        conn.execute("INSERT INTO devices (id, roster_id, created_at) VALUES ('dev-b', 2, 'x')")
+    service.set_class_location(*HALL)
+    return ScanTicket(session["id"], int(clock.now().timestamp()))
+
+
+def marks(db):
+    return rows(db, "SELECT session_id, roster_id, device_id, source, location_ok FROM marks ORDER BY id")
+
+
+def flags(db):
+    return rows(db, "SELECT roster_id, device_id, kind FROM flags ORDER BY id")
+
+
+# TC-21: one mark, source self, only yes/no location. 12:00 UTC is 14:00 in Israel.
+def test_mark_records_one_self_mark_tc21(service, db, marking):
+    result = service.mark("dev-a", marking, HALL)
+    assert (result.outcome, result.time) == ("marked", "14:00")
+    assert marks(db) == [(marking.session_id, 1, "dev-a", "self", 1)]
+    assert flags(db) == []
+
+
+# TC-22: the tap comes within SUBMIT_SEC or not.
+def test_mark_at_submit_sec_is_accepted_tc22(service, db, marking, clock, settings):
+    clock.set(NOON + timedelta(seconds=settings.submit_sec))
+    assert service.mark("dev-a", marking, HALL).outcome == "marked"
+
+
+def test_mark_after_submit_sec_is_rejected_tc22(service, db, marking, clock, settings):
+    clock.set(NOON + timedelta(seconds=settings.submit_sec + 1))
+    with pytest.raises(ValueError, match="Scan the QR again"):
+        service.mark("dev-a", marking, HALL)
+    assert marks(db) == []
+
+
+# TC-23: a second mark for the same roster entry shows the earlier time. Still one row, no flag.
+def test_second_mark_shows_earlier_time_tc23(service, db, marking, clock):
+    service.mark("dev-a", marking, HALL)
+    clock.set(NOON + timedelta(seconds=20))
+    again = service.mark("dev-a", marking, HALL)
+    assert (again.outcome, again.time) == ("already", "14:00")
+    assert len(marks(db)) == 1 and flags(db) == []
+
+
+def test_second_device_of_the_same_student_gets_the_earlier_time_tc23(service, db, marking):
+    service.mark("dev-a", marking, HALL)
+    with closing(db.connect()) as conn, conn:
+        conn.execute("INSERT INTO devices (id, roster_id, created_at) VALUES ('dev-a2', 1, 'x')")
+    again = service.mark("dev-a2", marking, HALL)
+    assert (again.outcome, again.time) == ("already", "14:00")
+    assert len(marks(db)) == 1 and flags(db) == []
+
+
+# TC-24: the window is closed.
+def test_mark_after_close_tc24(service, db, marking):
+    service.close_window(marking.session_id)
+    with pytest.raises(ValueError, match="Attendance is closed; ask the lecturer"):
+        service.mark("dev-a", marking, HALL)
+    assert marks(db) == []
+
+
+def test_mark_after_the_window_ends_tc24(service, db, marking, clock, settings):
+    # A ticket scanned late in the window: the tap comes after the window ended.
+    late = ScanTicket(marking.session_id, int(NOON.timestamp()) + settings.att_window_sec - 5)
+    clock.set(NOON + timedelta(seconds=settings.att_window_sec + 1))
+    with pytest.raises(ValueError, match="Attendance is closed; ask the lecturer"):
+        service.mark("dev-a", late, HALL)
+    assert marks(db) == []
+
+
+# TC-25: a device that marked A tries B: blocked, flag device_reuse on the student who tapped.
+def test_device_that_marked_a_cannot_mark_b_tc25(service, db, marking):
+    service.mark("dev-a", marking, HALL)
+    with closing(db.connect()) as conn, conn:
+        conn.execute("UPDATE devices SET roster_id = 2 WHERE id = 'dev-a'")
+    result = service.mark("dev-a", marking, HALL)
+    assert result.outcome == "blocked"
+    assert marks(db) == [(marking.session_id, 1, "dev-a", "self", 1)]
+    assert flags(db) == [(2, "dev-a", "device_reuse")]
+
+
+# TC-26: location out of range or denied: the mark is recorded with a flag. No class location: no check.
+def test_out_of_range_marks_with_a_flag_tc26(service, db, marking):
+    assert service.mark("dev-a", marking, FAR).outcome == "marked"
+    assert marks(db) == [(marking.session_id, 1, "dev-a", "self", 0)]
+    assert flags(db) == [(1, "dev-a", "location")]
+
+
+def test_denied_location_marks_with_a_flag_tc26(service, db, marking):
+    assert service.mark("dev-a", marking, None).outcome == "marked"
+    assert marks(db) == [(marking.session_id, 1, "dev-a", "self", 0)]
+    assert flags(db) == [(1, "dev-a", "location")]
+
+
+def test_no_class_location_skips_the_check_tc26(service, db, marking):
+    with closing(db.connect()) as conn, conn:
+        conn.execute("DELETE FROM class_location")
+    assert service.mark("dev-a", marking, None).outcome == "marked"
+    assert marks(db) == [(marking.session_id, 1, "dev-a", "self", None)]
+    assert flags(db) == []
+
+
+# ---- extra ----
+
+def test_distance_m_known_value():
+    assert distance_m(32.0, 34.0, 32.001, 34.0) == pytest.approx(111.2, abs=1)
+
+
+def test_an_unlinked_device_cannot_mark(service, db, marking):
+    with pytest.raises(ValueError, match="Scan the QR in class first"):
+        service.mark("dev-unknown", marking, HALL)
+    assert marks(db) == []
