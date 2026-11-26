@@ -17,6 +17,7 @@ from app.db import Db
 from app.google import make_oauth
 from app.identity import StudentIdentity
 from app.lecturer import LecturerAccess
+from app.polls import PollService
 from app.qr_tokens import QrTokens
 from app.roster import RosterService
 from app.settings import Settings
@@ -47,6 +48,7 @@ def create_app(settings=None, google=None):
         db, clock, settings, QrTokens(settings.secret_key, settings.qr_rotate_sec, clock)
     )
     app.state.comments = CommentService(db, clock, settings)
+    app.state.polls = PollService(db, clock, settings)
     templates = Jinja2Templates(directory=str(TEMPLATES))
 
     # The lecturer session is a signed cookie. max_age is set explicitly (EDD 6).
@@ -234,7 +236,7 @@ def create_app(settings=None, google=None):
         )
         return reply
 
-    # ---- The class page: comments (UC-06). No sign-in (D7, D10). ----
+    # ---- The class page: comments and polls (UC-06, UC-09). No sign-in (D7, D10, D11). ----
 
     def anon_id(request):
         """The random browser id for comments and polls (D27). Never linked to the device cookie or a student."""
@@ -253,20 +255,37 @@ def create_app(settings=None, google=None):
             )
         return reply
 
-    def public_class_page(request, anon, status_code=200, error=None, text="", sent=False):
+    def public_class_page(request, anon, status_code=200, **notes):
+        """notes: error, text and sent (comment form); answered and refused (poll)."""
         session = app.state.attendance.session_for_today()
-        own = app.state.comments.own(anon, session["id"]) if session else []
-        reply = templates.TemplateResponse(
-            request,
-            "class_page.html",
-            {"session": session, "own": own, "error": error, "text": text, "sent": sent},
-            status_code=status_code,
-        )
+        context = {"session": session, "own": [], "poll": None, **notes}
+        if session is not None:
+            context["own"] = app.state.comments.own(anon, session["id"])
+            poll = app.state.polls.active(session["id"])
+            if poll is not None:
+                context["poll"] = poll
+                context["choice"] = app.state.polls.answer_of(poll["id"], anon)
+                # Votes go to the student's page only after the poll is closed.
+                context["results"] = None if poll["open"] else app.state.polls.results(poll["id"])
+        reply = templates.TemplateResponse(request, "class_page.html", context, status_code=status_code)
         return keep_anon(request, reply, anon)
 
     @app.get("/c")
-    def student_class_page(request: Request, sent: str = ""):
-        return public_class_page(request, anon_id(request), sent=sent == "1")
+    def student_class_page(request: Request, sent: str = "", answered: str = ""):
+        return public_class_page(request, anon_id(request), sent=sent == "1", answered=answered == "1")
+
+    @app.post("/c/answer")
+    def send_answer(request: Request, poll_id: int = Form(0), option: int = Form(-1)):
+        anon = anon_id(request)
+        session = app.state.attendance.session_for_today()
+        if session is None:
+            return public_class_page(request, anon, 400)
+        outcome = app.state.polls.answer(session["id"], poll_id, anon, option)
+        if outcome == "not accepted":
+            return public_class_page(request, anon, 400, refused=True)
+        # "already": the plain page says "You answered".
+        address = "/c?answered=1" if outcome == "ok" else "/c"
+        return keep_anon(request, RedirectResponse(address, status_code=303), anon)
 
     @app.post("/c/comment")
     def send_comment(request: Request, text: str = Form("")):
@@ -304,6 +323,67 @@ def create_app(settings=None, google=None):
             return JSONResponse({"session": None, "comments": []})
         label = f"{session['date']}, {session['name']}" if session["name"] else session["date"]
         return JSONResponse({"session": label, "comments": app.state.comments.list_for_lecturer(session["id"])})
+
+    # ---- Lecturer: polls (UC-08). The latest session, also from an earlier day. ----
+
+    def polls_page(request, status_code=200, errors=()):
+        session = app.state.attendance.latest_session()
+        poll = app.state.polls.active(session["id"]) if session else None
+        return templates.TemplateResponse(
+            request,
+            "polls.html",
+            {
+                "lecturer": True,
+                "errors": list(errors),
+                "session": session,
+                "poll": poll,
+                "results": app.state.polls.results(poll["id"]) if poll else None,
+                "max_options": settings.poll_options_max,
+                "refresh_ms": settings.refresh_sec * 1000,
+            },
+            status_code=status_code,
+        )
+
+    @app.get("/polls", dependencies=guard)
+    def polls_home(request: Request):
+        return polls_page(request)
+
+    @app.get("/polls/state", dependencies=guard)
+    def polls_state():
+        # Read only. results() gives only the number of answers while the poll is open (D36).
+        session = app.state.attendance.latest_session()
+        poll = app.state.polls.active(session["id"]) if session else None
+        if poll is None:
+            return JSONResponse({"open": False, "answered": 0})
+        return JSONResponse(app.state.polls.results(poll["id"]))
+
+    @app.post("/polls/start", dependencies=guard)
+    def polls_start(
+        request: Request,
+        question: str = Form(""),
+        option1: str = Form(""),
+        option2: str = Form(""),
+        option3: str = Form(""),
+        option4: str = Form(""),
+        correct: str = Form(""),
+    ):
+        session = app.state.attendance.session_for_today()
+        if session is None:
+            return polls_page(request, 400, errors=["Start class first."])
+        # The form counts the fields from 1, the service from 0. An unreadable value becomes a refused one.
+        chosen = None
+        if correct:
+            chosen = int(correct) - 1 if correct in ("1", "2", "3", "4") else -1
+        try:
+            app.state.polls.start(session["id"], question, [option1, option2, option3, option4], chosen)
+        except ValueError as error:
+            return polls_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/polls", status_code=303)
+
+    @app.post("/polls/close", dependencies=guard)
+    def polls_close(poll_id: int = Form(0)):
+        app.state.polls.close(poll_id)
+        return RedirectResponse("/polls", status_code=303)
 
     @app.get("/class", dependencies=guard)
     def class_home(request: Request):

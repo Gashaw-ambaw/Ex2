@@ -1,4 +1,4 @@
-{#- Student class page (/c), no sign-in: send an anonymous comment and see your own comments of today. -#}
+{#- Student class page (/c), no sign-in: answer the poll, send a comment, see your own comments. -#}
 {% extends "base.html" %}
 {% block title %}Class page{% endblock %}
 {% block content %}
@@ -6,6 +6,32 @@
 {% if not session %}
 <p>Class has not started.</p>
 {% else %}
+<h2>Question</h2>
+{% if refused %}<p class="error">Not accepted.</p>{% endif %}
+{% if not poll %}
+<p>No question now. Refresh when the lecturer announces one</p>
+{% else %}
+<p dir="auto"><strong>{{ poll.question }}</strong></p>
+{% if poll.open and choice is none %}
+<form method="post" action="/c/answer">
+  <input type="hidden" name="poll_id" value="{{ poll.id }}">
+  {% for option in poll.options %}
+  <p><button type="submit" name="option" value="{{ loop.index0 }}" dir="auto" style="width: 100%;">{{ option }}</button></p>
+  {% endfor %}
+</form>
+{% elif poll.open %}
+<p class="ok">{% if answered %}Thanks. When the lecturer closes the poll, refresh to see the result{% else %}You answered{% endif %}</p>
+{% elif poll.correct is not none %}
+{% if choice is not none %}
+{% if choice == poll.correct %}<p class="ok">Correct</p>{% else %}<p class="error">Wrong</p>{% endif %}
+{% endif %}
+<p dir="auto">Right answer: {{ poll.options[poll.correct] }}</p>
+{% else %}
+<p>Class answers:</p>
+<ul>{% for option in poll.options %}<li dir="auto">{{ option }}: {{ results.votes[loop.index0] }}</li>{% endfor %}</ul>
+{% endif %}
+{% endif %}
+
 <h2>Comment</h2>
 <p>Anonymous: your name is not saved.</p>
 {% if sent %}<p class="ok">Sent</p>{% endif %}

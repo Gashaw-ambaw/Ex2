@@ -1,0 +1,65 @@
+{#- Lecturer Polls page: start a poll, see how many answered, close it, then see the results. -#}
+{% extends "base.html" %}
+{% block title %}Polls{% endblock %}
+{% block content %}
+<h1>Polls</h1>
+{% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}
+
+{% if poll %}
+<h2 dir="auto">{{ poll.question }}</h2>
+<p>Session: {{ session["date"] }}{% if session["name"] %}, {{ session["name"] }}{% endif %}.
+  {% if poll.open %}The poll is open.{% else %}The poll is closed.{% endif %}</p>
+<p><strong id="answered">{{ results.answered }}</strong> answered</p>
+{% if poll.open %}
+{# No numbers per option here: the page may be projected in class (D36). #}
+<ol>{% for option in poll.options %}<li dir="auto">{{ option }}</li>{% endfor %}</ol>
+<button type="button" id="refresh">Refresh now</button>
+<p id="offline" class="error"></p>
+<form method="post" action="/polls/close">
+  <input type="hidden" name="poll_id" value="{{ poll.id }}">
+  <button type="submit">Close poll</button>
+</form>
+<script>
+  function poll() {
+    fetch("/polls/state", { cache: "no-store" }).then(function (r) {
+      if (!r.ok) { throw new Error("status " + r.status); }
+      return r.json();
+    }).then(function (s) {
+      document.getElementById("offline").textContent = "";
+      if (!s.open) { window.location.reload(); return; }  // closed in another tab
+      document.getElementById("answered").textContent = s.answered;
+    }).catch(function () {
+      document.getElementById("offline").textContent = "Offline. Trying again...";
+    });
+  }
+  document.getElementById("refresh").addEventListener("click", poll);
+  setInterval(poll, {{ refresh_ms }});
+</script>
+{% else %}
+<table>
+  <tr><th>Option</th><th>Votes</th></tr>
+  {% for option in poll.options %}
+  <tr><td dir="auto">{{ option }}{% if poll.correct == loop.index0 %} <strong class="ok">(Correct answer)</strong>{% endif %}</td>
+    <td>{{ results.votes[loop.index0] }}</td></tr>
+  {% endfor %}
+</table>
+{% if poll.correct is not none %}
+<p>Right: <strong>{{ results.right }}</strong>. Wrong: <strong>{{ results.wrong }}</strong>.</p>
+{% endif %}
+{% endif %}
+{% endif %}
+
+<h2>New poll</h2>
+{% if poll and poll.open %}<p>Starting a new poll closes the open one.</p>{% endif %}
+<form method="post" action="/polls/start">
+  <p><label>Question<br><input type="text" name="question" dir="auto" size="50"></label></p>
+  {% for number in range(1, max_options + 1) %}
+  <p>
+    <label>Option {{ number }} <input type="text" name="option{{ number }}" dir="auto" size="30"></label>
+    <label><input type="radio" name="correct" value="{{ number }}"> correct</label>
+  </p>
+  {% endfor %}
+  <p><label><input type="radio" name="correct" value="" checked> No correct answer</label></p>
+  <button type="submit">Start</button>
+</form>
+{% endblock %}
