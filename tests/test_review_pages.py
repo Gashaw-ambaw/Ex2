@@ -135,7 +135,7 @@ def test_add_a_student_who_is_not_on_the_roster_tc36(app, lecturer):
     marked_class(app)
     new = {"first_name": "Noa", "last_name": "Bar", "email": "noa@example.com"}
     assert lecturer.post("/roster/add", data=new).status_code == 303
-    assert "noa@example.com" in lecturer.get("/class/review").text  # now in the picker
+    assert "Noa Bar (noa@example.com)" in lecturer.get("/class/review").text  # now in the picker, first name first
     lecturer.post("/class/review/add", data={"roster_id": entry_id(app, new)})
     assert marks(app)[-1] == (entry_id(app, new), "manual", "normal")
 

@@ -44,7 +44,7 @@
 <form method="post" action="/class/review/add">
   <select name="roster_id">
     {% for entry in unmarked %}
-    <option value="{{ entry.id }}">{{ entry.last_name }} {{ entry.first_name }} ({{ entry.email }})</option>
+    <option value="{{ entry.id }}">{{ entry.first_name }} {{ entry.last_name }} ({{ entry.email }})</option>
     {% endfor %}
   </select>
   <button type="submit">Add mark</button>
