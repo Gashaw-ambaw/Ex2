@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Review{% endblock %}
+{% block content %}
+<h1>Review</h1>
+{% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}
+{% if not session %}
+<p>No class yet.</p>
+{% else %}
+<p>Class of {{ session.date }}{% if session.name %} ({{ session.name }}){% endif %}: {{ table|length }} marks.</p>
+<table>
+  <tr><th>Name</th><th>Email</th><th>Time</th><th>Source</th><th>Flags</th><th>Status</th><th></th></tr>
+  {% for row in table %}
+  <tr{% if row.flags %} class="flagged"{% endif %}>
+    <td>{{ row.name }}</td>
+    <td>{{ row.email }}</td>
+    <td>{{ row.time }}</td>
+    <td>{{ row.source }}</td>
+    <td>{{ row.flags|join(", ") }}</td>
+    <td>{{ row.status }}</td>
+    <td>
+      {# Every change is a POST (D24). #}
+      <form method="post" action="/class/review/status">
+        <input type="hidden" name="mark_id" value="{{ row.mark_id }}">
+        {% if row.status == "normal" %}
+        <button type="submit" name="status" value="unverified">Unverified</button>
+        {% else %}
+        <button type="submit" name="status" value="normal">Normal</button>
+        {% endif %}
+      </form>
+      <form method="post" action="/class/review/reset">
+        <input type="hidden" name="mark_id" value="{{ row.mark_id }}">
+        <button type="submit">Reset</button>
+      </form>
+    </td>
+  </tr>
+  {% endfor %}
+</table>
+{% if without_mark %}
+<p>Flags without a mark:
+  {% for name, kinds in without_mark %}{{ name }} ({{ kinds|join(", ") }}){% if not loop.last %}; {% endif %}{% endfor %}</p>
+{% endif %}
+
+<h2>Add a mark by hand</h2>
+<form method="post" action="/class/review/add">
+  <select name="roster_id">
+    {% for entry in unmarked %}
+    <option value="{{ entry.id }}">{{ entry.last_name }} {{ entry.first_name }} ({{ entry.email }})</option>
+    {% endfor %}
+  </select>
+  <button type="submit">Add mark</button>
+</form>
+<p>A student who is not on the roster is added first on the <a href="/roster">Roster</a> page.</p>
+
+<h2>Export</h2>
+<form method="post" action="/class/review/export"><button type="submit">Export CSV</button></form>
+{% endif %}
+{% endblock %}

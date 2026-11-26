@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS class_location (
     lon REAL NOT NULL,
     updated_at TEXT NOT NULL
 );
--- The people count from the class photo (or typed by hand) and the gap to the marks.
+-- The people count from the class photo and the gap to the marks.
 CREATE TABLE IF NOT EXISTS head_counts (
     session_id INTEGER PRIMARY KEY REFERENCES class_sessions(id),
     count INTEGER NOT NULL,

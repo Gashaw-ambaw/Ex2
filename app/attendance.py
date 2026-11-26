@@ -1,3 +1,5 @@
+import csv
+import io
 import math
 from contextlib import closing
 from dataclasses import dataclass
@@ -278,6 +280,108 @@ class AttendanceService:
     @staticmethod
     def _israel_hhmm(iso):
         return datetime.fromisoformat(iso).astimezone(ISRAEL).strftime("%H:%M")
+
+    # ---- Review, manual mark, reset, export (UC-05, FR-06, FR-07) ----
+
+    def latest_session(self):
+        # Review and export show the newest session, also from an earlier day.
+        with closing(self._db.connect()) as conn:
+            return conn.execute("SELECT * FROM class_sessions ORDER BY id DESC LIMIT 1").fetchone()
+
+    def _flag_kinds(self, conn, session_id):
+        """roster_id -> sorted kinds, each kind once."""
+        kinds = {}
+        for row in conn.execute(
+            "SELECT DISTINCT roster_id, kind FROM flags WHERE session_id = ? ORDER BY kind", (session_id,)
+        ):
+            kinds.setdefault(row["roster_id"], []).append(row["kind"])
+        return kinds
+
+    def review_table(self, session_id):
+        """One row per mark; rows with flags first, then by last and first name."""
+        with closing(self._db.connect()) as conn:
+            kinds = self._flag_kinds(conn, session_id)
+            found = conn.execute(
+                "SELECT m.id, m.roster_id, m.marked_at, m.source, m.status, r.first_name, r.last_name, r.email "
+                "FROM marks m JOIN roster_entries r ON r.id = m.roster_id WHERE m.session_id = ? "
+                "ORDER BY r.last_name, r.first_name, r.id",
+                (session_id,),
+            ).fetchall()
+        table = [
+            {
+                "mark_id": row["id"],
+                "roster_id": row["roster_id"],
+                "name": f"{row['first_name']} {row['last_name']}",
+                "email": row["email"],
+                "marked_at": row["marked_at"],
+                "time": self._israel_hhmm(row["marked_at"]),
+                "source": row["source"],
+                "status": row["status"],
+                "flags": kinds.get(row["roster_id"], []),
+            }
+            for row in found
+        ]
+        return sorted(table, key=lambda r: not r["flags"])  # a stable sort keeps the name order
+
+    def unmarked_entries(self, session_id):
+        """Active roster entries with no mark in this session (the manual-mark picker)."""
+        with closing(self._db.connect()) as conn:
+            return conn.execute(
+                "SELECT * FROM roster_entries WHERE active = 1 AND id NOT IN "
+                "(SELECT roster_id FROM marks WHERE session_id = ?) ORDER BY last_name, first_name, id",
+                (session_id,),
+            ).fetchall()
+
+    def flags_without_mark(self, session_id):
+        """[(name, kinds)] for students who have flags but no mark, for example a blocked phone."""
+        with closing(self._db.connect()) as conn:
+            kinds = self._flag_kinds(conn, session_id)
+            found = conn.execute(
+                "SELECT id, first_name, last_name FROM roster_entries WHERE id NOT IN "
+                "(SELECT roster_id FROM marks WHERE session_id = ?) ORDER BY last_name, first_name, id",
+                (session_id,),
+            ).fetchall()
+        return [(f"{r['first_name']} {r['last_name']}", kinds[r["id"]]) for r in found if r["id"] in kinds]
+
+    def set_status(self, mark_id, status):
+        if status not in ("normal", "unverified"):
+            raise ValueError("Unknown status.")
+        with closing(self._db.connect()) as conn, conn:
+            conn.execute("UPDATE marks SET status = ? WHERE id = ?", (status, mark_id))
+
+    def add_manual(self, session_id, roster_id):
+        with closing(self._db.connect()) as conn:
+            conn.execute("BEGIN IMMEDIATE")
+            self._session(conn, session_id)
+            if conn.execute("SELECT 1 FROM roster_entries WHERE id = ?", (roster_id,)).fetchone() is None:
+                raise ValueError("No such roster entry.")
+            earlier = conn.execute(
+                "SELECT marked_at FROM marks WHERE session_id = ? AND roster_id = ?", (session_id, roster_id)
+            ).fetchone()
+            if earlier is not None:
+                raise ValueError(f"Already marked at {self._israel_hhmm(earlier['marked_at'])}.")
+            conn.execute(
+                "INSERT INTO marks (session_id, roster_id, marked_at, source) VALUES (?, ?, ?, 'manual')",
+                (session_id, roster_id, self._clock.now_iso()),
+            )
+            conn.commit()
+
+    def reset_mark(self, mark_id):
+        # Removes the mark only; the roster entry and the flags stay (UC-05 5d).
+        with closing(self._db.connect()) as conn, conn:
+            conn.execute("DELETE FROM marks WHERE id = ?", (mark_id,))
+
+    def export_csv(self, session_id):
+        """CSV, UTF-8 with BOM (so Excel reads Hebrew names). One row per mark, in the table order."""
+        out = io.StringIO()
+        writer = csv.writer(out)
+        writer.writerow(["name", "email", "time", "source", "status", "flags"])
+        for row in self.review_table(session_id):
+            when = datetime.fromisoformat(row["marked_at"]).astimezone(ISRAEL).strftime("%Y-%m-%d %H:%M")
+            writer.writerow(
+                [row["name"], row["email"], when, row["source"], row["status"], "; ".join(row["flags"])]
+            )
+        return out.getvalue().encode("utf-8-sig")
 
     def count_marks(self, session_id):
         with closing(self._db.connect()) as conn:

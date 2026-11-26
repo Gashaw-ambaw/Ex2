@@ -539,3 +539,85 @@ def test_an_unlinked_device_cannot_mark(service, db, marking):
     with pytest.raises(ValueError, match="Scan the QR in class first"):
         service.mark("dev-unknown", marking, HALL)
     assert marks(db) == []
+
+
+# ---- Review, manual mark, reset, export (UC-05; step 7) ----
+
+def test_latest_session_is_the_newest_even_from_an_earlier_day(service, clock):
+    assert service.latest_session() is None
+    first = service.start_class()
+    clock.set(NOON + timedelta(days=1))
+    assert service.session_for_today() is None
+    assert service.latest_session()["id"] == first["id"]
+
+
+def test_review_table_lists_flagged_rows_first_tc33(service, db, marking):
+    service.mark("dev-a", marking, HALL)  # A: no flag
+    service.mark("dev-b", marking, None)  # B: location flag
+    table = service.review_table(marking.session_id)
+    assert [(r["name"], r["flags"]) for r in table] == [("B X", ["location"]), ("A X", [])]
+    assert table[1]["time"] == "14:00" and table[1]["source"] == "self" and table[1]["status"] == "normal"
+    assert table[1]["email"] == "a@example.com"
+
+
+def test_set_status_unverified_and_back_tc33_tc34(service, db, marking):
+    service.mark("dev-a", marking, HALL)
+    mark_id = service.review_table(marking.session_id)[0]["mark_id"]
+    service.set_status(mark_id, "unverified")
+    assert service.review_table(marking.session_id)[0]["status"] == "unverified"
+    service.set_status(mark_id, "normal")
+    assert service.review_table(marking.session_id)[0]["status"] == "normal"
+
+
+def test_set_status_refuses_other_values(service, db, marking):
+    service.mark("dev-a", marking, HALL)
+    mark_id = service.review_table(marking.session_id)[0]["mark_id"]
+    with pytest.raises(ValueError):
+        service.set_status(mark_id, "absent")
+
+
+def test_add_manual_records_a_manual_mark_tc35(service, db, marking):
+    service.add_manual(marking.session_id, 2)
+    assert rows(db, "SELECT roster_id, device_id, source, location_ok FROM marks") == [(2, None, "manual", None)]
+    assert [r["id"] for r in service.unmarked_entries(marking.session_id)] == [1]
+
+
+def test_add_manual_for_a_marked_student_says_so_tc37(service, db, marking):
+    service.mark("dev-a", marking, HALL)
+    with pytest.raises(ValueError, match="Already marked at 14:00"):
+        service.add_manual(marking.session_id, 1)
+    assert len(marks(db)) == 1
+
+
+def test_reset_removes_only_the_mark_tc39(service, db, marking):
+    service.mark("dev-a", marking, None)  # a mark with a location flag
+    mark_id = service.review_table(marking.session_id)[0]["mark_id"]
+    service.reset_mark(mark_id)
+    assert marks(db) == []
+    assert flags(db) == [(1, "dev-a", "location")]
+    assert len(rows(db, "SELECT * FROM roster_entries")) == 2
+    service.add_manual(marking.session_id, 1)
+    assert len(marks(db)) == 1
+
+
+def test_flags_without_mark_once_per_student_and_kind(service, db, marking):
+    service.mark("dev-a", marking, HALL)
+    with closing(db.connect()) as conn, conn:
+        conn.execute("UPDATE devices SET roster_id = 2 WHERE id = 'dev-a'")
+    service.mark("dev-a", marking, HALL)  # blocked twice: two device_reuse flags on B
+    service.mark("dev-a", marking, HALL)
+    service.add_flags(marking.session_id, 2, "dev-a", ["relinked"])
+    assert service.flags_without_mark(marking.session_id) == [("B X", ["device_reuse", "relinked"])]
+
+
+def test_export_csv_bom_columns_one_row_per_mark_tc40(service, db, marking):
+    service.mark("dev-a", marking, HALL)
+    service.mark("dev-b", marking, None)
+    data = service.export_csv(marking.session_id)
+    assert data.startswith("﻿".encode("utf-8"))
+    lines = data.decode("utf-8-sig").splitlines()
+    assert lines == [
+        "name,email,time,source,status,flags",
+        "B X,b@example.com,2026-11-24 14:00,self,normal,location",
+        "A X,a@example.com,2026-11-24 14:00,self,normal,",
+    ]

@@ -1,10 +1,11 @@
+import logging
 import secrets
 from pathlib import Path
 
 import segno
 
 from fastapi import Depends, FastAPI, Form, Request, UploadFile
-from fastapi.responses import JSONResponse, RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
 
@@ -294,6 +295,63 @@ def create_app(settings=None, google=None):
         return JSONResponse(
             {"open": state.open, "seconds_left": state.seconds_left, "marks": state.marks,
              "flags": state.flags, "qr_svg": svg}
+        )
+
+    # ---- Review and export (UC-05). The latest session, also from an earlier day. ----
+
+    def review_page(request, status_code=200, errors=()):
+        attendance = app.state.attendance
+        session = attendance.latest_session()
+        context = {"lecturer": True, "errors": list(errors), "session": session}
+        if session is not None:
+            context["table"] = attendance.review_table(session["id"])
+            context["without_mark"] = attendance.flags_without_mark(session["id"])
+            context["unmarked"] = attendance.unmarked_entries(session["id"])
+        return templates.TemplateResponse(request, "review.html", context, status_code=status_code)
+
+    @app.get("/class/review", dependencies=guard)
+    def review(request: Request):
+        return review_page(request)
+
+    @app.post("/class/review/status", dependencies=guard)
+    def review_status(request: Request, mark_id: int = Form(0), status: str = Form("")):
+        try:
+            app.state.attendance.set_status(mark_id, status)
+        except ValueError as error:
+            return review_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/class/review", status_code=303)
+
+    @app.post("/class/review/reset", dependencies=guard)
+    def review_reset(mark_id: int = Form(0)):
+        app.state.attendance.reset_mark(mark_id)
+        return RedirectResponse("/class/review", status_code=303)
+
+    @app.post("/class/review/add", dependencies=guard)
+    def review_add(request: Request, roster_id: int = Form(0)):
+        session = app.state.attendance.latest_session()
+        if session is not None:
+            try:
+                app.state.attendance.add_manual(session["id"], roster_id)
+            except ValueError as error:
+                return review_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/class/review", status_code=303)
+
+    @app.post("/class/review/export", dependencies=guard)
+    def review_export(request: Request):
+        session = app.state.attendance.latest_session()
+        if session is None:
+            return RedirectResponse("/class/review", status_code=303)
+        try:
+            data = app.state.attendance.export_csv(session["id"])
+        except Exception:
+            # UC-05 6a: say so; the table stays as it was.
+            logging.exception("Export failed")
+            return review_page(request, 500, errors=["Export failed. Try again."])
+        name = f"attendance_{session['date']}.csv"
+        return Response(
+            data,
+            media_type="text/csv; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="{name}"'},
         )
 
     @app.get("/roster", dependencies=guard)
