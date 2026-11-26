@@ -1,3 +1,4 @@
+"""The database: creates the SQLite tables and opens connections."""
 import logging
 import os
 import sqlite3

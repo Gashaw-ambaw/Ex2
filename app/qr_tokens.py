@@ -1,3 +1,4 @@
+"""The changing attendance QR (F1): makes and checks short-lived codes."""
 import hashlib
 import hmac
 

@@ -1,3 +1,4 @@
+"""Tests of the changing attendance QR codes: which codes are accepted and which are refused."""
 from datetime import datetime, timezone
 
 from app.clock import Clock

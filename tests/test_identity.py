@@ -1,3 +1,4 @@
+"""Tests of StudentIdentity (F1): the device link, the flags and the Google sign-in result."""
 import asyncio
 from contextlib import closing
 

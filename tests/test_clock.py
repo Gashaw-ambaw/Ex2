@@ -1,3 +1,4 @@
+"""Tests of the Clock: UTC time, Israel time and a fixed time for tests."""
 from datetime import date, datetime, timezone
 
 import pytest

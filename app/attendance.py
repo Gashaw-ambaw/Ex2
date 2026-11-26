@@ -1,3 +1,5 @@
+"""Attendance (F1): class sessions, the attendance window, marking a student,
+and the lecturer's review and CSV export."""
 import csv
 import io
 import math

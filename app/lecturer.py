@@ -1,3 +1,4 @@
+"""Lecturer access: one password, logout, and a short lock after too many wrong attempts."""
 import hmac
 import threading
 from datetime import timedelta

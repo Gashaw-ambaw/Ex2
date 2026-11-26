@@ -1,3 +1,4 @@
+"""Tests of the settings: environment variables, fixed numbers and hidden secrets."""
 import pytest
 
 from app.settings import Settings

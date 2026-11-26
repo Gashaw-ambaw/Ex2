@@ -1,3 +1,4 @@
+"""Prepares the Google sign-in client that students use to register a phone."""
 from authlib.integrations.starlette_client import OAuth
 
 

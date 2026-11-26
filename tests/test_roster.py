@@ -1,3 +1,4 @@
+"""Tests of RosterService (F1): reading the CSV file, saving, and adding or editing a student."""
 from contextlib import closing
 from pathlib import Path
 

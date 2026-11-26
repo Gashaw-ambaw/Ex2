@@ -1,3 +1,4 @@
+"""Shared test setup: dummy settings, a temporary database and a clock."""
 import pytest
 
 from app.clock import Clock

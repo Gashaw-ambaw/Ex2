@@ -1,3 +1,4 @@
+"""Tests of the student attendance pages (F1): scan, sign-in, registration and marking."""
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from urllib.parse import urlparse

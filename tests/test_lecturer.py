@@ -1,3 +1,4 @@
+"""Tests of LecturerAccess: the password and the lock after wrong attempts."""
 from datetime import datetime, timedelta, timezone
 
 import pytest

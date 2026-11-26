@@ -1,3 +1,4 @@
+"""Tests of the database: the tables are created and the schema rules refuse wrong rows."""
 import sqlite3
 
 import pytest

@@ -1,3 +1,4 @@
+"""Tests of AttendanceService (F1): sessions, the window, scan, marking, review and export."""
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 from urllib.parse import parse_qs, urlparse

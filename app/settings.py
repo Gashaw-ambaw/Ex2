@@ -1,3 +1,4 @@
+"""All settings in one place: secrets from environment variables, and the fixed numbers (limits, times)."""
 import os
 from dataclasses import dataclass, field
 

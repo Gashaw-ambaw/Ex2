@@ -1,3 +1,4 @@
+"""Builds the web app: connects the services and defines all the page addresses (routes)."""
 import logging
 import secrets
 from pathlib import Path

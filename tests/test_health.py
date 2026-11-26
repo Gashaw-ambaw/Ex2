@@ -1,3 +1,4 @@
+"""Tests that the app starts and answers /health without writing to the database."""
 from fastapi.testclient import TestClient
 
 from app.main import create_app

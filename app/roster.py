@@ -1,3 +1,4 @@
+"""The course roster (F1): reads the CSV file, saves the students, and adds or edits one student."""
 import csv
 import io
 import sqlite3

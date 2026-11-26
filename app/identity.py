@@ -1,3 +1,4 @@
+"""Student identity (F1): checks the Google sign-in and links a browser to one student on the roster."""
 from contextlib import closing
 from dataclasses import dataclass, field
 

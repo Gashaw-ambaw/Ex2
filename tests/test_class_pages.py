@@ -1,3 +1,4 @@
+"""Tests of the lecturer Class and QR pages (F1): login, Start class, open, close, location."""
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 

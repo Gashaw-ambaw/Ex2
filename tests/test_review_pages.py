@@ -1,3 +1,4 @@
+"""Tests of the lecturer Review page (F1): flags, status, marks by hand and CSV export."""
 from contextlib import closing
 from datetime import datetime, timedelta, timezone
 

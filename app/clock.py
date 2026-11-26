@@ -1,3 +1,4 @@
+"""The current time: stored in UTC, shown in Israel time. Tests can set a fixed time."""
 from datetime import date, datetime, timezone
 from zoneinfo import ZoneInfo
 

@@ -1,3 +1,4 @@
+"""Tests of the login and Roster pages: password, upload, preview and confirm."""
 import csv
 import html
 from pathlib import Path

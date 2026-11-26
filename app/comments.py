@@ -1,3 +1,5 @@
+"""Anonymous comments (F2): saves a comment and lists comments for the student and the lecturer.
+No name or email is stored."""
 from contextlib import closing
 from datetime import datetime, timedelta
 
