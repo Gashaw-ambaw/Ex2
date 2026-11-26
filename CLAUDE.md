@@ -30,3 +30,5 @@ two lines at most. Put what, why, rejected and who in those two lines.
 that are not in decisions.md. Propose a two-line entry for each. Only
 decisions that change behavior, scope, cost or a document; not technical
 details marked [P]. I decide what goes in.
+
+15. Every code file (app, templates, tests) starts with a 1-2 line comment in simple English that says what the file does.
