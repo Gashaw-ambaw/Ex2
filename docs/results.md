@@ -48,6 +48,21 @@ Source: my test runs. Screenshots for steps 1-6a, my report for the rest.
 - MEASURED [TC-19] After clearing the site data and registering again, the class page showed Flags: 1 (new_device).
 - NOT VERIFIED: scan from about 3 m on a projector; the Wi-Fi off and on check [TC-07] (I did not report it); opening the scan link inside WhatsApp [TC-15]; the 120-day cookie; the 100 test-user cap; real class location in the hall (S3); iPhone.
 
+## F1 live checks (26/11/2026)
+
+Setup: a laptop, two phones (A and B) and a third account (tester C).
+
+- MEASURED [TC-21] One self mark with location allowed worked.
+- MEASURED [TC-23] A second scan showed "Already marked at" with the same time.
+- MEASURED [TC-22] A ticket older than 60 s gave "Scan the QR again."
+- MEASURED [TC-26] B, with location blocked, was marked, and the flag count went up.
+- MEASURED [TC-25] A's phone, relinked to C, was blocked with "This phone already marked another student in this class. Ask the lecturer."; the mark count did not change.
+- MEASURED [UC-03 5b] After Close, B got "Attendance is closed; ask the lecturer."
+- MEASURED [no TC] A was relinked back. Final totals in the last session: Marks 2, Flags 3 (relinked, device_reuse and one more, probably location from B; the page shows only the number).
+- NOT VERIFIED: the kind of each flag; location in the real hall (S3); iPhone; WhatsApp.
+
 ## F1 known limits
 
 - After a new session is started (UC-01 1b), review and export show the latest session only. A lecturer who starts a new session by mistake does not see the first session's marks there.
+- The class page shows only the number of flags, not their kinds; the review page in step 7 will show them.
+- If a student once chooses "never allow" for location, the browser does not ask again, so every later mark of that device gets a location flag. The site cannot re-ask. Accepted for now (flags matter only when the D18 gap alert fires); a hint line for the student may be added later if time remains.
