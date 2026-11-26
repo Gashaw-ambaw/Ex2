@@ -237,7 +237,7 @@ flowchart TD
 **Main flow**
 1. The lecturer opens the Polls page, enters a question and 2-4 options, and may mark one option as correct.
 2. The lecturer taps "Start" and tells the class that a poll started.
-3. The system publishes the poll on the class page and shows the lecturer the live count per option (refreshed every 20 seconds while the poll is open, with a "Refresh now" button).
+3. The system publishes the poll on the class page and shows the lecturer the live number of answers, not the count per option, so a projected page does not influence the answers (D36). It refreshes every 20 seconds while the poll is open, with a "Refresh now" button.
 4. Students answer (UC-09).
 5. The lecturer taps "Close".
 6. The system stops accepting answers and shows the final results: the number of votes per option, and, if a correct option was marked, how many were right and wrong. The lecturer may project the page.

@@ -187,14 +187,15 @@ classDiagram
   class ReviewController
   class CommentService {
     +send(session_id, anon_id, text)
-    +own(anon_id) list
+    +own(anon_id, session_id) list
     +list_for_lecturer(session_id) list
   }
   class PollService {
     +start(session_id, question, options, correct)
     +close(poll_id)
     +active(session_id) Poll
-    +answer(poll_id, anon_id, option)
+    +answer(session_id, poll_id, anon_id, option)
+    +answer_of(poll_id, anon_id)
     +results(poll_id)
   }
   class SummaryService {
@@ -229,8 +230,8 @@ classDiagram
   PollsController ..> PollService
   SummaryController ..> SummaryService
   ReviewController ..> RepoReviewService
-  CommentService ..> AttendanceService
-  PollService ..> AttendanceService
+  CommentsController ..> AttendanceService
+  PollsController ..> AttendanceService
   SummaryService ..> JobRunner
   SummaryService ..> LlmGateway
   RepoReviewService ..> JobRunner
@@ -240,6 +241,8 @@ classDiagram
 ```
 
 Entities: `Comment`, `Poll`, `Answer`, `Summary`, `Job`, `RepoResult`, `Checklist`; their fields are in section 3. Login and logout routes are in `AttendanceController` [U21].
+
+Built 26/11 (steps 9-10) [P]: the controller finds the session (today's latest for students, the latest for the lecturer pages) and passes session_id. Routes: `/c`, `POST /c/comment`, `POST /c/answer` (no sign-in, `anon` cookie); `/class/link` (fixed QR of `BASE_URL/c`), `/comments`, `/comments/state`, `/polls`, `/polls/state`, `POST /polls/start`, `POST /polls/close`. `own()` gives only today's session. `start()` closes every open poll; with no session today the page says "Start class first.". `answer()` accepts only the open latest poll of the session ("ok", "already", "not accepted"). `results()` gives only the number of answers while the poll is open (D36).
 
 ## 3. Schema
 

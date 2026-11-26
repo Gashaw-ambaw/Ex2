@@ -1,12 +1,12 @@
 # Test Plan
 
-Status: draft (F1 only). Date: 22/11/2026. Read with `srs.md`, `use_cases.md` and `edd.md` (section 10). IDs follow D20.
-F2-F5 test cases are added when those features are built; until then B11 (srs.md) is covered for F1 only.
+Status: draft (F1-F3). Date: 22/11/2026; F2-F3 added 26/11/2026. Read with `srs.md`, `use_cases.md` and `edd.md` (section 10). IDs follow D20.
+F4-F5 test cases are added when those features are built; until then B11 (srs.md) is covered for F1-F3.
 
 ## 1. Strategy
 
-- Services (`QrTokens`, `AttendanceService`, `RosterService`, `StudentIdentity`, `HeadCountService`) are tested through their public methods, on a temporary SQLite file per test and a set `Clock`. `Google` and `PeopleCounter` are fakes [EDD:493].
-- Controllers are thin: tested through the FastAPI test client, written after the code. Tests first only for classes with logic: `QrTokens`, the marking rules of `AttendanceService` and the count gap (TC-10 to TC-13, TC-21 to TC-26, TC-28).
+- Services (`QrTokens`, `AttendanceService`, `RosterService`, `StudentIdentity`, `HeadCountService`, `CommentService`, `PollService`) are tested through their public methods, on a temporary SQLite file per test and a set `Clock`. `Google` and `PeopleCounter` are fakes [EDD:493].
+- Controllers are thin: tested through the FastAPI test client, written after the code. Tests first only for classes with logic: `QrTokens`, the marking rules of `AttendanceService`, the count gap, `CommentService` and `PollService` (TC-10 to TC-13, TC-21 to TC-26, TC-28, TC-47 to TC-51, TC-55 to TC-62, TC-65).
 - Test data: `sample_data/` only (`roster.csv`: 102 students and 2 staff rows; `roster_bad.csv`; `roster_duplicates.csv`). No real data (D5, NFR-07).
 - Phone tests are manual, on 2-3 Android phones with the deployed app. The load test (S2) runs on the real mark endpoint on a local server (one uvicorn worker, a SQLite file), not on Railway: the deployed app has no test route and no real test accounts.
 - Parameter values are those of SRS 3.4: `ATT_WINDOW_SEC` 300, `QR_ROTATE_SEC` 10, `SUBMIT_SEC` 60, `GAP_TOLERANCE_PCT` 5, `PHOTO_MAX_MB` 10, `LOAD_SIM_MARKS` 100.
@@ -65,7 +65,31 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 TC-08 and TC-09 run in two parts: the window side (state, close, expiry) in step 4; the scan side ("Attendance is closed", `check_scan`) in step 5.
 TC-27 to TC-32 run with S4 (28/11); TC-38 ran in step 5.
 
-## 3. B11 coverage: F1 alternative flows (32)
+## 3. F2-F3 test cases
+
+| TC | FR | UC flow | Type | Expected result |
+|---|---|---|---|---|
+| TC-47 | FR-08 | UC-06 main | unit, API | A comment is stored with session, browser id and time, no identity; "Sent"; the browser sees only its own comments of today's session, newest first |
+| TC-48 | FR-08 | UC-06 2a | API, manual | No session today: /c says "Class has not started"; a sent comment is not stored |
+| TC-49 | FR-08 | UC-06 3a | unit, API | Empty, spaces only or over `COMMENT_MAX_CHARS`: "Write 1 to 300 characters."; the text is kept; nothing stored |
+| TC-50 | FR-08 | UC-06 4a | unit | Same browser after 9 s: "Wait a moment."; after `COMMENT_MIN_INTERVAL_SEC` (10 s): stored |
+| TC-51 | FR-08 | UC-06 4c | unit | After Close and after a new session, a comment goes to today's latest session; an earlier date is never used |
+| TC-52 | FR-09 | UC-07 main | API | Comments page: the latest session (also from an earlier day), newest first; refresh every `REFRESH_SEC`; "Refresh now" |
+| TC-53 | FR-17 | UC-07 1a; UC-08 | API | /comments, /comments/state, /class/link, /polls, /polls/state, /polls/start, /polls/close need the password |
+| TC-54 | FR-09 | UC-07 2a | manual | Comments page offline: "Offline", then resumes |
+| TC-55 | FR-10 | UC-08 main | unit | Start a poll (2-4 options, optional correct); answers counted; Close; votes per option and right/wrong |
+| TC-56 | FR-10 | UC-08 1a | unit, API | Empty or spaces-only question, fewer than 2 or more than 4 options, correct on a blank field: "Write a question and 2 to 4 options."; nothing stored. Blank fields are dropped; the correct mark stays with its text |
+| TC-57 | FR-10 | UC-08 2a | unit | Start while a poll is open (also one from an earlier day): the open poll is closed and its results kept |
+| TC-58 | FR-10 | UC-08 3a | manual | Polls page offline while a poll is open: "Offline", then resumes |
+| TC-59 | FR-10, FR-11 | UC-08 s6; UC-09 main | API | The student answers and sees "Thanks..."; after Close "Correct"/"Wrong" and the right answer; the lecturer sees votes, the correct answer and right/wrong |
+| TC-60 | FR-11 | UC-09 2a | API | No poll: "No question now. Refresh when the lecturer announces one" |
+| TC-61 | FR-11 | UC-09 3a | unit, API | A second answer of the same browser is not stored; "You answered" |
+| TC-62 | FR-11 | UC-09 3b, s5 | unit, API | Closed before answering: the results are shown and an answer gets "Not accepted." (also a bad option, an old poll or an earlier session); without a correct option: the distribution |
+| TC-63 | NFR-08, FR-16, FR-18 | UC-06, UC-09 | API | /c, /c/comment and /c/answer need no sign-in; the `anon` cookie is separate from the device cookie; comment and answer rows hold no device or roster id; /class/link shows `BASE_URL/c` |
+| TC-64 | FR-10 | UC-08 precondition | API, manual | Start poll with no session today: "Start class first."; nothing stored |
+| TC-65 | FR-10 | UC-08 s3 (D36) | unit, API | While a poll is open, /polls and /polls/state give only the number of answers: no votes per option, no correct answer |
+
+## 4. B11 coverage: alternative flows of UC-00 to UC-09 (50)
 
 | UC | Flow | TC |
 |---|---|---|
@@ -101,5 +125,23 @@ TC-27 to TC-32 run with S4 (28/11); TC-38 ran in step 5.
 | UC-05 | 5c | TC-38 |
 | UC-05 | 5d | TC-39 |
 | UC-05 | 6a | TC-41 |
+| UC-06 | 2a | TC-48 |
+| UC-06 | 3a | TC-49 |
+| UC-06 | 4a | TC-50 |
+| UC-06 | 4b | Could (srs App. C), not built |
+| UC-06 | 4c | TC-51 |
+| UC-07 | 1a | TC-53 |
+| UC-07 | 2a | TC-54 |
+| UC-07 | 4a | Could (srs App. C), not built |
+| UC-07 | 4b | Could (srs App. C), not built |
+| UC-07 | 4c | Could (srs App. C), not built |
+| UC-08 | 1a | TC-56 |
+| UC-08 | 2a | TC-57 |
+| UC-08 | 3a | TC-58 |
+| UC-08 | 6a | Could (srs App. C), not built |
+| UC-09 | 2a | TC-60 |
+| UC-09 | 3a | TC-61 |
+| UC-09 | 3b | TC-62 |
+| UC-09 | 3c | Could (srs App. C), not built |
 
-32 of 32 flows have a TC. The 41 flows of UC-06 to UC-13 are added when those features are built.
+50 of 50 flows of UC-00 to UC-09 are listed: 44 have a TC, 6 are Could (srs App. C), not built (D35). The 23 flows of UC-10 to UC-13 are added when those features are built.

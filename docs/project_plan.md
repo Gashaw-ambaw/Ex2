@@ -1,6 +1,6 @@
 # Project Plan – Ex2
 
-Status: draft (stage 1). Last updated: 22/11/2026. Deadline: Monday 30/11/2026, 23:59.
+Status: draft (stage 1). Last updated: 26/11/2026. Deadline: Monday 30/11/2026, 23:59.
 Closed decisions are in `decisions.md`. Everything below is open or a working assumption.
 Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
@@ -75,7 +75,7 @@ Also: a survey of existing tools for the tools report.
 | 18-19/11 | SoW. Repo documents brought up to date. Tools report. | SoW draft written; tools report not started |
 | 19-20/11 | SRS draft, human review, SRS closed. SDD, EDD, test plan. | SRS and SDD drafts written; human review not verified; EDD and test plan not started |
 | 24-26/11 | F1 end to end on real phones, S2 load check, rehearsal. | Step 1 done (24/11) |
-| 27/11 | F2, F3. | Planned |
+| 27/11 | F2, F3. | Built and live-checked 26/11 (`results.md`); two checks before Start class on 27/11 |
 | 28/11 | F4 thin slice; S4 if F1 is stable. | Planned |
 | 29/11 | F5 thin slice, tools report, results, README. | Planned |
 | 30/11 | Final check and submission (by 23:59). | Planned |

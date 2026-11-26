@@ -87,6 +87,39 @@ Setup: the deployed app, testers A and B, two Android phones with Chrome, differ
 - MEASURED [TC-40] The exported CSV had English headers and English names.
 - NOT VERIFIED: the lecturer action count with the class photo (S4); Hebrew names in the CSV; iPhone; real class location in the hall (S3).
 
+## F2 live check (26/11/2026)
+
+Setup: the deployed app, a laptop and two Android devices: a phone (A) and a tablet (B).
+
+- MEASURED [TC-63] The Class link page showed the fixed QR and the text https://ex2-production.up.railway.app/c; A and B reached /c without sign-in.
+- MEASURED [TC-47, TC-49, TC-50] "Sent"; a second send at once gave "Wait a moment" with the text kept; a Hebrew comment was accepted; a spaces-only comment gave the error.
+- MEASURED [TC-52, TC-54] The Comments page showed the comments newest first; "Refresh now" worked; with the laptop Wi-Fi off it showed "Offline" and then resumed.
+- MEASURED [TC-51] After the attendance window was closed, a new comment arrived at the top of the Comments page.
+- PENDING 27/11 [TC-48] /c before Start class ("Class has not started"): today already had a session.
+
+## F3 live check (26/11/2026)
+
+Setup: as in the F2 live check.
+
+- MEASURED [TC-65, TC-61] While open, the laptop showed "2 answered" and no per-option counts; A got "Thanks..." after answering and "You answered" when opening /c again.
+- MEASURED [TC-58] "Offline" while open, then resumed.
+- MEASURED [TC-59] After Close: votes per option, "(Correct answer)", "Right: 1. Wrong: 1."; A and B saw Correct or Wrong with the right answer.
+- MEASURED [TC-62] A poll without a correct option: A and B saw the distribution.
+- MEASURED [TC-57] Start while a poll was open: the new poll started with no error (the first poll is no longer open).
+- MEASURED [TC-56] Empty question: "Write a question and 2 to 4 options."; the open poll stayed open.
+- PENDING 27/11 [TC-64] Start poll before Start class ("Start class first.").
+- NOT VERIFIED: iPhone; many students at once.
+
+## F2-F3 known limits
+
+- A refused Start poll clears the form.
+- Refreshing /c?answered=1 shows "Thanks..." again; opening /c shows "You answered".
+- If a new poll is started in a second /polls tab, the first tab keeps the old question while its count follows the new poll, until a reload.
+- When the 8 h lecturer login expires while Comments or Polls is open, the page shows "Offline" instead of the login page.
+- A poll left open in an earlier session of the same day is not shown on /polls; the next Start closes it.
+- Clearing cookies, blocked cookies or a second browser get past the 10 s limit and the one-answer rule (use_cases.md Known limits 3-4).
+- Not built: the Could flows (D35: retry of an unsent comment or answer; hide, show, delete comments; delete a poll); a private lecturer view of per-option counts while open; older sessions on the lecturer pages; poll history; editing a poll; a word filter.
+
 ## F1 known limits
 
 - After a new session is started (UC-01 1b), review and export show the latest session only. A lecturer who starts a new session by mistake does not see the first session's marks there.

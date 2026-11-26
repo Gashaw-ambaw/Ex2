@@ -37,4 +37,6 @@ Real roster and class photos were shown only in the planning chat to understand 
 | 26/11 | Claude Code | F1 step 7: review page, manual mark, reset, CSV export; 9 unit tests written first, 16 page tests | Answered the questions, approved the plan, D33 and D34; live check next |
 | 26/11 | Claude Code | Recorded the step 7 live check and updated the F1 known limits; checked the picker name order | Ran the live check on a laptop and two phones; decided the known limits |
 | 26/11 | Claude Code | F1 step 8: TC-44 load test (`tests/test_load.py`), rehearsal script, doc edits | Answered the questions, approved the plan; ran the rehearsal (TC-43) and gave the results |
+| 26/11 | Claude Code | F2 step 9: CommentService, class page `/c`, fixed class QR, Comments page; 27 tests written first; file header comments and CLAUDE.md rule 15 | Answered the plan questions; ran the live check on a laptop, an Android phone and an Android tablet |
+| 26/11 | Claude Code | F3 step 10: PollService, Polls page, poll on the class page, results only after Close (D36); 45 tests written first; doc edits for steps 9-10 | Proposed the closed-only results; approved the plan, D35 and D36; ran the live check |
 | 22/11 | Claude Code | STP draft (F1): strategy, 44 test cases, B11 table for the 32 F1 flows | Approved the plan; review of the STP text later |
