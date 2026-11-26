@@ -44,12 +44,12 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 | TC-27 | FR-05 | UC-04 main | API | Fake counter returns 97 for 104 marks: alert "gap 7", flagged marks first; count and gap stored; photo deleted |
 | TC-28 | FR-05 | UC-04 s4 | unit | Count gap: alert when marks > count x 1.05. 104 marks / 97: alert; 101 / 97: no alert; 102 / 97: alert |
 | TC-29 | FR-05 | UC-04 1a | API | A file over `PHOTO_MAX_MB` or not an image: error; nothing stored |
-| TC-30 | FR-05 | UC-04 2a | API | The counter fails: a form to type the count; the typed count gives the same alert rule |
+| TC-30 | FR-05 | UC-04 2a | API | The counter fails: an error; no count stored; no alert |
 | TC-31 | FR-05 | UC-04 4a | unit | Count higher than marks: no alert |
 | TC-32 | FR-05, FR-06 | UC-04 4b; UC-05 3a | unit | A gap with no flagged mark: alert shown, the list is unchanged |
-| TC-33 | FR-06 | UC-05 main s1-4 | API | The table shows name, time, source, flags, status; flagged first when the alert fired; a mark can be set to unverified |
+| TC-33 | FR-06 | UC-05 main s1-4 | API | The table shows name, time, source, flags, status; flagged rows first and highlighted; flags without a mark in one line; a mark can be set to unverified |
 | TC-34 | FR-06 | UC-05 4a | API | An unverified mark is set back to normal |
-| TC-35 | FR-06 | UC-05 main s5 | API | Add a late student from the roster: a mark with source `manual` |
+| TC-35 | FR-06 | UC-05 main s5 | API | Add a mark by hand from the roster: a mark with source `manual` |
 | TC-36 | FR-06 | UC-05 5a | API | Add a student not on the roster (name, email) first, then the mark |
 | TC-37 | FR-06 | UC-05 5b | API | Add a student who already has a mark: a message; no second row |
 | TC-38 | FR-06 | UC-05 5c | API | Edit a roster email: sign-in with the new email matches the entry |
@@ -63,6 +63,7 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 | TC-46 | FR-02 | UC-01 1b | API | After a closed or expired window, Start a new session (optional name) creates a second session for today; Open attendance works; the old session keeps its marks |
 
 TC-08 and TC-09 run in two parts: the window side (state, close, expiry) in step 4; the scan side ("Attendance is closed", `check_scan`) in step 5.
+TC-27 to TC-32 run with S4 (28/11); TC-38 ran in step 5.
 
 ## 3. B11 coverage: F1 alternative flows (32)
 

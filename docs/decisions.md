@@ -1,6 +1,6 @@
 # Decisions
 
-Closed decisions only. Open items are in `project_plan.md`. Last updated: 24/11/2026.
+Closed decisions only. Open items are in `project_plan.md`. Last updated: 26/11/2026.
 
 | # | Decision | Reason (rejected alternative) | Source |
 |---|---|---|---|
@@ -36,3 +36,5 @@ Closed decisions only. Open items are in `project_plan.md`. Last updated: 24/11/
 | D30 | Roster input is a CSV file (UTF-8), read by header name: first name, last name, email (`שם פרטי`, `שם משפחה`, `דוא"ל`). Other columns, such as the class group number, are ignored. | No extra library; matches FR-01, D8 and UC-00. Rejected: XLSX or Google Sheet as input; using the groups column. | Own decision, 22/11 |
 | D31 | UC-01 1b is built: after a closed or expired window, the lecturer can start a new session for today (optional name); the old session and its marks stay. "Open attendance" on a closed window still shows "Attendance already closed for this session". | No recovery otherwise (testing, rehearsal, demo). Rejected: reopening the same session; no auto-expiry. | Me, 24/11 (deferred); 25/11 (built) |
 | D32 | Roster re-upload: match by email; entries missing from the new file become inactive but are kept, so old marks keep their name; an inactive entry returns when the same email is added again. | Keeps attendance history. Rejected: deleting them. | Own decision, 24/11 |
+| D33 | No manual head count: only the app counts the class photo (S4); if counting fails, an error is shown and no count is stored. | The app should save the lecturer the counting; the QR and location layers remain. Rejected: a typed count (UC-04 2a). | Me, 26/11 |
+| D34 | The review lists flagged marks first and highlighted, always; flags of students with no mark are shown in one line. The lecturer sees flags always and acts on them only when the gap alert fires (D16). | Step 7 has no count, so the lecturer sees all flags. Rejected: a flagged-only filter (for now). | Me, 26/11 |

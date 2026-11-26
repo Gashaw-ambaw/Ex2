@@ -157,7 +157,7 @@ flowchart TD
 
 **Alternative flows**
 - 1a. The upload fails or the file is too large: the system shows an error.
-- 2a. The count fails: the lecturer can type a count by hand.
+- 2a. The count fails: the system shows an error; no count is stored and the list stands.
 - 4a. The count is higher than the marks: no alert. The lecturer can add missing students (UC-05).
 - 4b. There is a gap but no flagged mark: the alert is shown and the list stands (D18).
 
@@ -170,10 +170,10 @@ flowchart TD
 
 **Main flow**
 1. The lecturer opens the session's attendance table: name, time, source, flags, status.
-2. If the count alert fired, the system lists the flagged marks first.
+2. The system lists the flagged marks first, highlighted.
 3. The lecturer checks the flagged students in class, for example by calling their names.
 4. The lecturer marks as "unverified" those who do not answer.
-5. The lecturer adds a late student by picking the name from the roster. The system records a mark with source "manual".
+5. The lecturer adds a mark by hand by picking a roster student who has no mark (for example a late student). The system records a mark with source "manual".
 6. The lecturer taps "Export". The system creates a spreadsheet file (name, email, time, source, status, flags) and downloads it.
 
 **Alternative flows**

@@ -66,3 +66,5 @@ Setup: a laptop, two phones (A and B) and a third account (tester C).
 - After a new session is started (UC-01 1b), review and export show the latest session only. A lecturer who starts a new session by mistake does not see the first session's marks there.
 - The class page shows only the number of flags, not their kinds; the review page in step 7 will show them.
 - If a student once chooses "never allow" for location, the browser does not ask again, so every later mark of that device gets a location flag. The site cannot re-ask. Accepted for now (flags matter only when the D18 gap alert fires); a hint line for the student may be added later if time remains.
+- The CSV export does not escape a value that starts with `=`, so a spreadsheet program could read such a name as a formula. Accepted for now.
+- Adding a mark by hand does not check that the roster entry is active; only the picker leaves out inactive entries. Accepted for now.

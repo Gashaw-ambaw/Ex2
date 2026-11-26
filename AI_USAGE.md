@@ -34,4 +34,5 @@ Real roster and class photos were shown only in the planning chat to understand 
 | 25/11 | Claude Code | F1 step 6: `mark()` and the marking page, 23 tests written first; closed text per UC-03 5b | Approved the plan and the answers; live check next; review of the code later |
 | 25/11 | Claude Code | Searched the docs for the demo date; set 8/12/2026 in sow.md and project_plan.md | Gave the date; approved the 4 edits |
 | 25/11 | Claude Code | Tools report skeleton (`docs/tools_report.md`): tested tools with pointers to results.md, "[fill]" cells for the rest | Chose the rows and the format; checked the Mermaid render; writes the missing cells |
+| 26/11 | Claude Code | F1 step 7: review page, manual mark, reset, CSV export; 9 unit tests written first, 16 page tests | Answered the questions, approved the plan, D33 and D34; live check next |
 | 22/11 | Claude Code | STP draft (F1): strategy, 44 test cases, B11 table for the 32 F1 flows | Approved the plan; review of the STP text later |

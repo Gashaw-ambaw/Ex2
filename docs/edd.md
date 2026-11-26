@@ -72,7 +72,10 @@ classDiagram
     +mark(device_id, ticket, location) MarkResult
     +add_flags(session_id, roster_id, device_id, kinds)
     +count_marks(session_id) int
-    +review_table(session_id, flagged_first) list
+    +latest_session() ClassSession
+    +review_table(session_id) list
+    +flags_without_mark(session_id) list
+    +unmarked_entries(session_id) list
     +set_status(mark_id, status)
     +add_manual(session_id, roster_id)
     +reset_mark(mark_id)
@@ -85,7 +88,6 @@ classDiagram
   }
   class HeadCountService {
     +count_photo(session_id, image) CountResult
-    +set_manual_count(session_id, count) CountResult
     +result(session_id) CountResult
   }
   class PeopleCounter {
@@ -168,12 +170,12 @@ classDiagram
   ClassSession "1" --> "*" Mark
 ```
 
-- C-06 calls C-05 `count_marks()`. C-05 never calls C-06 [SDD:48, U21]. For "flagged first", the controller asks `HeadCountService.result()` and passes the alert to `review_table()`.
+- C-06 calls C-05 `count_marks()`. C-05 never calls C-06 [SDD:48, U21]. `review_table()` always lists flagged marks first; it does not need the count.
 - `PeopleCounter` hides the count method. Option A or B stays OPEN until S4 [SDD:134].
 - `RegisterResult` carries the roster entry and the events (`new_device`, `relinked`). The controller passes them to `add_flags()`, so C-04 never calls C-05 [P].
 - `new_session(name)` (1b, D31) is refused while a window is open.
 - `WindowState` = open, seconds_left, marks, flags. `class_location()` returns (lat, lon) or None.
-- `RosterService.add_entry` and `edit_email` were built in step 5 (UC-05 5a, 5c). Step 5 also builds a minimal `/scan` (verify the token, keep the ticket). Step 6 builds `mark()` and `POST /mark`; `MarkResult` has the outcome (marked, already or blocked) and the time (HH:MM, Israel).
+- `RosterService.add_entry` and `edit_email` were built in step 5 (UC-05 5a, 5c). Step 5 also builds a minimal `/scan` (verify the token, keep the ticket). Step 6 builds `mark()` and `POST /mark`; `MarkResult` has the outcome (marked, already or blocked) and the time (HH:MM, Israel). Step 7 builds the attendance review at `/class/review` (AttendanceController; `ReviewController` is F5).
 
 ### 2.2 F2-F5 (C-07 to C-11, Must methods only)
 
@@ -401,14 +403,14 @@ sequenceDiagram
   HC->>PC: count(image), in memory
   alt count fails
     HC-->>AC: failed
-    AC-->>L: form to type a count, then set_manual_count
+    AC-->>L: error, no count stored
   else counted
     HC->>AS: count_marks(session_id)
     HC->>HC: gap and alert (section 5)
     HC->>DB: save the head_counts row
   end
   Note over HC: The photo is dropped in every case and never written to disk
-  AC->>AS: review_table(session_id, flagged_first = alert)
+  AC->>AS: review_table(session_id)
   AC-->>L: alert with flagged marks first, or No gap
   L->>AC: POST unverified, manual add or reset (FR-06)
   AC->>AS: set_status, add_manual or reset_mark
