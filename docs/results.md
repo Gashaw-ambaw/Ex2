@@ -61,10 +61,20 @@ Setup: a laptop, two phones (A and B) and a third account (tester C).
 - MEASURED [no TC] A was relinked back. Final totals in the last session: Marks 2, Flags 3 (relinked, device_reuse and one more, probably location from B; the page shows only the number).
 - NOT VERIFIED: the kind of each flag; location in the real hall (S3); iPhone; WhatsApp.
 
+## F1 live checks, step 7 (26/11/2026)
+
+- MEASURED [TC-33] /class/review: flagged rows first and highlighted; flag kinds seen: location, relinked, device_reuse. The "Flags without a mark" line showed one name, each kind once.
+- MEASURED [TC-33, TC-34, TC-35, TC-39] Unverified and back to Normal, Add a mark by hand (source manual) and Reset worked.
+- MEASURED [TC-40] Export CSV opened in Excel with the six columns, one row per mark. "####" in the time column was only a narrow Excel column.
+- MEASURED [TC-42] After Logout, /class/review redirected to /login.
+- MEASURED [no TC] A first check showed the location flag on the wrong phone. A repeat with two different Google accounts and a new session showed it correctly. Probable cause: the two phones used one Google account (not proven).
+- NOT VERIFIED: Hebrew names in the exported CSV.
+
 ## F1 known limits
 
 - After a new session is started (UC-01 1b), review and export show the latest session only. A lecturer who starts a new session by mistake does not see the first session's marks there.
-- The class page shows only the number of flags, not their kinds; the review page in step 7 will show them.
+- The class page shows only the number of flags, not their kinds; the review page (/class/review) shows them.
 - If a student once chooses "never allow" for location, the browser does not ask again, so every later mark of that device gets a location flag. The site cannot re-ask. Accepted for now (flags matter only when the D18 gap alert fires); a hint line for the student may be added later if time remains.
-- The CSV export does not escape a value that starts with `=`, so a spreadsheet program could read such a name as a formula. Accepted for now.
+- The CSV export does not escape a value that starts with `=`, `+`, `-` or `@`, so a spreadsheet program could read it as a formula. Accepted for now (fix only if time remains).
 - Adding a mark by hand does not check that the roster entry is active; only the picker leaves out inactive entries. Accepted for now.
+- Hebrew names in the exported CSV were not tested (the file is UTF-8 with BOM).
