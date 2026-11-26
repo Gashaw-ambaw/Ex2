@@ -11,6 +11,7 @@ from starlette.middleware.sessions import SessionMiddleware
 
 from app.attendance import AttendanceService, ScanTicket, parse_location
 from app.clock import Clock
+from app.comments import CommentService
 from app.db import Db
 from app.google import make_oauth
 from app.identity import StudentIdentity
@@ -44,6 +45,7 @@ def create_app(settings=None, google=None):
     app.state.attendance = AttendanceService(
         db, clock, settings, QrTokens(settings.secret_key, settings.qr_rotate_sec, clock)
     )
+    app.state.comments = CommentService(db, clock, settings)
     templates = Jinja2Templates(directory=str(TEMPLATES))
 
     # The lecturer session is a signed cookie. max_age is set explicitly (EDD 6).
@@ -60,6 +62,10 @@ def create_app(settings=None, google=None):
         app.state.access.require_lecturer(request)
 
     guard = [Depends(lecturer_only)]
+
+    def qr_svg(address):
+        # omitsize gives a viewBox, so CSS can scale the QR to the screen.
+        return segno.make(address, error="m").svg_inline(omitsize=True, border=2)
 
     # Fixed texts for the ?done= address, so the address cannot put text on the page.
     done_messages = {"added": "Student added.", "email": "Email changed."}
@@ -227,6 +233,77 @@ def create_app(settings=None, google=None):
         )
         return reply
 
+    # ---- The class page: comments (UC-06). No sign-in (D7, D10). ----
+
+    def anon_id(request):
+        """The random browser id for comments and polls (D27). Never linked to the device cookie or a student."""
+        return request.cookies.get("anon") or secrets.token_urlsafe(32)
+
+    def keep_anon(request, reply, anon):
+        # The cookie is set once, when the browser has none.
+        if request.cookies.get("anon") != anon:
+            reply.set_cookie(
+                "anon",
+                anon,
+                max_age=settings.browser_cookie_days * 86400,
+                httponly=True,
+                secure=settings.https_only,
+                samesite="lax",
+            )
+        return reply
+
+    def public_class_page(request, anon, status_code=200, error=None, text="", sent=False):
+        session = app.state.attendance.session_for_today()
+        own = app.state.comments.own(anon, session["id"]) if session else []
+        reply = templates.TemplateResponse(
+            request,
+            "class_page.html",
+            {"session": session, "own": own, "error": error, "text": text, "sent": sent},
+            status_code=status_code,
+        )
+        return keep_anon(request, reply, anon)
+
+    @app.get("/c")
+    def student_class_page(request: Request, sent: str = ""):
+        return public_class_page(request, anon_id(request), sent=sent == "1")
+
+    @app.post("/c/comment")
+    def send_comment(request: Request, text: str = Form("")):
+        anon = anon_id(request)
+        session = app.state.attendance.session_for_today()
+        if session is None:
+            # The page itself says "Class has not started". Nothing is stored.
+            return public_class_page(request, anon, 400)
+        try:
+            app.state.comments.send(session["id"], anon, text)
+        except ValueError as error:
+            return public_class_page(request, anon, 400, error=str(error), text=text)
+        return keep_anon(request, RedirectResponse("/c?sent=1", status_code=303), anon)
+
+    # ---- Lecturer: the fixed QR and the comments (UC-07). The latest session, also from an earlier day. ----
+
+    @app.get("/class/link", dependencies=guard)
+    def class_link(request: Request):
+        link = f"{settings.base_url}/c"
+        return templates.TemplateResponse(
+            request, "class_link.html", {"lecturer": True, "link": link, "qr_svg": qr_svg(link)}
+        )
+
+    @app.get("/comments", dependencies=guard)
+    def comments_page(request: Request):
+        return templates.TemplateResponse(
+            request, "comments.html", {"lecturer": True, "refresh_ms": settings.refresh_sec * 1000}
+        )
+
+    @app.get("/comments/state", dependencies=guard)
+    def comments_state():
+        # Read only. The Comments page asks this every REFRESH_SEC seconds.
+        session = app.state.attendance.latest_session()
+        if session is None:
+            return JSONResponse({"session": None, "comments": []})
+        label = f"{session['date']}, {session['name']}" if session["name"] else session["date"]
+        return JSONResponse({"session": label, "comments": app.state.comments.list_for_lecturer(session["id"])})
+
     @app.get("/class", dependencies=guard)
     def class_home(request: Request):
         return class_page(request)
@@ -290,8 +367,7 @@ def create_app(settings=None, google=None):
             return JSONResponse({"open": False, "seconds_left": 0, "marks": 0, "flags": 0, "qr_svg": None})
         state = attendance.window_state(session["id"])
         address = attendance.current_qr(session["id"])
-        # omitsize gives a viewBox, so CSS can scale the QR to the screen.
-        svg = segno.make(address, error="m").svg_inline(omitsize=True, border=2) if address else None
+        svg = qr_svg(address) if address else None
         return JSONResponse(
             {"open": state.open, "seconds_left": state.seconds_left, "marks": state.marks,
              "flags": state.flags, "qr_svg": svg}

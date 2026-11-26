@@ -18,7 +18,7 @@
 <body>
   <header>
     <strong>Ex2</strong>
-    {% if lecturer %}<nav><a href="/class">Class</a> | <a href="/class/review">Review</a> | <a href="/roster">Roster</a></nav>{% endif %}
+    {% if lecturer %}<nav><a href="/class">Class</a> | <a href="/class/review">Review</a> | <a href="/comments">Comments</a> | <a href="/roster">Roster</a></nav>{% endif %}
     {# Logout is a POST button on every lecturer page (EDD 6, D24). #}
     {% if lecturer %}
     <form method="post" action="/logout"><button type="submit">Log out</button></form>

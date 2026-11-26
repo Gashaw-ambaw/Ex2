@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Class link{% endblock %}
+{% block content %}
+<style>#qr svg { width: min(65vh, 100%); height: auto; background: #fff; }</style>
+<h1>Class link</h1>
+<p>For comments and polls. This QR does not change.</p>
+<div id="qr">{{ qr_svg | safe }}</div>  {# SVG made by our own server #}
+<p style="font-size: 1.5rem;">{{ link }}</p>
+<p><a href="/class">Back to Class</a></p>
+{% endblock %}

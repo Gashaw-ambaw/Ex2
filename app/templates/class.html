@@ -32,7 +32,9 @@
 <p>Attendance is closed. Marks: <strong>{{ state.marks }}</strong>. Flags: <strong>{{ state.flags }}</strong>.</p>
 {% endif %}
 {# Shown in every state: on a closed window it answers with the closed message (D31). #}
-<form method="post" action="/class/open"><button type="submit">Open attendance</button></form>
+<form method="post" action="/class/open" style="display: inline;"><button type="submit">Open attendance</button></form>
+{# The fixed QR for comments and polls. A GET form only opens a page. #}
+<form method="get" action="/class/link" style="display: inline;"><button type="submit">Class link</button></form>
 {# UC-01 1b: when the window was used and is over, a new session can start (the old one and its marks stay). #}
 {% if session["window_opened_at"] and not state.open %}
 <h2>New session</h2>

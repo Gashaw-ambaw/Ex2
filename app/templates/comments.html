@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Comments{% endblock %}
+{% block content %}
+<h1>Comments</h1>
+<p id="session"></p>
+<button type="button" id="refresh">Refresh now</button>
+<p id="offline" class="error"></p>
+<ul id="list"></ul>
+<script>
+  // The page asks the server every REFRESH_SEC. If a request fails, it keeps the old list and tries again.
+  function show(s) {
+    document.getElementById("session").textContent =
+      !s.session ? "No class session yet." :
+      "Session: " + s.session + " (" + s.comments.length + " comments, newest first)";
+    var list = document.getElementById("list");
+    list.textContent = "";
+    s.comments.forEach(function (c) {
+      var item = document.createElement("li");
+      var text = document.createElement("span");
+      text.dir = "auto";
+      text.style.whiteSpace = "pre-wrap";
+      text.textContent = c.text;  // textContent: a comment is never read as HTML
+      item.append(c.time + " ", text);
+      list.appendChild(item);
+    });
+  }
+  function poll() {
+    fetch("/comments/state", { cache: "no-store" }).then(function (r) {
+      if (!r.ok) { throw new Error("status " + r.status); }
+      return r.json();
+    }).then(function (s) {
+      document.getElementById("offline").textContent = "";
+      show(s);
+    }).catch(function () {
+      document.getElementById("offline").textContent = "Offline. Trying again...";
+    });
+  }
+  document.getElementById("refresh").addEventListener("click", poll);
+  poll();
+  setInterval(poll, {{ refresh_ms }});
+</script>
+{% endblock %}
