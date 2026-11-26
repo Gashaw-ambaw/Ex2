@@ -1,6 +1,6 @@
 # Ex2 – Web-based Teaching Tool
 
-Status: F1 build in progress (step 7 done). Deadline: Monday 30/11/2026, 23:59.
+Status: F1 build in progress (step 8 done). Deadline: Monday 30/11/2026, 23:59.
 
 ## What it is
 

@@ -70,6 +70,23 @@ Setup: a laptop, two phones (A and B) and a third account (tester C).
 - MEASURED [no TC] A first check showed the location flag on the wrong phone. A repeat with two different Google accounts and a new session showed it correctly. Probable cause: the two phones used one Google account (not proven).
 - NOT VERIFIED: Hebrew names in the exported CSV.
 
+## S2 load check (26/11/2026)
+
+Setup: local server on my laptop (one uvicorn worker, a SQLite file), not Railway, because the deployed app has no test route and no real test accounts. Test: `tests/test_load.py`, synthetic students from `sample_data/`.
+
+- MEASURED [TC-44] 100 marks sent at once: all replied "Marked at", each student recorded once (100 students, 100 devices); the last reply came after 2.8 s (limit 60 s).
+- NOT VERIFIED: Railway CPU; campus Wi-Fi; NFR-03 (95% of students marked within the window); QR timing under load.
+
+## F1 rehearsal (26/11/2026)
+
+Setup: the deployed app, testers A and B, two Android phones with Chrome, different Google accounts.
+
+- MEASURED [TC-43] Round 1 (session "Rehearsal"): A and B scanned, signed in with Google once, confirmed, tapped "I'm here" and got "Marked at". Review showed 2 marks, status normal, each with the flags location and new_device; new_device likely because the accounts already had a linked device from earlier checks (not verified).
+- MEASURED [TC-43, NFR-02] Round 2 (session "Rehearsal 2"): one tap, no Google; about 10 s from scan to "Marked at" (rough, by me). Review showed 2 marks; A had no flag, B had location only. No errors, no help needed.
+- MEASURED [TC-43, NFR-04] Lecturer actions (Open attendance, Close, Review, Export CSV): 4 actions without the class photo; with the S4 photo it would be 5 if Review counts, above the 3-4 target. Whether Review counts is an open decision (until S4). "Start a new session", tapped before opening, is not counted.
+- MEASURED [TC-40] The exported CSV had English headers and English names.
+- NOT VERIFIED: the lecturer action count with the class photo (S4); Hebrew names in the CSV; iPhone; real class location in the hall (S3).
+
 ## F1 known limits
 
 - After a new session is started (UC-01 1b), review and export show the latest session only. A lecturer who starts a new session by mistake does not see the first session's marks there.
@@ -78,3 +95,4 @@ Setup: a laptop, two phones (A and B) and a third account (tester C).
 - The CSV export does not escape a value that starts with `=`, `+`, `-` or `@`, so a spreadsheet program could read it as a formula. Accepted for now (fix only if time remains).
 - Adding a mark by hand does not check that the roster entry is active; only the picker leaves out inactive entries. Accepted for now.
 - Hebrew names in the exported CSV were not tested (the file is UTF-8 with BOM).
+- A scan does not keep a private window: the phone camera opens the link in the default browser (seen in the rehearsal, 26/11).

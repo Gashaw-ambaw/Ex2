@@ -48,7 +48,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | # | Goal | When / status |
 |---|---|---|
 | S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`results.md`): Railway; Hobby plan (D23) |
-| S2 | Time-based QR and up to 100 simultaneous marks | Before F1. Not started |
+| S2 | Time-based QR and up to 100 simultaneous marks | Load check done 26/11, local (`results.md`) |
 | S3 | Location (about 50 m) in the real hall, on a class day | On a class day (date not set). Not started |
 | S4 | Head count on class photos against manual counts | Before F1 is finished. Not started |
 | S5 | F4 summary from a Hebrew transcript | Before F4. Not started |

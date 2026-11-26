@@ -36,4 +36,5 @@ Real roster and class photos were shown only in the planning chat to understand 
 | 25/11 | Claude Code | Tools report skeleton (`docs/tools_report.md`): tested tools with pointers to results.md, "[fill]" cells for the rest | Chose the rows and the format; checked the Mermaid render; writes the missing cells |
 | 26/11 | Claude Code | F1 step 7: review page, manual mark, reset, CSV export; 9 unit tests written first, 16 page tests | Answered the questions, approved the plan, D33 and D34; live check next |
 | 26/11 | Claude Code | Recorded the step 7 live check and updated the F1 known limits; checked the picker name order | Ran the live check on a laptop and two phones; decided the known limits |
+| 26/11 | Claude Code | F1 step 8: TC-44 load test (`tests/test_load.py`), rehearsal script, doc edits | Answered the questions, approved the plan; ran the rehearsal (TC-43) and gave the results |
 | 22/11 | Claude Code | STP draft (F1): strategy, 44 test cases, B11 table for the 32 F1 flows | Approved the plan; review of the STP text later |

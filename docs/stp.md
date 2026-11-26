@@ -8,7 +8,7 @@ F2-F5 test cases are added when those features are built; until then B11 (srs.md
 - Services (`QrTokens`, `AttendanceService`, `RosterService`, `StudentIdentity`, `HeadCountService`) are tested through their public methods, on a temporary SQLite file per test and a set `Clock`. `Google` and `PeopleCounter` are fakes [EDD:493].
 - Controllers are thin: tested through the FastAPI test client, written after the code. Tests first only for classes with logic: `QrTokens`, the marking rules of `AttendanceService` and the count gap (TC-10 to TC-13, TC-21 to TC-26, TC-28).
 - Test data: `sample_data/` only (`roster.csv`: 102 students and 2 staff rows; `roster_bad.csv`; `roster_duplicates.csv`). No real data (D5, NFR-07).
-- Phone tests are manual, on 2-3 Android phones with the deployed app. The load test (S2) runs on the real mark endpoint.
+- Phone tests are manual, on 2-3 Android phones with the deployed app. The load test (S2) runs on the real mark endpoint on a local server (one uvicorn worker, a SQLite file), not on Railway: the deployed app has no test route and no real test accounts.
 - Parameter values are those of SRS 3.4: `ATT_WINDOW_SEC` 300, `QR_ROTATE_SEC` 10, `SUBMIT_SEC` 60, `GAP_TOLERANCE_PCT` 5, `PHOTO_MAX_MB` 10, `LOAD_SIM_MARKS` 100.
 
 ## 2. F1 test cases

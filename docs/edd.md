@@ -519,7 +519,7 @@ F2-F5 in short: FR-08/09 CommentService, `comments`; FR-10/11 PollService, `poll
 
 ## 12. Open items
 
-- S2: QR timing (`QR_ROTATE_SEC`, `SUBMIT_SEC`, `ATT_WINDOW_SEC`) and up to 100 simultaneous marks on one SQLite file. Not verified.
+- S2: QR timing (`QR_ROTATE_SEC`, `SUBMIT_SEC`, `ATT_WINDOW_SEC`) and up to 100 simultaneous marks on one SQLite file. Local load check done 26/11 (`results.md`); QR timing calibration and Railway not verified.
 - S3: block or flag when out of range (FR-04). The "no class location set" rule is a proposal. **Risk:** laptop geolocation can be inaccurate when the lecturer uses "Use my current location" (not verified, test in S3).
 - S4: the `PeopleCounter` implementation. S5, S6: the model provider and the F4 and F5 limits.
 - Not verified: `segno`, the 120-day cookies, the WhatsApp in-app browser and the 100 test-user cap [S1].
