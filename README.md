@@ -59,6 +59,7 @@ Written in English, in Markdown.
 | [EDD](docs/edd.md) | Draft |
 | [Test plan](docs/stp.md) | Draft (F1) |
 | [Results](docs/results.md) | In progress |
+| [Test log](docs/test_log.md) | In progress |
 | [AI usage](AI_USAGE.md) | In progress |
 
 ## Quick start, usage, tests
