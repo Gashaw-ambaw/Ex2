@@ -1,0 +1,6 @@
+# Downloaded from OpenCV Zoo (Apache 2.0) and any downloaded photos: never committed.
+*.onnx
+yolox.py
+demo.py
+photos/
+__pycache__/

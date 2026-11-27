@@ -3,7 +3,7 @@
 Project: Ex2, a web-based teaching tool (attendance first). Phase: design (EDD draft done, STP next).
 
 1. The full assignment text is in private_data/AssEX2.md (git-ignored). Read it when a requirement is unclear.
-   You may quote short lines from it in chat only. Do not open other files in private_data/.
+   You may quote short lines from it in chat only. Do not open other files in private_data/, except private_data/photos/ for S4.
 2. Reading and searching need no permission. Create, edit or delete repo files only after I approve your plan.
 3. Never run git add, commit or push unless I ask for it in that message.
 4. No real names, IDs or .env content in chat or files. Use synthetic data from sample_data/.
