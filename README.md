@@ -1,6 +1,6 @@
 # Ex2 – Web-based Teaching Tool
 
-Status: F1-F3 built (step 10 done; two checks pending 27/11). Deadline: Monday 30/11/2026, 23:59.
+Status: F1-F3 built and live-checked (26-27/11). Deadline: Monday 30/11/2026, 23:59.
 
 ## What it is
 

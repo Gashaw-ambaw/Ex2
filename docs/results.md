@@ -95,7 +95,7 @@ Setup: the deployed app, a laptop and two Android devices: a phone (A) and a tab
 - MEASURED [TC-47, TC-49, TC-50] "Sent"; a second send at once gave "Wait a moment" with the text kept; a Hebrew comment was accepted; a spaces-only comment gave the error.
 - MEASURED [TC-52, TC-54] The Comments page showed the comments newest first; "Refresh now" worked; with the laptop Wi-Fi off it showed "Offline" and then resumed.
 - MEASURED [TC-51] After the attendance window was closed, a new comment arrived at the top of the Comments page.
-- PENDING 27/11 [TC-48] /c before Start class ("Class has not started"): today already had a session.
+- MEASURED [TC-48] 27/11/2026, before any Start class that day: /c without sign-in showed "Class has not started." (the laptop, in the Claude Desktop built-in browser, and a phone).
 
 ## F3 live check (26/11/2026)
 
@@ -107,7 +107,7 @@ Setup: as in the F2 live check.
 - MEASURED [TC-62] A poll without a correct option: A and B saw the distribution.
 - MEASURED [TC-57] Start while a poll was open: the new poll started with no error (the first poll is no longer open).
 - MEASURED [TC-56] Empty question: "Write a question and 2 to 4 options."; the open poll stayed open.
-- PENDING 27/11 [TC-64] Start poll before Start class ("Start class first.").
+- MEASURED [TC-64] 27/11/2026, before any Start class that day: Start poll returned "Start class first." (status 400); nothing was stored (the Polls page still showed the closed poll of the 26/11 session).
 - NOT VERIFIED: iPhone; many students at once.
 
 ## F2-F3 known limits
