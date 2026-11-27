@@ -5,7 +5,7 @@ from pathlib import Path
 
 import segno
 
-from fastapi import Depends, FastAPI, Form, Request, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Request, UploadFile
 from fastapi.responses import JSONResponse, RedirectResponse, Response
 from fastapi.templating import Jinja2Templates
 from starlette.middleware.sessions import SessionMiddleware
@@ -15,8 +15,10 @@ from app.clock import Clock
 from app.comments import CommentService
 from app.db import Db
 from app.google import make_oauth
+from app.headcount import HeadCountService
 from app.identity import StudentIdentity
 from app.lecturer import LecturerAccess
+from app.people_counter import PeopleCounter
 from app.polls import PollService
 from app.qr_tokens import QrTokens
 from app.roster import RosterService
@@ -25,9 +27,9 @@ from app.settings import Settings
 TEMPLATES = Path(__file__).parent / "templates"
 
 
-def create_app(settings=None, google=None):
+def create_app(settings=None, google=None, counter=None):
     """Build the app. Run it with: uvicorn app.main:create_app --factory
-    Tests pass a fake google; the real run uses the Google client."""
+    Tests pass a fake google and counter; the real run uses the Google client and the model."""
     # Tests pass their own settings; the real run reads the environment.
     settings = settings or Settings.from_env()
     # Create the tables at start (safe to repeat).
@@ -47,6 +49,7 @@ def create_app(settings=None, google=None):
     app.state.attendance = AttendanceService(
         db, clock, settings, QrTokens(settings.secret_key, settings.qr_rotate_sec, clock)
     )
+    app.state.headcount = HeadCountService(db, clock, settings, app.state.attendance, counter or PeopleCounter())
     app.state.comments = CommentService(db, clock, settings)
     app.state.polls = PollService(db, clock, settings)
     templates = Jinja2Templates(directory=str(TEMPLATES))
@@ -454,6 +457,25 @@ def create_app(settings=None, google=None):
              "flags": state.flags, "qr_svg": svg}
         )
 
+    # ---- Class photo count (UC-04). ----
+
+    # A plain def: FastAPI runs it in a thread, so counting does not stop other requests.
+    @app.post("/class/photo", dependencies=guard)
+    def class_photo(request: Request, photo: UploadFile | None = File(None)):
+        attendance = app.state.attendance
+        session = attendance.session_for_today()
+        if session is None:
+            return class_page(request, 400, errors=["Start class first."])
+        if not session["window_opened_at"] or attendance.window_state(session["id"]).open:
+            return class_page(request, 400, errors=["Close attendance first."])
+        # One byte more than the limit is enough to see that the file is too large.
+        data = photo.file.read(settings.photo_max_mb * 1024 * 1024 + 1) if photo else b""
+        try:
+            app.state.headcount.count_photo(session["id"], data)
+        except ValueError as error:
+            return class_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/class/review", status_code=303)
+
     # ---- Review and export (UC-05). The latest session, also from an earlier day. ----
 
     def review_page(request, status_code=200, errors=()):
@@ -462,6 +484,7 @@ def create_app(settings=None, google=None):
         context = {"lecturer": True, "errors": list(errors), "session": session}
         if session is not None:
             context["table"] = attendance.review_table(session["id"])
+            context["head"] = app.state.headcount.result(session["id"])
             context["without_mark"] = attendance.flags_without_mark(session["id"])
             context["unmarked"] = attendance.unmarked_entries(session["id"])
         return templates.TemplateResponse(request, "review.html", context, status_code=status_code)

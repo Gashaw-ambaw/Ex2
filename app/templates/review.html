@@ -1,4 +1,4 @@
-{#- Lecturer review of the attendance: flags, status, marks by hand and CSV export. -#}
+{#- Lecturer review of the attendance: photo count gap, flags, status, marks by hand and CSV export. -#}
 {% extends "base.html" %}
 {% block title %}Review{% endblock %}
 {% block content %}
@@ -8,6 +8,13 @@
 <p>No class yet.</p>
 {% else %}
 <p>Class of {{ session.date }}{% if session.name %} ({{ session.name }}){% endif %}: {{ table|length }} marks.</p>
+{% if head %}
+{% if head.alert %}
+<p class="error">Marks {{ head.marks }}, counted {{ head.count }}, gap {{ head.gap }}. Check the flagged marks first.</p>
+{% else %}
+<p class="ok">No gap</p>
+{% endif %}
+{% endif %}
 <table>
   <tr><th>Name</th><th>Email</th><th>Time</th><th>Source</th><th>Flags</th><th>Status</th><th></th></tr>
   {% for row in table %}

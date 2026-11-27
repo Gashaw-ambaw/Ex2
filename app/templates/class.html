@@ -1,4 +1,4 @@
-{#- Lecturer Class page: class location, Start class, open and close attendance, class link. -#}
+{#- Lecturer Class page: class location, Start class, open and close attendance, class photo, class link. -#}
 {% extends "base.html" %}
 {% block title %}Class{% endblock %}
 {% block content %}
@@ -36,6 +36,15 @@
 <form method="post" action="/class/open" style="display: inline;"><button type="submit">Open attendance</button></form>
 {# The fixed QR for comments and polls. A GET form only opens a page. #}
 <form method="get" action="/class/link" style="display: inline;"><button type="submit">Class link</button></form>
+{# UC-04: after the window is closed. The photo is counted and not saved. #}
+{% if session["window_opened_at"] and not state.open %}
+<h2>Class photo</h2>
+<form method="post" action="/class/photo" enctype="multipart/form-data">
+  <input type="file" name="photo" accept="image/*" required>
+  <button type="submit">Count people</button>
+</form>
+<p>The photo is used only for counting and is not saved.</p>
+{% endif %}
 {# UC-01 1b: when the window was used and is over, a new session can start (the old one and its marks stay). #}
 {% if session["window_opened_at"] and not state.open %}
 <h2>New session</h2>
