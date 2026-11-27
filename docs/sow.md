@@ -49,7 +49,7 @@ There are no payment points. The cost is the supplier's time and the LLM API usa
 
 ## 5. Acceptance process
 
-- The lecturer reviews each deliverable against the table in section 2. The evidence is the test plan run, recorded in `results.md`.
+- The lecturer reviews each deliverable against the table in section 2. The evidence is the test plan run, recorded in `test_log.md` and summarized in `results.md`.
 - A deliverable is done when its criterion is met, or the gap is written in `results.md`.
 - If time runs out, F5 is cut first, then F4. F1 to F3 are protected.
 - A change to the scope is requested in writing by the lecturer and accepted by the supplier.

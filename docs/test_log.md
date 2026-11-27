@@ -1,13 +1,18 @@
-# S1 results (21/11/2026)
+# Test log
+
+Every check that was run, by date: spikes, live checks, the load check and the rehearsal, with the known limits found. The summary is in [results.md](results.md).
+MEASURED = seen in a real run; NOT VERIFIED = not checked.
+
+## S1 results (21/11/2026)
 
 Source: my test runs. Screenshots for steps 1-6a, my report for the rest.
 
-## Tested
+### Tested
 
 - Stack: Python 3.13 + FastAPI + uvicorn, one worker (one "Started server process" in the deploy log). Code: `spikes/s1/main.py`.
 - Host: Railway Trial, always-on (Serverless off), fixed HTTPS URL, Volume at `/data`. Railpack 0.43.0 chose Python 3.13.18 and the uvicorn start command by itself.
 
-## Worked
+### Worked
 
 - Hello page over HTTPS on an Android phone (POCO X7 Pro, Chrome 157) and a tablet, Wi-Fi and mobile data. Load under 1 second, also after 10+ minutes idle.
 - Cookie kept after reload and after closing and reopening the tab (laptop, tablet).
@@ -15,25 +20,24 @@ Source: my test runs. Screenshots for steps 1-6a, my report for the rest.
 - SQLite on the Volume: 18 rows survived a Redeploy and a new deployment.
 - 90 s background job (DB row + thread, same process): finished with the tab closed and no traffic. A double start gave one job. A Redeploy mid-job gave "failed, server restarted", and a new job could start after.
 
-## Problems
+### Problems
 
 - The Google client secret gave `invalid_client` until a new one was created.
 - Railway "Redeploy" runs the old commit. Use "Deploy latest commit".
 - A GET route that writes data produced duplicate rows (probably browser preload, not verified). State-changing actions must be POST.
 
-## Not verified
+### Not verified
 
 - WhatsApp in-app browser sign-in (the test phone opens Chrome).
 - 24-hour cookie lifetime.
 - Sleep after hours without traffic (only 10 minutes tested).
-- The 100 test-user cap (one extra account tested).
-- Google OAuth app: Publishing status was not checked in Google Cloud Console (Audience). The 100 test-user cap applies only in Testing mode (not verified), so the result of the extra-account test depends on it.
+- The 100 test-user cap (one extra account tested). It applies only in Testing mode (not verified); the Publishing status (Google Cloud Console, Audience) was not checked, so the extra-account result depends on it.
 - Concurrent writes (S2).
 - Railway Trial limits and cost.
 
-## Open (my decision)
+### Open (my decision)
 
-- Railway Hobby or Render paid, and the budget. Python + FastAPI + SQLite stays a candidate stack until I approve it.
+- Closed 26/11: Railway Trial kept for submission and demo; recorded in decisions.md in the D23 task (pending).
 
 ## F1 live checks (25/11/2026)
 
@@ -46,7 +50,7 @@ Source: my test runs. Screenshots for steps 1-6a, my report for the rest.
 - MEASURED [TC-17] Tester B, not on the roster, got "Contact the lecturer"; after the roster form added B, B registered.
 - MEASURED [TC-20] More than 60 s on the Google account screen gave "Registered. Scan again."
 - MEASURED [TC-19] After clearing the site data and registering again, the class page showed Flags: 1 (new_device).
-- NOT VERIFIED: scan from about 3 m on a projector; the Wi-Fi off and on check [TC-07] (I did not report it); opening the scan link inside WhatsApp [TC-15]; the 120-day cookie; the 100 test-user cap; real class location in the hall (S3); iPhone.
+- NOT VERIFIED: scan from about 3 m on a projector; the Wi-Fi off and on check [TC-07] (I did not report it); opening the scan link inside WhatsApp [TC-15]; the 120-day cookie; real class location in the hall (S3); iPhone.
 
 ## F1 live checks (26/11/2026)
 

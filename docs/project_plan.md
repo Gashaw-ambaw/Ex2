@@ -47,8 +47,8 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
 | # | Goal | When / status |
 |---|---|---|
-| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`results.md`): Railway; Hobby plan (D23) |
-| S2 | Time-based QR and up to 100 simultaneous marks | Load check done 26/11, local (`results.md`) |
+| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`test_log.md`): Railway; Hobby plan (D23) |
+| S2 | Time-based QR and up to 100 simultaneous marks | Load check done 26/11, local (`test_log.md`) |
 | S3 | Location (about 50 m) in the real hall, on a class day | On a class day (date not set). Not started |
 | S4 | Head count on class photos against manual counts | Before F1 is finished. Not started |
 | S5 | F4 summary from a Hebrew transcript | Before F4. Not started |
@@ -75,7 +75,7 @@ Also: a survey of existing tools for the tools report.
 | 18-19/11 | SoW. Repo documents brought up to date. Tools report. | SoW draft written; tools report not started |
 | 19-20/11 | SRS draft, human review, SRS closed. SDD, EDD, test plan. | SRS and SDD drafts written; human review not verified; EDD and test plan not started |
 | 24-26/11 | F1 end to end on real phones, S2 load check, rehearsal. | Step 1 done (24/11) |
-| 27/11 | F2, F3. | Built and live-checked 26/11 (`results.md`) |
+| 27/11 | F2, F3. | Built and live-checked 26/11 (`test_log.md`) |
 | 28/11 | F4 thin slice; S4 if F1 is stable. | Planned |
 | 29/11 | F5 thin slice, tools report, results, README. | Planned |
 | 30/11 | Final check and submission (by 23:59). | Planned |
