@@ -37,6 +37,8 @@ class Settings:
     loc_radius_m: int = 50  # initial value, OPEN until spike S3
     gap_tolerance_pct: int = 5
     photo_max_mb: int = 10
+    f4_upload_max_mb: int = 2
+    summary_max_words: int = 200
     comment_max_chars: int = 300
     comment_min_interval_sec: int = 10
     refresh_sec: int = 20

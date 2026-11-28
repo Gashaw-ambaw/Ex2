@@ -1,0 +1,49 @@
+WEBVTT
+
+1
+00:00:01.000 --> 00:00:06.000
+Lecturer: Today we talk about use cases and why we write them before code.
+
+2
+00:00:06.500 --> 00:00:12.000
+Lecturer: A use case describes one goal of one actor, step by step.
+
+3
+00:00:12.500 --> 00:00:18.000
+Lecturer: The main flow is the normal path, where everything works.
+
+4
+00:00:18.500 --> 00:00:25.000
+Lecturer: Alternative flows describe errors and other choices, for example a wrong password.
+
+5
+00:00:25.500 --> 00:00:31.000
+Student: Should the use case say which buttons are on the screen?
+
+6
+00:00:31.500 --> 00:00:38.000
+Lecturer: Usually not. It says what the actor does and what the system does.
+
+7
+00:00:38.500 --> 00:00:45.000
+Lecturer: Preconditions say what must be true before the use case starts.
+
+8
+00:00:45.500 --> 00:00:52.000
+Lecturer: Postconditions say what is true after it ends, for example which data is stored.
+
+9
+00:00:52.500 --> 00:00:59.000
+Lecturer: From each flow we can write at least one test case. That gives traceability.
+
+10
+00:00:59.500 --> 00:01:06.000
+Lecturer: If a requirement has no test, we do not know whether it works.
+
+11
+00:01:06.500 --> 00:01:13.000
+Lecturer: For homework, write one use case for borrowing a book from a library.
+
+12
+00:01:13.500 --> 00:01:18.000
+Lecturer: Add two alternative flows. That is all for today.

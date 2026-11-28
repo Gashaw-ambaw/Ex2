@@ -17,19 +17,23 @@ from app.db import Db
 from app.google import make_oauth
 from app.headcount import HeadCountService
 from app.identity import StudentIdentity
+from app.jobs import JobRunner
 from app.lecturer import LecturerAccess
+from app.llm import LlmGateway
 from app.people_counter import PeopleCounter
 from app.polls import PollService
 from app.qr_tokens import QrTokens
 from app.roster import RosterService
 from app.settings import Settings
+from app.summaries import HINT as TRANSCRIPT_HINT
+from app.summaries import SummaryService
 
 TEMPLATES = Path(__file__).parent / "templates"
 
 
-def create_app(settings=None, google=None, counter=None):
+def create_app(settings=None, google=None, counter=None, llm=None, spawn=None):
     """Build the app. Run it with: uvicorn app.main:create_app --factory
-    Tests pass a fake google and counter; the real run uses the Google client and the model."""
+    Tests pass fakes (google, counter, llm) and their own spawn for jobs; the real run uses the real ones."""
     # Tests pass their own settings; the real run reads the environment.
     settings = settings or Settings.from_env()
     # Create the tables at start (safe to repeat).
@@ -52,6 +56,10 @@ def create_app(settings=None, google=None, counter=None):
     app.state.headcount = HeadCountService(db, clock, settings, app.state.attendance, counter or PeopleCounter())
     app.state.comments = CommentService(db, clock, settings)
     app.state.polls = PollService(db, clock, settings)
+    # A new random id for each server run (D25).
+    app.state.jobs = JobRunner(db, clock, secrets.token_hex(8), spawn)
+    app.state.jobs.fail_dead_jobs()
+    app.state.summaries = SummaryService(db, clock, settings, app.state.jobs, llm or LlmGateway(settings))
     templates = Jinja2Templates(directory=str(TEMPLATES))
 
     # The lecturer session is a signed cookie. max_age is set explicitly (EDD 6).
@@ -475,6 +483,45 @@ def create_app(settings=None, google=None, counter=None):
         except ValueError as error:
             return class_page(request, 400, errors=[str(error)])
         return RedirectResponse("/class/review", status_code=303)
+
+    # ---- Lecture summary (UC-10). The latest session only (D40). ----
+
+    def summary_page(request, status_code=200, errors=()):
+        summaries = app.state.summaries
+        session = app.state.attendance.latest_session()
+        job = summaries.latest_job()
+        context = {
+            "lecturer": True,
+            "errors": list(errors),
+            "session": session,
+            "configured": summaries.configured,
+            "running": job is not None and job["status"] == "running",
+            "failed": job is not None and job["status"] == "failed",
+            "summary": summaries.summary(session["id"]) if session else None,
+            "refresh_sec": settings.refresh_sec,
+        }
+        return templates.TemplateResponse(request, "summary.html", context, status_code=status_code)
+
+    @app.get("/summary", dependencies=guard)
+    def summary(request: Request):
+        return summary_page(request)
+
+    @app.post("/summary", dependencies=guard)
+    def upload_transcript(request: Request, transcript: UploadFile | None = File(None)):
+        session = app.state.attendance.latest_session()
+        if session is None:
+            return summary_page(request, 400)  # The page itself says "Start class first."
+        if not app.state.summaries.configured:
+            return summary_page(request, 400)  # The page itself says "Summary is not set up."
+        if transcript is None or not transcript.filename:
+            return summary_page(request, 400, errors=[TRANSCRIPT_HINT])
+        # One byte more than the limit is enough to see that the file is too large.
+        data = transcript.file.read(settings.f4_upload_max_mb * 1024 * 1024 + 1)
+        try:
+            app.state.summaries.start(session["id"], transcript.filename, data)
+        except ValueError as error:
+            return summary_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/summary", status_code=303)
 
     # ---- Review and export (UC-05). The latest session, also from an earlier day. ----
 
