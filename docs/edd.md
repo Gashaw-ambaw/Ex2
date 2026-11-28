@@ -453,6 +453,8 @@ sequenceDiagram
   Note over JR,DB: After a restart, a running row with another boot id is shown as failed (S1)
 ```
 
+Built 28/11 [P]: `GET` and `POST /summary` (latest session); the page refreshes every `REFRESH_SEC` while a job runs and shows "Failed: upload again." after a failed one. LlmGateway: `claude-sonnet-5-5`, thinking `between_tools`, `max_tokens` 4000, timeout 120 s, 2 retries; the transcript is sent as data inside `<transcript>` tags; token counts are logged. A failed job logs only the job id and the error class. The instruction asks for a recap, then each main topic with a title and a paragraph, plain text, at most 600 words. `GET /summary/download` (lecturer password) returns the latest session's summary as a .txt attachment, UTF-8 with BOM; 404 "No summary yet." without one. The page shows a line of at most 80 characters without end punctuation as a title (larger, bold, underlined); the stored text is unchanged. "Download .txt" is a button next to "Summarize".
+
 ## 5. Algorithms
 
 - **QR token** [U21; details P]: w = floor(now / `QR_ROTATE_SEC`); t = HMAC-SHA256(`SECRET_KEY`, "session_id:w"), first 16 hex characters. A scan is accepted when t matches (constant-time compare), w is the current or previous window, and the window is open.
@@ -526,5 +528,5 @@ F2-F5 in short: FR-08/09 CommentService, `comments`; FR-10/11 PollService, `poll
 
 - S2: QR timing (`QR_ROTATE_SEC`, `SUBMIT_SEC`, `ATT_WINDOW_SEC`) and up to 100 simultaneous marks on one SQLite file. Local load check done 26/11 (`test_log.md`); QR timing calibration and Railway not verified.
 - S3: block or flag when out of range (FR-04). The "no class location set" rule is a proposal. **Risk:** laptop geolocation can be inaccurate when the lecturer uses "Use my current location" (not verified, test in S3).
-- S5, S6: the model provider and the F4 and F5 limits.
+- S6: the F5 limits.
 - Not verified: `segno`, the 120-day cookies, the WhatsApp in-app browser and the 100 test-user cap [S1].

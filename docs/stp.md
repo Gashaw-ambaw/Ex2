@@ -1,11 +1,11 @@
 # Test Plan
 
-Status: draft (F1-F3). Date: 22/11/2026; F2-F3 added 26/11/2026. Read with `srs.md`, `use_cases.md` and `edd.md` (section 10). IDs follow D20.
-F4-F5 test cases are added when those features are built; until then B11 (srs.md) is covered for F1-F3.
+Status: draft (F1-F4). Date: 22/11/2026; F2-F3 added 26/11/2026; F4 added 28/11/2026. Read with `srs.md`, `use_cases.md` and `edd.md` (section 10). IDs follow D20.
+F5 test cases are added when it is built; until then B11 (srs.md) is covered for F1-F4.
 
 ## 1. Strategy
 
-- Services (`QrTokens`, `AttendanceService`, `RosterService`, `StudentIdentity`, `HeadCountService`, `CommentService`, `PollService`) are tested through their public methods, on a temporary SQLite file per test and a set `Clock`. `Google` and `PeopleCounter` are fakes [EDD:493]; only TC-68 loads the real model.
+- Services (`QrTokens`, `AttendanceService`, `RosterService`, `StudentIdentity`, `HeadCountService`, `CommentService`, `PollService`) are tested through their public methods, on a temporary SQLite file per test and a set `Clock`. `Google` and `PeopleCounter` are fakes [EDD:493]; only TC-68 loads the real model. The language model client is a fake in all tests.
 - Controllers are thin: tested through the FastAPI test client, written after the code. Tests first only for classes with logic: `QrTokens`, the marking rules of `AttendanceService`, the count gap, `HeadCountService`, `CommentService` and `PollService` (TC-10 to TC-13, TC-21 to TC-26, TC-28 to TC-31, TC-47 to TC-51, TC-55 to TC-62, TC-65, TC-67, TC-68).
 - Test data: `sample_data/` only (`roster.csv`: 102 students and 2 staff rows; `roster_bad.csv`; `roster_duplicates.csv`). No real data (D5, NFR-07).
 - Phone tests are manual, on 2-3 Android phones with the deployed app. The load test (S2) runs on the real mark endpoint on a local server (one uvicorn worker, a SQLite file), not on Railway: the deployed app has no test route and no real test accounts.
@@ -68,7 +68,7 @@ F4-F5 test cases are added when those features are built; until then B11 (srs.md
 TC-08 and TC-09 run in two parts: the window side (state, close, expiry) in step 4; the scan side ("Attendance is closed", `check_scan`) in step 5.
 TC-27 to TC-32 and TC-66 to TC-68 run with S4 (27/11); TC-38 ran in step 5.
 
-## 3. F2-F3 test cases
+## 3. F2-F4 test cases
 
 | TC | FR | UC flow | Type | Expected result |
 |---|---|---|---|---|
@@ -91,8 +91,22 @@ TC-27 to TC-32 and TC-66 to TC-68 run with S4 (27/11); TC-38 ran in step 5.
 | TC-63 | NFR-08, FR-16, FR-18 | UC-06, UC-09 | API | /c, /c/comment and /c/answer need no sign-in; the `anon` cookie is separate from the device cookie; comment and answer rows hold no device or roster id; /class/link shows `BASE_URL/c` |
 | TC-64 | FR-10 | UC-08 precondition | API, manual | Start poll with no session today: "Start class first."; nothing stored |
 | TC-65 | FR-10 | UC-08 s3 (D36) | unit, API | While a poll is open, /polls and /polls/state give only the number of answers: no votes per option, no correct answer |
+| TC-69 | FR-12 | UC-10 s2-s4 | unit | A VTT becomes plain text; a txt is kept as is |
+| TC-70 | FR-12 | UC-10 2a | unit, API | Wrong type, over 2 MB, not UTF-8 or no file: error, no job, nothing stored |
+| TC-71 | FR-12 | UC-10 4c | unit | Empty or damaged transcript: error |
+| TC-72 | FR-12, NFR-11 | UC-10 s3-s5 | unit | The job stores the summary; the model gets the text and the instruction (structure, 600 words, same language) |
+| TC-73 | FR-12 | UC-10 4a | unit, API | Model error: "Failed: upload again.", nothing stored, no message or key in the log |
+| TC-74 | FR-12 | UC-10 s3 | unit | A second upload while a job runs is refused |
+| TC-75 | FR-12 | UC-10 s3 (D25) | unit, API | A running job of an earlier server run is shown as failed |
+| TC-76 | FR-12, FR-17 | UC-10 precondition, s1, s6 | API | Password needed; no session; no key; Processing refresh; the latest session's summary |
+| TC-77 | FR-12 | UC-10 s4 | unit | The model call (model, 4000 tokens, data apart from instructions), token log, refusal or cut-off or empty fails, key stripped |
+| TC-78 | FR-12, FR-17 | UC-10 s7 | API | The download needs the password |
+| TC-79 | FR-12 | UC-10 s7 | API | No session or no summary: 404 "No summary yet." |
+| TC-80 | FR-12, NFR-11 | UC-10 s7 | API | The file is the stored text (Hebrew too), UTF-8, ASCII name with the session date |
+| TC-81 | FR-12 | UC-10 s6-s7 | API | The download button shows only when a summary exists |
+| TC-82 | FR-12 | UC-10 s6 | unit, API | A short line without end punctuation is shown as a title; the text stays escaped |
 
-## 4. B11 coverage: alternative flows of UC-00 to UC-09 (50)
+## 4. B11 coverage: alternative flows of UC-00 to UC-10 (56)
 
 | UC | Flow | TC |
 |---|---|---|
@@ -146,5 +160,11 @@ TC-27 to TC-32 and TC-66 to TC-68 run with S4 (27/11); TC-38 ran in step 5.
 | UC-09 | 3a | TC-61 |
 | UC-09 | 3b | TC-62 |
 | UC-09 | 3c | Could (srs App. C), not built |
+| UC-10 | 2a | TC-70 |
+| UC-10 | 4a | TC-73 (the Retry button is Could, not built) |
+| UC-10 | 4b | Could (srs App. C), not built |
+| UC-10 | 4c | TC-71 |
+| UC-10 | 4d | Could (srs App. C), not built |
+| UC-10 | 6a | Could (srs App. C), not built |
 
-50 of 50 flows of UC-00 to UC-09 are listed: 44 have a TC, 6 are Could (srs App. C), not built (D35). The 23 flows of UC-10 to UC-13 are added when those features are built.
+56 of 56 flows of UC-00 to UC-10 are listed: 47 have a TC, 9 are Could (srs App. C), not built (D35). The 17 flows of UC-11 to UC-13 are added when those features are built.

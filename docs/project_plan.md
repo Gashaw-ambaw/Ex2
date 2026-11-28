@@ -35,7 +35,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | 5 | If Google sign-in fails on phones, what replaces it (SoW: the lecturer takes attendance the regular way; alternative: magic link by email, proposal, not approved) | Spike S1 |
 | 6 | Export format (file, Google Sheets) | Resolved: a file, CSV or XLSX (FR-07); Google Sheets optional |
 | 7 | F2 refresh interval and abuse handling | Resolved: `REFRESH_SEC` and `COMMENT_MIN_INTERVAL_SEC` (FR-08, FR-09) |
-| 8 | F4 and F5 models, Hebrew support | Spikes S5, S6 |
+| 8 | F4 and F5 models, Hebrew support | Resolved for F4: Claude Sonnet 5.5 (D39). F5: spike S6 |
 | 9 | UC-01 1b (new session, for example a tutorial): decided, built 25/11 (D31) | Done; the known limit is in `results.md` |
 | 10 | Google OAuth stays in Testing mode (S1 client): only listed test users can sign in; a whole-class demo meets the cap of about 100 (not verified) | Before the rehearsal and the demo: add the testers' and the lecturer's emails; decide for the demo |
 
@@ -51,7 +51,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | S2 | Time-based QR and up to 100 simultaneous marks | Load check done 26/11, local (`test_log.md`) |
 | S3 | Location (about 50 m) in the real hall, on a class day | On a class day (date not set). Not started |
 | S4 | Head count on class photos against manual counts | Done 27/11 (`test_log.md`, D37) |
-| S5 | F4 summary from a Hebrew transcript | Before F4. Not started |
+| S5 | F4 summary from a Hebrew transcript | Done 28/11 on one real Hebrew transcript (`test_log.md`, D39) |
 | S6 | F5 report on 2-3 repos | Before F5. Not started |
 
 Also: a survey of existing tools for the tools report.
@@ -76,7 +76,7 @@ Also: a survey of existing tools for the tools report.
 | 19-20/11 | SRS draft, human review, SRS closed. SDD, EDD, test plan. | SRS and SDD drafts written; human review not verified; EDD and test plan not started |
 | 24-26/11 | F1 end to end on real phones, S2 load check, rehearsal. | Step 1 done (24/11) |
 | 27/11 | F2, F3. | Built and live-checked 26/11 (`test_log.md`) |
-| 28/11 | F4 thin slice; S4 if F1 is stable. | S4 built 27/11, live check 28/11 (`test_log.md`); F4 not started |
+| 28/11 | F4 thin slice; S4 if F1 is stable. | S4 built 27/11, live check 28/11 (`test_log.md`); F4 built and live-checked 28/11, with the longer summary, the download and the titles (`test_log.md`) |
 | 29/11 | F5 thin slice, tools report, results, README. | Planned |
 | 30/11 | Final check and submission (by 23:59). | Planned |
 

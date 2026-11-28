@@ -1,6 +1,6 @@
 # Ex2 – Web-based Teaching Tool
 
-Status: F1-F3 built and live-checked (26-27/11); photo head count (S4) built (27/11) and live-checked (28/11). Deadline: Monday 30/11/2026, 23:59.
+Status: F1-F4 built and live-checked (26-28/11), including the photo head count; F5 not built yet. Deadline: Monday 30/11/2026, 23:59.
 
 ## What it is
 
@@ -57,7 +57,7 @@ Written in English, in Markdown.
 | [Use cases](docs/use_cases.md) | Draft |
 | [SDD](docs/sdd.md) | Draft |
 | [EDD](docs/edd.md) | Draft |
-| [Test plan](docs/stp.md) | Draft (F1) |
+| [Test plan](docs/stp.md) | Draft (F1-F4) |
 | [Results](docs/results.md) | In progress |
 | [Test log](docs/test_log.md) | In progress |
 | [AI usage](AI_USAGE.md) | In progress |

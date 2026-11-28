@@ -175,6 +175,44 @@ Setup: the deployed app on Railway.
 - Approximate (read from the Railway pages, about 11:55): memory about 425-430 MB after several counts (Metrics graph); one short CPU spike at the time of a count, well under 0.1 vCPU; top bar "24 days or $4.79 left" (Trial); Usage page $0.20 used of $5; the Trial plan section of the Usage page shows a 1 GB RAM limit.
 - NOT VERIFIED: other halls; a photo taken and uploaded from a phone camera; "Counting failed" on the live site (TC-30 only).
 
+## F4 live check (28/11/2026)
+
+Setup: the deployed app on Railway, with the first instruction (at most 200 words, `max_tokens` 2000).
+
+- MEASURED [TC-72] English sample: input 379 tokens, output 234.
+- The wait I saw was 21 s: an upper bound, because the page refreshes every 20 s.
+- Approximate (Console): $0.02 of $5 used so far.
+- [TC-71] An empty VTT shows "The transcript is empty or damaged."
+- Judged by me: the real Hebrew summary was mostly correct and fixed Zoom recognition errors from context; it missed a minor topic (the poll) and added one small inference. Because of this the summary was made longer and structured (D39).
+
+Second check, same day, after the longer and structured instruction (600 words, `max_tokens` 4000):
+
+- `/health` returned ok after the deploy.
+- MEASURED [TC-72] A real Hebrew lecture of 45 minutes: input 4527 tokens, output 1495, stop reason `end_turn` (not cut off).
+- ESTIMATE About 380 words, under the 600 ceiling.
+- Approximate (Console): about $0.02 for this file.
+- Judged by me: the length is very good.
+- The summary has a recap and topics with titles, and now includes the poll topic.
+- The file chooser did not offer a PDF. The server's refusal of a PDF is NOT VERIFIED on the live site (TC-70 only).
+- NOT VERIFIED: a longer lecture (1.5 to 3 hours).
+
+Third check, same day, after the download and the titles:
+
+- [TC-80] The downloaded .txt file was correct (judged by me).
+- [TC-81, TC-82] The titles and the "Download .txt" button next to "Summarize" worked on the live site (judged by me).
+- Judged by me: the second summary added nothing that was not said.
+
+## F4 known limits
+- The download gives only the latest summary of the latest session.
+- Titles are guessed: a short line without end punctuation is shown as a title even if it is not one. Not built: two title levels.
+- 600 words is a ceiling for the whole lecture; minor topics can still be left out.
+- The model can add small inferences; the lecturer checks the text.
+- Needs a Zoom cloud transcript; local recordings have none; Hebrew transcription in Zoom is not verified for our account.
+- The API key expires about 28/12; there is no warning.
+- A "Failed" message stays until the next upload, also in a new session.
+- Not built: recording input; session chooser; chapters, keywords, "related to", date, length; copy button; other formats (PDF, Word, Markdown); download of older summaries or sessions; retry button; delete summary; note for txt without timestamps; fallback model; SUMMARY_MAX_WORDS from an environment variable; escaping a closing transcript tag inside the text.
+- Not verified: whether uploads over 1 MB are spooled to a temporary file.
+
 ## F2-F3 known limits
 
 - A refused Start poll clears the form.

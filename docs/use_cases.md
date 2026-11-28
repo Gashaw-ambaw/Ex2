@@ -273,16 +273,16 @@ flowchart TD
 ## UC-10 Summarize a lecture
 
 **Actor:** Lecturer
-**Preconditions:** The lecturer is signed in. A class session exists. The lecturer has a Zoom transcript (VTT preferred, or txt) or, if none, a recording.
+**Preconditions:** The lecturer is signed in. A class session exists. The lecturer has a Zoom transcript (VTT or txt). A recording as input is not built (srs App. C).
 
 **Main flow**
-1. The lecturer opens the Lecture summary page and chooses the session (the latest by default).
+1. The lecturer opens the Lecture summary page. The system uses the latest session (D40).
 2. The lecturer uploads the file and taps "Summarize".
 3. The system checks the type and size, starts a background job, and shows "Processing". The page refreshes every 20 seconds.
 4. For a transcript the system sends the text to a language model with a fixed format. For a recording it first extracts the audio, splits it, transcribes each part and joins them.
 5. The system stores the summary and deletes the uploaded file.
 6. The lecturer sees the summary: a short summary, chapters with timestamps, keywords, a "related to" line (from this transcript only), the date and the length.
-7. The lecturer copies the text or downloads it as a file.
+7. The lecturer reads the summary on the page and can download it as a .txt file.
 
 **Alternative flows**
 - 2a. Unsupported type or too large: the system shows an error and stores nothing.

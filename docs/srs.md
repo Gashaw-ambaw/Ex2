@@ -63,7 +63,7 @@ Android phone browsers for students (iPhone is not tested and not guaranteed); a
 | Built for the live demo; runs on Railway Trial (D23); no production hosting, uptime or load guarantee | sow.md:22, 33 |
 
 ### 2e Assumptions
-The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One more: a class takes place on its date and is not postponed (D19).
+The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One more: a class takes place on its date and is not postponed (D19). For F4: the lecturer records to the Zoom cloud with "audio transcript" enabled; local recordings have no transcript; Hebrew transcription in Zoom is not verified for our account.
 
 ### 2f Spike dependencies (derived from the Spike column)
 
@@ -105,7 +105,7 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One
 | FR-09 | let the lecturer read the comments of the current or latest session, newest first, refreshed every `REFRESH_SEC` seconds with a manual refresh control and an offline state | F2 | UC-07 (including its alternative flows); D10 | S1 |
 | FR-10 | let the lecturer create a poll (a question, `POLL_OPTIONS_MIN` to `POLL_OPTIONS_MAX` options, an optional correct option), publish it, see the live number of answers (not per option, D36), close it and see the number of votes per option and right/wrong; starting a new poll closes an open one and keeps its results | F3 | UC-08 (including its alternative flows); D11, D36 | |
 | FR-11 | let a student see the active poll and give one anonymous answer per browser (random browser id, not changeable), and see the result after the poll closes | F3 | UC-09 (including its alternative flows); D11 | |
-| FR-12 | let the lecturer upload a transcript (VTT or txt, at most `F4_UPLOAD_MAX_MB`), process it in the background with a status refreshed every `REFRESH_SEC` seconds, produce a short summary of at most `SUMMARY_MAX_WORDS` words (**OPEN**) with a language model, in the language of the transcript, which may be Hebrew (NFR-11), store the summary and delete the uploaded file; a failure shows a failed status | F4 | UC-10 (including its alternative flows); D12; sow.md:18 | S1, S5 |
+| FR-12 | let the lecturer upload a transcript (VTT or txt, at most `F4_UPLOAD_MAX_MB`), process it in the background with a status refreshed every `REFRESH_SEC` seconds, produce a structured summary (a recap, then the main topics) of at most `SUMMARY_MAX_WORDS` words with a language model, in the language of the transcript, which may be Hebrew (NFR-11), store the summary, let the lecturer download it as a text file and delete the uploaded file; a failure shows a failed status | F4 | UC-10 (including its alternative flows); D12; sow.md:18 | S1, S5 |
 | FR-13 | let a student paste a public repo link and get a report: layer 1 (code, no AI) checks file names against the checklist and the links in the README; layer 2 (a model) rates each checklist topic as absent, brief or detailed. The report marks what code checked and what a model rated, falls back to layer 1 when the model fails, and is not stored. It carries 3-5 remarks (**OPEN**, B2) and is written in the language of the README (NFR-11). When the lecturer has run the class review (FR-14), it also shows the class comparison, computed from the stored per-repo ratings; otherwise it shows none | F5 | UC-11 (including its alternative flows); UC-12 (s5, stored results); D13; sow.md:19, 31; README.md:42 | S6 |
 | FR-14 | let the lecturer upload the submissions list (form responses export), read only the repo link column, clean and de-duplicate the links, and confirm. The system then reviews all repos in the background with a status refreshed every `REFRESH_SEC` seconds, applying layers 1 and 2. It stores the per-repo results and class counts (no emails), flags a private or missing repo and continues, shows a table with one row per repo, and deletes the uploaded file | F5 | UC-12 (including its alternative flows); D13 | S1, S6 |
 | FR-15 | let the lecturer edit the review checklist in a text box (one item per line with the word to look for), validate and save it, pre-filled from the Ex1 To Do list and kept until changed | F5 | UC-13 (including its alternative flows); sow.md:19 | |
@@ -128,7 +128,7 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One
 | NFR-07 | keep the lecturer password in an environment variable and real personal data out of the repo; tests use synthetic data | All | Must | D14, D5 | |
 | NFR-08 | store no ID numbers, and no identity with comments and poll answers | F1, F2, F3 | Must | D8, D10, D11 | |
 | NFR-09 | apply one retention rule: everything stored is kept until the end of the semester, then deleted; uploaded files are deleted after processing; the F5 student report is not stored; F5 limit counters reset daily; the checklist and the class location are kept until changed | All | Must | D21 | |
-| NFR-10 | stay under a provider spending limit for model calls in F4 and F5 (`MODEL_SPEND_LIMIT`, **OPEN**) | F4, F5 | Must | D13; sow.md:47 | S5, S6 |
+| NFR-10 | stay under a provider spending limit for model calls in F4 and F5 (`MODEL_SPEND_LIMIT`) | F4, F5 | Must | D13; sow.md:47 | S5, S6 |
 | NFR-11 | show the user interface in English, and write summaries (F4) and reports (F5) in the language of the input (the transcript or the README) | All | Must | D22; use_cases.md (UI texts are in English) | |
 | NFR-12 | run from a clean checkout with the README steps, and the tests run | All | Must | sow.md:20 | |
 
@@ -146,12 +146,12 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One
 | `COMMENT_MIN_INTERVAL_SEC` | 10 | initial value: proposal | use_cases.md:205 | |
 | `REFRESH_SEC` (lecturer pages, F4 and F5 status) | 20 | initial value: proposal | use_cases.md:218, 281, 332 | |
 | `POLL_OPTIONS_MIN`, `POLL_OPTIONS_MAX` | 2 and 4 | decided (D11) | D11 | |
-| `F4_UPLOAD_MAX_MB` | none | **OPEN** | use_cases.md:288 | S5 |
-| `SUMMARY_MAX_WORDS` | none | **OPEN** | sow.md:18 | S5 |
+| `F4_UPLOAD_MAX_MB` | 2 | decided 28/11 | D39; use_cases.md:288 | S5 |
+| `SUMMARY_MAX_WORDS` | 600 | decided 28/11: a ceiling, not a target | D39; sow.md:18 | S5 |
 | `F5_REPORT_INTERVAL_SEC` | 60 | initial value: proposal | use_cases.md:313; D13 | S6 |
 | `F5_DAILY_CAP` | none | **OPEN** | D13; use_cases.md:314 | S6 |
 | `README_MAX_CHARS` | none | **OPEN** | use_cases.md:320 | S6 |
-| `MODEL_SPEND_LIMIT` | none | **OPEN** | D13; sow.md:47 | S5, S6 |
+| `MODEL_SPEND_LIMIT` | 5 USD a month | decided 28/11: Console workspace | D39; D13; sow.md:47 | S5, S6 |
 | `LOGIN_ATTEMPT_LIMIT` | 5 | decided 21/11 | D26; use_cases.md:224 | |
 | `LOAD_SIM_MARKS` | 100 | initial value, decided 22/11 | NFR-05 | S2 |
 | `LOGIN_LOCKOUT_SEC` | 300 | decided 21/11 (name: proposal) | D26 | |
@@ -231,7 +231,7 @@ The Test column is filled in the STP. Several test cases verify each FR. NFR-01 
 | B3 | OPEN / S3: block or flag for location (FR-04). |
 | B4 | Decided (no decision ID; statuses follow D16 and D18): attendance statuses (normal and unverified only; source is a separate field) and the poll refresh (`REFRESH_SEC` with a manual refresh control). `use_cases.md` UC-08 step 3 now says 20 s. |
 | B5 | Decided: a reset only removes the mark. The lecturer can add one by hand. Fixed in `use_cases.md` UC-05 5d. |
-| B6 | OPEN numbers: supported browsers, `F4_UPLOAD_MAX_MB`, `SUMMARY_MAX_WORDS`, `F5_DAILY_CAP`, `README_MAX_CHARS`, `MODEL_SPEND_LIMIT`, `JOB_TIMEOUT_SEC`. |
+| B6 | OPEN numbers: supported browsers, `F5_DAILY_CAP`, `README_MAX_CHARS`, `JOB_TIMEOUT_SEC`. |
 | B7 | HTTPS (NFR-06): basis not verified, check in S1. The 95% and the 3-4 actions are ESTIMATE targets. |
 | B8 | `sow.md:18` accepts a transcript or a short recording. The transcript is in FR-12; the recording is Appendix C. Hebrew is in scope. |
 | B9 | D10 and D11 describe hide, delete and retry as part of the feature. They are optional (Appendix C), as decided. |
@@ -256,7 +256,7 @@ These are not requirements. They are cut first, in the SoW order: F5 first, then
 | UC-07 | s4-5, 4a, 4b, 4c (hide, show, delete, delete all) |
 | UC-08 | 6a (delete a poll) |
 | UC-09 | 3c (retry of an unsent answer) |
-| UC-10 | recording input (s4, 4d, `JOB_TIMEOUT_SEC` OPEN); 4a (retry control); 4b (txt without timestamps); s6 (chapters, keywords, "related to", date, length); s7 (copy or download); 6a (delete the summary) |
+| UC-10 | recording input (s4, 4d, `JOB_TIMEOUT_SEC` OPEN); 4a (retry control); 4b (txt without timestamps); s6 (chapters, keywords, "related to", date, length); s7 (copy button); 6a (delete the summary) |
 | UC-11 | s7 (report download) |
 | UC-12 | s3 (progress); s6 (sort and filter); s7 (export); 4c (stop the run); 6a (delete the overview) |
 | UC-13 | s2 (minimum length); 3a (invalid-line error); 3b (reset to the default list) |

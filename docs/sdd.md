@@ -130,4 +130,4 @@ Details are in `project_plan.md`.
 - S2: QR timing; up to 100 simultaneous marks (database write load).
 - S3: block or flag (FR-04); no structural impact.
 - S4: done (`test_log.md`, D37): an open-source detector on our server (option A); no hosted service.
-- S5, S6: provider, timings, GitHub limits.
+- S5: done for F4 (D39). S6: timings, GitHub limits.
