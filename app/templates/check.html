@@ -1,0 +1,47 @@
+{#- Student Check page (F5), no sign-in: paste a repo link and read the report. -#}
+{% extends "base.html" %}
+{% block title %}Check my repo{% endblock %}
+{% block content %}
+<h1>Check my repo</h1>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+<form method="post" action="/check">
+  <p>Paste the link to your public GitHub repo.</p>
+  <input type="text" name="url" value="{{ url }}" placeholder="https://github.com/owner/repo" required
+         style="width: 100%; box-sizing: border-box; padding: 0.5rem;">
+  <p><button type="submit">Check</button></p>
+</form>
+<p>One report per minute. The report is not saved.</p>
+{% if report %}
+<h2>Report: {{ report.repo }}</h2>
+{% if not report.found %}
+<p class="error">The repo is private or not found.</p>
+{% else %}
+<h3>Checked by code: files</h3>
+<ul>
+{% for item in report.files %}
+  <li>{{ item.topic }} ({{ item.filename }}): {{ item.status }}{% if item.kb is not none %}, {{ "%.1f"|format(item.kb) }} KB{% endif %}, expected {{ "%g"|format(item.min_kb) }}-{{ "%g"|format(item.max_kb) }} KB.
+  {% if item.counts %}Class: {{ item.counts }}.{% endif %}</li>
+{% endfor %}
+</ul>
+{% if not report.files|selectattr("counts")|list %}<p>No class comparison yet.</p>{% endif %}
+<h3>Checked by code: links in the README</h3>
+{% if report.readme == "missing" %}
+<p>No README in the repo root.</p>
+{% elif report.readme == "unreadable" %}
+<p>The README could not be read.</p>
+{% elif not report.links %}
+<p>No links found.</p>
+{% else %}
+<ul style="overflow-wrap: anywhere;">
+{% for item in report.links %}<li>{{ item.link }}: {{ item.result }}</li>{% endfor %}
+</ul>
+{% endif %}
+<h3>Written by a model, may be wrong</h3>
+{% if report.remarks %}
+<ul>{% for remark in report.remarks %}<li dir="auto">{{ remark }}</li>{% endfor %}</ul>
+{% else %}
+<p>Model check not available.</p>
+{% endif %}
+{% endif %}
+{% endif %}
+{% endblock %}

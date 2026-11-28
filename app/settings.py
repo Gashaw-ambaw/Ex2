@@ -45,6 +45,8 @@ class Settings:
     poll_options_min: int = 2
     poll_options_max: int = 4
     f5_report_interval_sec: int = 60
+    f5_daily_cap: int = 50
+    readme_max_chars: int = 20000
     login_attempt_limit: int = 5
     login_lockout_sec: int = 300
     lecturer_session_hours: int = 8

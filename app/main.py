@@ -14,6 +14,7 @@ from app.attendance import AttendanceService, ScanTicket, parse_location
 from app.clock import Clock
 from app.comments import CommentService
 from app.db import Db
+from app.github import GitHubClient
 from app.google import make_oauth
 from app.headcount import HeadCountService
 from app.identity import StudentIdentity
@@ -23,6 +24,7 @@ from app.llm import LlmGateway
 from app.people_counter import PeopleCounter
 from app.polls import PollService
 from app.qr_tokens import QrTokens
+from app.repos import BAD_CSV, CSV_MAX_BYTES, RepoReviewService, links_from_csv
 from app.roster import RosterService
 from app.settings import Settings
 from app.summaries import HINT as TRANSCRIPT_HINT
@@ -31,9 +33,9 @@ from app.summaries import SummaryService, summary_parts
 TEMPLATES = Path(__file__).parent / "templates"
 
 
-def create_app(settings=None, google=None, counter=None, llm=None, spawn=None):
+def create_app(settings=None, google=None, counter=None, llm=None, spawn=None, github=None):
     """Build the app. Run it with: uvicorn app.main:create_app --factory
-    Tests pass fakes (google, counter, llm) and their own spawn for jobs; the real run uses the real ones."""
+    Tests pass fakes (google, counter, llm, github) and their own spawn for jobs; the real run uses the real ones."""
     # Tests pass their own settings; the real run reads the environment.
     settings = settings or Settings.from_env()
     # Create the tables at start (safe to repeat).
@@ -59,7 +61,12 @@ def create_app(settings=None, google=None, counter=None, llm=None, spawn=None):
     # A new random id for each server run (D25).
     app.state.jobs = JobRunner(db, clock, secrets.token_hex(8), spawn)
     app.state.jobs.fail_dead_jobs()
-    app.state.summaries = SummaryService(db, clock, settings, app.state.jobs, llm or LlmGateway(settings))
+    # F4 and F5 share one model gateway.
+    llm = llm or LlmGateway(settings)
+    app.state.summaries = SummaryService(db, clock, settings, app.state.jobs, llm)
+    app.state.repos = RepoReviewService(
+        db, clock, settings, app.state.jobs, llm, github or GitHubClient(settings.github_token)
+    )
     templates = Jinja2Templates(directory=str(TEMPLATES))
 
     # The lecturer session is a signed cookie. max_age is set explicitly (EDD 6).
@@ -535,6 +542,80 @@ def create_app(settings=None, google=None, counter=None, llm=None, spawn=None):
             media_type="text/plain; charset=utf-8",
             headers={"Content-Disposition": f'attachment; filename="summary-{session["date"]}.txt"'},
         )
+
+    # ---- Repo check for students (UC-11). No sign-in (D13). ----
+
+    def check_page(request, anon, status_code=200, url="", error=None, report=None):
+        context = {"url": url, "error": error, "report": report}
+        reply = templates.TemplateResponse(request, "check.html", context, status_code=status_code)
+        return keep_anon(request, reply, anon)
+
+    @app.get("/check")
+    def check_form(request: Request):
+        return check_page(request, anon_id(request))
+
+    # A plain def: FastAPI runs it in a thread, so waiting for GitHub does not stop other requests.
+    @app.post("/check")
+    def check_repo(request: Request, url: str = Form("")):
+        anon = anon_id(request)
+        try:
+            report = app.state.repos.student_report(anon, url)
+        except ValueError as error:
+            return check_page(request, anon, 400, url=url, error=str(error))
+        return check_page(request, anon, url=url, report=report)
+
+    # ---- Lecturer: checklist and class review (UC-12, UC-13). ----
+
+    def repos_page(request, status_code=200, errors=(), saved=False, checklist=None, links=None, invalid=()):
+        overview = app.state.repos.overview()
+        context = {
+            "lecturer": True,
+            "errors": list(errors),
+            "saved": saved,
+            # After an error the box keeps what the lecturer typed.
+            "checklist": app.state.repos.checklist() if checklist is None else checklist,
+            "links": links,
+            "invalid": list(invalid),
+            "overview": overview,
+            "running": overview["job"] is not None and overview["job"]["status"] == "running",
+            "refresh_sec": settings.refresh_sec,
+        }
+        return templates.TemplateResponse(request, "repos.html", context, status_code=status_code)
+
+    @app.get("/repos", dependencies=guard)
+    def repos_home(request: Request, saved: str = ""):
+        return repos_page(request, saved=saved == "1")
+
+    @app.post("/repos/checklist", dependencies=guard)
+    def repos_checklist(request: Request, checklist: str = Form("")):
+        try:
+            app.state.repos.save_checklist(checklist)
+        except ValueError as error:
+            return repos_page(request, 400, errors=[str(error)], checklist=checklist)
+        return RedirectResponse("/repos?saved=1", status_code=303)
+
+    @app.post("/repos/upload", dependencies=guard)
+    def repos_upload(request: Request, file: UploadFile | None = File(None)):
+        if file is None or not file.filename:
+            return repos_page(request, 400, errors=["Choose a CSV file."])
+        if not file.filename.lower().endswith(".csv"):
+            return repos_page(request, 400, errors=[BAD_CSV])
+        # One byte more than the limit is enough to see that the file is too large.
+        data = file.file.read(CSV_MAX_BYTES + 1)
+        try:
+            links, invalid = links_from_csv(data)
+        except ValueError as error:
+            return repos_page(request, 400, errors=[str(error)])
+        # Nothing is stored: the page sends the links back with "Run review".
+        return repos_page(request, links=links, invalid=invalid)
+
+    @app.post("/repos/run", dependencies=guard)
+    def repos_run(request: Request, link: list[str] = Form([])):
+        try:
+            app.state.repos.start_class_review(link)
+        except ValueError as error:
+            return repos_page(request, 400, errors=[str(error)])
+        return RedirectResponse("/repos", status_code=303)
 
     # ---- Review and export (UC-05). The latest session, also from an earlier day. ----
 

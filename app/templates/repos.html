@@ -1,0 +1,74 @@
+{#- Lecturer Repos page (F5): the checklist, the CSV upload, and the class review table. -#}
+{% extends "base.html" %}
+{% block title %}Repos{% endblock %}
+{% block head %}{% if running %}<meta http-equiv="refresh" content="{{ refresh_sec }}">{% endif %}{% endblock %}
+{% block content %}
+<h1>Repo review</h1>
+{% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}
+
+<h2>Checklist</h2>
+{% if saved %}<p class="ok">Saved.</p>{% endif %}
+<p>One item per line: Topic: filename | min-max (size in KB).</p>
+<form method="post" action="/repos/checklist">
+  <textarea name="checklist" rows="8" style="width: 100%; box-sizing: border-box;">{{ checklist }}</textarea>
+  <button type="submit">Save</button>
+</form>
+
+<h2>Class review</h2>
+{% if running %}
+<p>Reviewing: {{ overview.job.progress }} of {{ overview.job.total }}. This page refreshes every {{ refresh_sec }} s.</p>
+{% else %}
+{% if overview.job and overview.job.status == "failed" %}<p class="error">Failed: run again.</p>{% endif %}
+<form method="post" action="/repos/upload" enctype="multipart/form-data">
+  <input type="file" name="file" accept=".csv" required>
+  <button type="submit">Upload list</button>
+</form>
+<p>The CSV file of the form's Google Sheet. Only the repo link column is read. The file is not saved.</p>
+{% endif %}
+
+{% if links is not none %}
+<p>{{ links|length }} link{{ "" if links|length == 1 else "s" }}, {{ invalid|length }} invalid.</p>
+{% if invalid %}
+<p>Invalid (skipped):</p>
+<ul style="overflow-wrap: anywhere;">{% for cell in invalid %}<li>{{ cell }}</li>{% endfor %}</ul>
+{% endif %}
+{% if links and not running %}
+<form method="post" action="/repos/run">
+  {% for link in links %}<input type="hidden" name="link" value="{{ link }}">{% endfor %}
+  <button type="submit">Run review</button>
+</form>
+{% endif %}
+{% endif %}
+
+{% if not overview.job %}
+<p>No class review yet.</p>
+{% elif overview.rows %}
+<div style="overflow-x: auto;">
+<table>
+  <tr>
+    <th>Repo</th>
+    {% for item in overview["items"] %}<th>{{ item.filename }}</th>{% endfor %}
+    <th>Flags</th>
+    <th>Written by a model, may be wrong</th>
+  </tr>
+  {% for row in overview.rows %}
+  <tr{% if row.flags %} class="flagged"{% endif %}>
+    <td><a href="{{ row.url }}" rel="noreferrer">{{ row.repo }}</a></td>
+    {% for status in row.statuses %}<td>{{ status }}</td>{% endfor %}
+    <td>{{ row.flags }}</td>
+    <td style="min-width: 18rem;">
+      {% if row.remarks %}{% for remark in row.remarks %}<div dir="auto">{{ remark }}</div>{% endfor %}
+      {% elif row.accessible %}Model check not available.{% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+  <tr>
+    <th>Class</th>
+    {% for item in overview["items"] %}<td>{{ item.counts or "-" }}</td>{% endfor %}
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+</div>
+{% endif %}
+{% endblock %}

@@ -185,6 +185,13 @@ def test_gateway_call_tc77(settings, caplog):
     assert "secret transcript" not in caplog.text and "Summary." not in caplog.text
 
 
+# TC-95: F5 sends the README in its own tags; without a tag it stays <transcript>.
+def test_gateway_tag_tc95(settings):
+    llm, messages = gateway(settings)
+    llm.complete("Do this.", "readme text", tag="readme")
+    assert messages.asked["messages"] == [{"role": "user", "content": "<readme>\nreadme text\n</readme>"}]
+
+
 @pytest.mark.parametrize("reply", [
     {"stop_reason": "refusal"}, {"stop_reason": "max_tokens"}, {"text": "   "},
 ], ids=["refusal", "cut off", "empty"])

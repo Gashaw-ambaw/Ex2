@@ -50,6 +50,11 @@ class JobRunner:
                 (status, error, self._clock.now_iso(), job_id),
             )
 
+    def progress(self, job_id, done, total):
+        """How far a job is, for example 3 of 10."""
+        with closing(self._db.connect()) as conn, conn:
+            conn.execute("UPDATE jobs SET progress = ?, total = ? WHERE id = ?", (done, total, job_id))
+
     def status(self, job_id):
         return self._one("SELECT * FROM jobs WHERE id = ?", job_id)
 

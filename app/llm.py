@@ -27,7 +27,7 @@ class LlmGateway:
     def configured(self):
         return self._client is not None
 
-    def complete(self, instructions, data_text):
+    def complete(self, instructions, data_text, tag="transcript"):
         """The model's answer as text. LlmError on a refusal, a cut-off or an empty answer."""
         reply = self._client.messages.create(
             model=MODEL,
@@ -35,7 +35,7 @@ class LlmGateway:
             # No thinking, so all of max_tokens is for the answer.
             thinking={"type": "between_tools"},
             system=instructions,
-            messages=[{"role": "user", "content": f"<transcript>\n{data_text}\n</transcript>"}],
+            messages=[{"role": "user", "content": f"<{tag}>\n{data_text}\n</{tag}>"}],
         )
         # Numbers only: for the cost. Never the text or the key.
         logging.getLogger("uvicorn.error").info(

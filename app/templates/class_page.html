@@ -3,6 +3,7 @@
 {% block title %}Class page{% endblock %}
 {% block content %}
 <h1>Class page</h1>
+<form method="get" action="/check"><button type="submit">Check my repo</button></form>
 {% if not session %}
 <p>Class has not started.</p>
 {% else %}
