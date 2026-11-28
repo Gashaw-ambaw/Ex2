@@ -523,6 +523,18 @@ def create_app(settings=None, google=None, counter=None, llm=None, spawn=None):
             return summary_page(request, 400, errors=[str(error)])
         return RedirectResponse("/summary", status_code=303)
 
+    @app.get("/summary/download", dependencies=guard)
+    def download_summary():
+        session = app.state.attendance.latest_session()
+        text = app.state.summaries.summary(session["id"]) if session else None
+        if text is None:
+            return Response("No summary yet.", status_code=404, media_type="text/plain; charset=utf-8")
+        return Response(
+            text.encode("utf-8-sig"),  # With a BOM, so Windows editors read Hebrew.
+            media_type="text/plain; charset=utf-8",
+            headers={"Content-Disposition": f'attachment; filename="summary-{session["date"]}.txt"'},
+        )
+
     # ---- Review and export (UC-05). The latest session, also from an earlier day. ----
 
     def review_page(request, status_code=200, errors=()):

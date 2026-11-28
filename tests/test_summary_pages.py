@@ -170,3 +170,57 @@ def test_restart_tc75(app, lecturer, settings, llm, spawn):
     upload(lecturer)
     again = sign_in(make_app(settings, llm=llm, spawn=spawn))
     assert "Failed: upload again." in again.get("/summary").text
+
+
+# ---- Download as a text file (UC-10 s7). ----
+
+DOWNLOAD = "/summary/download"
+LINK = f'<a href="{DOWNLOAD}">Download .txt</a>'
+HEBREW = "תקציר קצר.\n\nירושה\nמחלקה יורשת פעולות & <שדות>."
+
+
+# TC-78: the download needs the password.
+def test_download_needs_login_tc78(app, lecturer):
+    app.state.attendance.start_class()
+    upload(lecturer)
+    client = TestClient(app, base_url="https://testserver", follow_redirects=False)
+    reply = client.get(DOWNLOAD)
+    assert reply.status_code == 303 and reply.headers["location"] == "/login"
+    assert "A short" not in reply.text
+
+
+# TC-79: no session or no summary: 404 with a short message.
+def test_download_without_summary_tc79(app, lecturer):
+    reply = lecturer.get(DOWNLOAD)
+    assert reply.status_code == 404 and reply.text == "No summary yet."
+    app.state.attendance.start_class()
+    reply = lecturer.get(DOWNLOAD)
+    assert reply.status_code == 404 and reply.text == "No summary yet."
+
+
+# TC-80: the file is the stored text, unchanged, as UTF-8 with an ASCII file name.
+def test_download_content_tc80(app, lecturer, llm):
+    app.state.attendance.start_class()
+    llm.reply = HEBREW
+    upload(lecturer)
+    reply = lecturer.get(DOWNLOAD)
+    assert reply.status_code == 200
+    assert reply.headers["content-type"] == "text/plain; charset=utf-8"
+    assert reply.headers["content-disposition"] == 'attachment; filename="summary-2026-11-28.txt"'
+    assert reply.content.startswith(b"\xef\xbb\xbf")
+    assert reply.content.decode("utf-8-sig") == HEBREW
+
+
+# TC-81: the link shows only when a summary exists.
+def test_download_link_tc81(app, lecturer, spawn):
+    app.state.attendance.start_class()
+    assert LINK not in lecturer.get("/summary").text
+    spawn.hold = True
+    upload(lecturer)
+    assert LINK not in lecturer.get("/summary").text
+
+
+def test_download_link_shown_tc81(app, lecturer):
+    app.state.attendance.start_class()
+    upload(lecturer)
+    assert LINK in lecturer.get("/summary").text
