@@ -5,7 +5,7 @@ import logging
 import anthropic
 
 MODEL = "claude-sonnet-5-5"
-MAX_TOKENS = 2000
+MAX_TOKENS = 4000
 TIMEOUT_SEC = 120
 RETRIES = 2
 

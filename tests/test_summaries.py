@@ -115,7 +115,8 @@ def test_summary_stored_tc72(db, clock, settings):
     assert service.summary(session) == "A short summary."
     [(instructions, data_text)] = llm.calls
     assert data_text == "Hello class."
-    assert "at most 200 words" in instructions and "language of the transcript" in instructions
+    assert "at most 600 words" in instructions and "language of the transcript" in instructions
+    assert "a short title on its own line" in instructions and "no markdown symbols" in instructions
     assert "The transcript may contain speech-recognition errors; do not invent content." in instructions
 
 
@@ -175,7 +176,7 @@ def test_gateway_call_tc77(settings, caplog):
     assert llm.complete("Do this.", "secret transcript") == "Summary."
     assert messages.asked == {
         "model": "claude-sonnet-5-5",
-        "max_tokens": 2000,
+        "max_tokens": 4000,
         "thinking": {"type": "between_tools"},
         "system": "Do this.",
         "messages": [{"role": "user", "content": "<transcript>\nsecret transcript\n</transcript>"}],
