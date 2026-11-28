@@ -11,11 +11,10 @@ Actors: the student (Android phone browser; iPhone not tested, not guaranteed) a
 |---|---|---|---|
 | Google sign-in | C-04 | OAuth / OpenID Connect, through a library | D8; SRS 3.1 |
 | Browser location | C-05 (through C-01) | browser API; the server computes yes/no | D9; FR-04 |
-| LLM API | C-09 only (used by C-10, C-11; by C-06 only in option B) | HTTPS | D12, D13, D17 |
+| LLM API | C-09 only (used by C-10, C-11) | HTTPS | D12, D13, D17 |
 | GitHub, public repos, read-only | C-11 | HTTPS | D13; SRS 3.1 |
-| Head-count service | C-06, only in option B | hosted service or a vision model through C-09; **OPEN until S4** | D2, D17; FR-05 |
 
-In option A (default) the head count runs on our server and is not an external system. The audio extraction and transcription tool is optional (SRS Appendix C).
+The head count runs on our server and is not an external system (D37). The audio extraction and transcription tool is optional (SRS Appendix C).
 
 ```mermaid
 flowchart LR
@@ -38,14 +37,13 @@ flowchart LR
   C04 --> G[Google sign-in]
   C10 --> C09
   C11 --> C09
-  C06 -.->|option B only, S4| C09
   C09 --> LLM[LLM API]
   C11 --> GH[GitHub]
 ```
 
 C-01 calls C-02 to C-11 through their service classes. All components use the database.
 
-Other calls: C-05 uses C-04 (FR-04) and C-03 (FR-06, roster); C-04 uses C-03 (FR-03); C-06 gets the number of marks from C-05 (FR-05); C-10 and C-11 use C-09; C-06 uses C-09 in option B only.
+Other calls: C-05 uses C-04 (FR-04) and C-03 (FR-06, roster); C-04 uses C-03 (FR-03); C-06 gets the number of marks from C-05 (FR-05); C-10 and C-11 use C-09.
 
 ## 2. Principles
 
@@ -70,7 +68,7 @@ Other calls: C-05 uses C-04 (FR-04) and C-03 (FR-06, roster); C-04 uses C-03 (FR
 | C-03 | Roster | load, validate and edit the roster | FR-01, FR-06 (roster edits) | roster entries |
 | C-04 | Student identity | Google sign-in, browser-to-roster link, device flags | FR-03 | device links |
 | C-05 | Attendance | sessions, window, rotating QR, marks, location yes/no, review, export | FR-02, FR-04, FR-06, FR-07 | sessions, attendance rows |
-| C-06 | Head count | count people with an existing tool (option A or B, section 8); gap alert; delete the photo | FR-05 | count and gap |
+| C-06 | Head count | count people with YOLOX through OpenCV on our server (D37); gap alert; delete the photo | FR-05 | count and gap |
 | C-07 | Comments | send, rate limit, list | FR-08, FR-09 | comments |
 | C-08 | Polls | create, answer, close, results | FR-10, FR-11 | polls, answers |
 | C-09 | LLM gateway | all LLM calls; input text is data; output in the input language | FR-20 | none |
@@ -131,5 +129,5 @@ Details are in `project_plan.md`.
 - S1: done (`test_log.md`, D23); Railway Hobby.
 - S2: QR timing; up to 100 simultaneous marks (database write load).
 - S3: block or flag (FR-04); no structural impact.
-- S4: count method. (A) an open-source detector on our server by default; (B) a hosted service only if A is not accurate enough, and only after checking that the provider does not keep the photo or after blurring faces first. Accuracy and library size: not verified, checked in S4.
+- S4: done (`test_log.md`, D37): an open-source detector on our server (option A); no hosted service.
 - S5, S6: provider, timings, GitHub limits.

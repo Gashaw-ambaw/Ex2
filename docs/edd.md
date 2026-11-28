@@ -171,7 +171,7 @@ classDiagram
 ```
 
 - C-06 calls C-05 `count_marks()`. C-05 never calls C-06 [SDD:48, U21]. `review_table()` always lists flagged marks first; it does not need the count.
-- `PeopleCounter` hides the count method. Option A or B stays OPEN until S4 [SDD:134].
+- `PeopleCounter` hides the count method. Built 27/11 (D37): YOLOX-s through OpenCV on the full photo and 3x2 tiles; the model is in `app/models/`.
 - `RegisterResult` carries the roster entry and the events (`new_device`, `relinked`). The controller passes them to `add_flags()`, so C-04 never calls C-05 [P].
 - `new_session(name)` (1b, D31) is refused while a window is open.
 - `WindowState` = open, seconds_left, marks, flags. `class_location()` returns (lat, lon) or None.
@@ -422,6 +422,8 @@ sequenceDiagram
   AC-->>L: CSV file
 ```
 
+Built 27/11 [P]: `POST /class/photo` (Class page, only after Close); success opens `/class/review` with "Marks X, counted Y, gap Z" or "No gap"; a new photo replaces the session's count (D38). The line shows the numbers at the time of the count.
+
 ### 4.5 F4 background job (UC-10)
 
 ```mermaid
@@ -524,5 +526,5 @@ F2-F5 in short: FR-08/09 CommentService, `comments`; FR-10/11 PollService, `poll
 
 - S2: QR timing (`QR_ROTATE_SEC`, `SUBMIT_SEC`, `ATT_WINDOW_SEC`) and up to 100 simultaneous marks on one SQLite file. Local load check done 26/11 (`test_log.md`); QR timing calibration and Railway not verified.
 - S3: block or flag when out of range (FR-04). The "no class location set" rule is a proposal. **Risk:** laptop geolocation can be inaccurate when the lecturer uses "Use my current location" (not verified, test in S3).
-- S4: the `PeopleCounter` implementation. S5, S6: the model provider and the F4 and F5 limits.
+- S5, S6: the model provider and the F4 and F5 limits.
 - Not verified: `segno`, the 120-day cookies, the WhatsApp in-app browser and the 100 test-user cap [S1].

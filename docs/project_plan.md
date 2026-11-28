@@ -1,6 +1,6 @@
 # Project Plan – Ex2
 
-Status: draft (stage 1). Last updated: 26/11/2026. Deadline: Monday 30/11/2026, 23:59.
+Status: draft (stage 1). Last updated: 28/11/2026. Deadline: Monday 30/11/2026, 23:59.
 Closed decisions are in `decisions.md`. Everything below is open or a working assumption.
 Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
@@ -30,7 +30,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 |---|---|---|
 | 1 | Location: block or flag only | Spike S3 in the real hall |
 | 2 | QR rotation and window timing | Initial values set (SRS 3.4): `QR_ROTATE_SEC` 10, `ATT_WINDOW_SEC` 300, `SUBMIT_SEC` 60; calibrate in S2 |
-| 3 | Count method and tolerance | Spike S4 on class photos with manual counts |
+| 3 | Count method and tolerance | Resolved: YOLOX-s with tiling, tolerance 5% (D37) |
 | 4 | Language, framework, hosting | Resolved: Python, FastAPI, SQLite; Railway Hobby, usage limit $10 (D23) |
 | 5 | If Google sign-in fails on phones, what replaces it (SoW: the lecturer takes attendance the regular way; alternative: magic link by email, proposal, not approved) | Spike S1 |
 | 6 | Export format (file, Google Sheets) | Resolved: a file, CSV or XLSX (FR-07); Google Sheets optional |
@@ -50,7 +50,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`test_log.md`): Railway; Hobby plan (D23) |
 | S2 | Time-based QR and up to 100 simultaneous marks | Load check done 26/11, local (`test_log.md`) |
 | S3 | Location (about 50 m) in the real hall, on a class day | On a class day (date not set). Not started |
-| S4 | Head count on class photos against manual counts | Before F1 is finished. Not started |
+| S4 | Head count on class photos against manual counts | Done 27/11 (`test_log.md`, D37) |
 | S5 | F4 summary from a Hebrew transcript | Before F4. Not started |
 | S6 | F5 report on 2-3 repos | Before F5. Not started |
 
@@ -76,7 +76,7 @@ Also: a survey of existing tools for the tools report.
 | 19-20/11 | SRS draft, human review, SRS closed. SDD, EDD, test plan. | SRS and SDD drafts written; human review not verified; EDD and test plan not started |
 | 24-26/11 | F1 end to end on real phones, S2 load check, rehearsal. | Step 1 done (24/11) |
 | 27/11 | F2, F3. | Built and live-checked 26/11 (`test_log.md`) |
-| 28/11 | F4 thin slice; S4 if F1 is stable. | Planned |
+| 28/11 | F4 thin slice; S4 if F1 is stable. | S4 built 27/11, live check 28/11 (`test_log.md`); F4 not started |
 | 29/11 | F5 thin slice, tools report, results, README. | Planned |
 | 30/11 | Final check and submission (by 23:59). | Planned |
 

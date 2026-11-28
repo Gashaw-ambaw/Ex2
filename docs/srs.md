@@ -140,7 +140,7 @@ The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One
 | `QR_ROTATE_SEC` | 10 | initial value, decided 22/11 | D7; use_cases.md:57 | S2 |
 | `SUBMIT_SEC` | 60 | initial value: proposal (changed 21/11) | use_cases.md:102 | S2 |
 | `LOC_RADIUS_M` | 50 | initial value: proposal; measured from the class location set by the lecturer in the app (no env var; value OPEN until S3) | D9, D28 | S3 |
-| `GAP_TOLERANCE_PCT` | 5 | initial value: proposal | D18 | S4 |
+| `GAP_TOLERANCE_PCT` | 5 | kept after spike S4 (D37) | D18, D37 | S4 |
 | `PHOTO_MAX_MB` | 10 | initial value, decided 22/11 | use_cases.md:159 | S4 |
 | `COMMENT_MAX_CHARS` | 300 | initial value: proposal | use_cases.md:204 | |
 | `COMMENT_MIN_INTERVAL_SEC` | 10 | initial value: proposal | use_cases.md:205 | |

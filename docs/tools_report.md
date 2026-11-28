@@ -11,6 +11,7 @@ Status: skeleton (25/11/2026). A tool is a row only after a real test; tools onl
 | Signed Starlette cookies | Lecturer session, scan ticket, device (D26, D27) | [fill: ...] | test_log.md "S1 results"; "F1 live checks" | 120-day lifetime not verified |
 | segno 1.6.6 | QR on the projector page | [fill: ...] | test_log.md "F1 live checks" | Scan from about 3 m not verified |
 | Browser Geolocation API | Class location button (D28) | [fill: ...] | test_log.md "F1 live checks" (laptop only) | Accuracy in the hall (S3) not verified |
+| OpenCV 4.14.0.94 (headless), YOLOX-s from OpenCV Zoo (Apache-2.0) | Head count on the class photo (D37) | supervision, sahi (more dependencies); YOLOX-m (101 MB, not tried) | test_log.md "S4 spike"; "S4 live check" | Laptop: 11 of 11 within 10%, mean error 3.5%; Railway about 365 MB; real photo on the live site not verified |
 | Mermaid | Diagrams in SDD, EDD, use cases | [fill: ...] | [fill: where, date] | Rendered correctly |
 | pytest, FastAPI TestClient | Automated tests (stp.md) | [fill: ...] | Local run [fill: date] | 229 tests pass; phone flows are manual |
 

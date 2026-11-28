@@ -5,8 +5,8 @@ F4-F5 test cases are added when those features are built; until then B11 (srs.md
 
 ## 1. Strategy
 
-- Services (`QrTokens`, `AttendanceService`, `RosterService`, `StudentIdentity`, `HeadCountService`, `CommentService`, `PollService`) are tested through their public methods, on a temporary SQLite file per test and a set `Clock`. `Google` and `PeopleCounter` are fakes [EDD:493].
-- Controllers are thin: tested through the FastAPI test client, written after the code. Tests first only for classes with logic: `QrTokens`, the marking rules of `AttendanceService`, the count gap, `CommentService` and `PollService` (TC-10 to TC-13, TC-21 to TC-26, TC-28, TC-47 to TC-51, TC-55 to TC-62, TC-65).
+- Services (`QrTokens`, `AttendanceService`, `RosterService`, `StudentIdentity`, `HeadCountService`, `CommentService`, `PollService`) are tested through their public methods, on a temporary SQLite file per test and a set `Clock`. `Google` and `PeopleCounter` are fakes [EDD:493]; only TC-68 loads the real model.
+- Controllers are thin: tested through the FastAPI test client, written after the code. Tests first only for classes with logic: `QrTokens`, the marking rules of `AttendanceService`, the count gap, `HeadCountService`, `CommentService` and `PollService` (TC-10 to TC-13, TC-21 to TC-26, TC-28 to TC-31, TC-47 to TC-51, TC-55 to TC-62, TC-65, TC-67, TC-68).
 - Test data: `sample_data/` only (`roster.csv`: 102 students and 2 staff rows; `roster_bad.csv`; `roster_duplicates.csv`). No real data (D5, NFR-07).
 - Phone tests are manual, on 2-3 Android phones with the deployed app. The load test (S2) runs on the real mark endpoint on a local server (one uvicorn worker, a SQLite file), not on Railway: the deployed app has no test route and no real test accounts.
 - Parameter values are those of SRS 3.4: `ATT_WINDOW_SEC` 300, `QR_ROTATE_SEC` 10, `SUBMIT_SEC` 60, `GAP_TOLERANCE_PCT` 5, `PHOTO_MAX_MB` 10, `LOAD_SIM_MARKS` 100.
@@ -61,9 +61,12 @@ F4-F5 test cases are added when those features are built; until then B11 (srs.md
 | TC-44 | NFR-03, NFR-05 | S2 | API (load) | `LOAD_SIM_MARKS` marks at once on the real endpoint: each roster entry is recorded once; the time to finish is noted |
 | TC-45 | FR-02 | UC-01 1b (D31) | API | Open attendance when today's session already has a closed window: "Attendance already closed for this session"; no window is opened |
 | TC-46 | FR-02 | UC-01 1b | API | After a closed or expired window, Start a new session (optional name) creates a second session for today; Open attendance works; the old session keeps its marks |
+| TC-66 | FR-05 | UC-04 precondition | API | No class today: "Start class first"; window never opened or still open: "Close attendance first"; the form shows only after Close; the upload needs the password |
+| TC-67 | FR-05 | UC-04 main (D38) | unit | A second photo of the same session replaces the count |
+| TC-68 | FR-05 | UC-04 s2 | unit | The real model loads from `app/models/` and counts nobody in a black picture |
 
 TC-08 and TC-09 run in two parts: the window side (state, close, expiry) in step 4; the scan side ("Attendance is closed", `check_scan`) in step 5.
-TC-27 to TC-32 run with S4 (28/11); TC-38 ran in step 5.
+TC-27 to TC-32 and TC-66 to TC-68 run with S4 (27/11); TC-38 ran in step 5.
 
 ## 3. F2-F3 test cases
 

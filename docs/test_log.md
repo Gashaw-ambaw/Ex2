@@ -114,6 +114,65 @@ Setup: as in the F2 live check.
 - MEASURED [TC-64] 27/11/2026, before any Start class that day: Start poll returned "Start class first." (status 400); nothing was stored (the Polls page still showed the closed poll of the 26/11 session).
 - NOT VERIFIED: iPhone; many students at once.
 
+## S4 spike (27/11/2026)
+
+Setup: my laptop; OpenCV 4.14.0.94 (headless); YOLOX-s ONNX from OpenCV Zoo (35.9 MB, Apache-2.0); 11 own photos, not committed. Manual counts by me, uncertainty ±1 (p34 ±2). Signed error = model - manual.
+
+- MEASURED First run (downloaded code, RGB, score 0.5), 5 photos: counts 4, 5, 5, 4, 6 for 38, 29, 42, 24, 37; 0 of 5 within 10%; 0.42-0.83 s, about 302 MB.
+- MEASURED Cause: the downloaded post-processing gave the duplicate filter (NMS) corner boxes instead of x, y, width, height; the current OpenCV Zoo file has the fix. Fix alone: counts 10, 10, 7, 7, 10; still 0 of 5.
+- Fallback setup: fix, BGR input (as in the official YOLOX preprocessing), score 0.03.
+- Tiling setup (chosen): fix, BGR, full photo plus 3x2 tiles, overlap 0.2, score 0.2, NMS 0.4. The best of 48 settings on the 5 tuning photos.
+
+Tuning photos (settings chosen on these):
+
+| Photo | Manual | Fallback | Error | % | s | MB | Tiling | Error | % | s | MB |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| p1 | 38 | 33 | -5 | -13.2 | 0.91 | 302 | 38 | 0 | 0 | 3.45 | 312 |
+| p15 | 29 | 32 | +3 | +10.3 | 0.84 | 302 | 29 | 0 | 0 | 3.40 | 312 |
+| p32 | 42 | 39 | -3 | -7.1 | 0.82 | 302 | 46 | +4 | +9.5 | 3.40 | 312 |
+| p3 | 24 | 29 | +5 | +20.8 | 0.73 | 301 | 25 | +1 | +4.2 | 3.39 | 312 |
+| p23 | 37 | 37 | 0 | 0 | 0.69 | 301 | 37 | 0 | 0 | 3.37 | 312 |
+
+Held-out photos (one frozen run):
+
+| Photo | Manual | Fallback | Error | % | s | MB | Tiling | Error | % | s | MB |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| p34 | 46 | 42 | -4 | -8.7 | 0.32 | 302 | 48 | +2 | +4.3 | 1.69 | 312 |
+| p2 | 38 | 35 | -3 | -7.9 | 0.31 | 302 | 40 | +2 | +5.3 | 3.31 | 312 |
+| p11 | 44 | 43 | -1 | -2.3 | 0.32 | 302 | 44 | 0 | 0 | 3.38 | 312 |
+
+Final check (one frozen run):
+
+| Photo | Manual | Fallback | Error | % | s | MB | Tiling | Error | % | s | MB |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| p13 | 29 | 28 | -1 | -3.4 | 0.55 | 301 | 28 | -1 | -3.4 | 1.65 | 312 |
+| p14 | 41 | 43 | +2 | +4.9 | 0.55 | 301 | 45 | +4 | +9.8 | 1.74 | 312 |
+| p21 | 41 | 49 | +8 | +19.5 | 0.52 | 301 | 42 | +1 | +2.4 | 3.41 | 312 |
+
+Times are the median of 3 runs without model loading (0.13-0.41 s more); memory is the peak.
+
+| 11 photos | Fallback | Tiling |
+|---|---|---|
+| Within 10% | 7 of 11 | 11 of 11 |
+| Mean absolute error | 8.9% | 3.5% |
+| Mean signed error | +1.2% (+0.1 people) | +2.9% (+1.2 people) |
+| False alerts at 5% / 10% (computed: marks = manual count) | 4 / 1 | 0 / 0 |
+
+- MEASURED The counter in the app gave the same count as the tiling script on 11 of 11 photos; 3.35-6.81 s per photo.
+- Rejected: `supervision` 0.32.3 and `sahi` 0.14.1 (both MIT) need more libraries (for example matplotlib; supervision also scipy and av; sahi also shapely and the non-headless OpenCV). The tiling is our own code. YOLOX-m was not tried (101 MB).
+- NOT VERIFIED: other halls and larger classes; p14 is borderline (9.8%; 12.5% if the true count is 40); slight over-counting (at 5% up to 6 extra marks could pass unnoticed, computed from p32 and p14).
+
+## S4 live check (28/11/2026)
+
+Setup: the deployed app on Railway.
+
+- MEASURED [TC-66] An upload before Start class and before Close gave an error.
+- MEASURED [TC-29] A file that is not an image gave an error. An 11 MB file was rejected; the upload from the browser took about 41 s.
+- MEASURED [TC-27] A blank image was counted in 1.9 s: "No gap".
+- MEASURED [TC-32] With 1 mark added by hand: "Marks 1, counted 0, gap 1. Check the flagged marks first."
+- MEASURED Railway memory about 365 MB after the first count. Usage: $0.20 of the $5 credit; Trial stays.
+- NOT VERIFIED: a real photo on the live site; an upload from a real phone; "Counting failed" (TC-30 only).
+
 ## F2-F3 known limits
 
 - A refused Start poll clears the form.
@@ -133,3 +192,4 @@ Setup: as in the F2 live check.
 - Adding a mark by hand does not check that the roster entry is active; only the picker leaves out inactive entries. Accepted for now.
 - Hebrew names in the exported CSV were not tested (the file is UTF-8 with BOM).
 - A scan does not keep a private window: the phone camera opens the link in the default browser (seen in the rehearsal, 26/11).
+- The gap line on the review page shows the numbers at the time of the count; it does not update if marks change afterwards (not built: upload the photo again).
