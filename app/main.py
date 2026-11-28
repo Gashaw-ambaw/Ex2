@@ -26,7 +26,7 @@ from app.qr_tokens import QrTokens
 from app.roster import RosterService
 from app.settings import Settings
 from app.summaries import HINT as TRANSCRIPT_HINT
-from app.summaries import SummaryService
+from app.summaries import SummaryService, summary_parts
 
 TEMPLATES = Path(__file__).parent / "templates"
 
@@ -490,6 +490,7 @@ def create_app(settings=None, google=None, counter=None, llm=None, spawn=None):
         summaries = app.state.summaries
         session = app.state.attendance.latest_session()
         job = summaries.latest_job()
+        text = summaries.summary(session["id"]) if session else None
         context = {
             "lecturer": True,
             "errors": list(errors),
@@ -497,7 +498,7 @@ def create_app(settings=None, google=None, counter=None, llm=None, spawn=None):
             "configured": summaries.configured,
             "running": job is not None and job["status"] == "running",
             "failed": job is not None and job["status"] == "failed",
-            "summary": summaries.summary(session["id"]) if session else None,
+            "parts": summary_parts(text) if text else [],
             "refresh_sec": settings.refresh_sec,
         }
         return templates.TemplateResponse(request, "summary.html", context, status_code=status_code)

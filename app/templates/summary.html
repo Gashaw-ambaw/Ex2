@@ -1,7 +1,10 @@
 {#- Lecturer Summary page (F4): upload a transcript, the job status and the latest session's summary. -#}
 {% extends "base.html" %}
 {% block title %}Summary{% endblock %}
-{% block head %}{% if running %}<meta http-equiv="refresh" content="{{ refresh_sec }}">{% endif %}{% endblock %}
+{% block head %}{% if running %}<meta http-equiv="refresh" content="{{ refresh_sec }}">{% endif %}
+<style>
+  h3.topic { font-size: 1.2rem; border-bottom: 2px solid #999; padding-bottom: 0.2rem; margin: 1.2rem 0 0.4rem; }
+</style>{% endblock %}
 {% block content %}
 <h1>Lecture summary</h1>
 {% for error in errors %}<p class="error">{{ error }}</p>{% endfor %}
@@ -15,17 +18,24 @@
 <p>Processing. This page refreshes every {{ refresh_sec }} s.</p>
 {% else %}
 {% if failed %}<p class="error">Failed: upload again.</p>{% endif %}
-<form method="post" action="/summary" enctype="multipart/form-data">
+<form method="post" action="/summary" enctype="multipart/form-data" style="display: inline;">
   <input type="file" name="transcript" accept=".vtt,.txt" required>
   <button type="submit">Summarize</button>
 </form>
+{% endif %}
+{# A GET form only opens the download. It shows next to Summarize when a summary exists. #}
+{% if parts %}<form method="get" action="/summary/download" style="display: inline;"><button type="submit">Download .txt</button></form>{% endif %}
+{% if configured and not running %}
 <p>Upload a VTT or txt transcript. The file is not saved.</p>
 {% endif %}
-{% if summary %}
+{% if parts %}
 <h2>Summary</h2>
 {# dir="auto": Hebrew text reads from the right. #}
-<p dir="auto" style="white-space: pre-wrap;">{{ summary }}</p>
-<p><a href="/summary/download">Download .txt</a></p>
+{% for is_title, text in parts %}
+{% if is_title %}<h3 class="topic" dir="auto">{{ text }}</h3>
+{% else %}<p dir="auto" style="white-space: pre-wrap;">{{ text }}</p>
+{% endif %}
+{% endfor %}
 {% endif %}
 {% endif %}
 {% endblock %}

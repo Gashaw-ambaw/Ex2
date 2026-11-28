@@ -175,7 +175,7 @@ def test_restart_tc75(app, lecturer, settings, llm, spawn):
 # ---- Download as a text file (UC-10 s7). ----
 
 DOWNLOAD = "/summary/download"
-LINK = f'<a href="{DOWNLOAD}">Download .txt</a>'
+BUTTON = f'<form method="get" action="{DOWNLOAD}"'
 HEBREW = "תקציר קצר.\n\nירושה\nמחלקה יורשת פעולות & <שדות>."
 
 
@@ -211,16 +211,25 @@ def test_download_content_tc80(app, lecturer, llm):
     assert reply.content.decode("utf-8-sig") == HEBREW
 
 
-# TC-81: the link shows only when a summary exists.
-def test_download_link_tc81(app, lecturer, spawn):
+# TC-81: the button shows only when a summary exists.
+def test_download_button_tc81(app, lecturer, spawn):
     app.state.attendance.start_class()
-    assert LINK not in lecturer.get("/summary").text
+    assert BUTTON not in lecturer.get("/summary").text
     spawn.hold = True
     upload(lecturer)
-    assert LINK not in lecturer.get("/summary").text
+    assert BUTTON not in lecturer.get("/summary").text
 
 
-def test_download_link_shown_tc81(app, lecturer):
+def test_download_button_shown_tc81(app, lecturer):
     app.state.attendance.start_class()
     upload(lecturer)
-    assert LINK in lecturer.get("/summary").text
+    assert BUTTON in lecturer.get("/summary").text
+
+
+def test_titles_on_the_page_tc82(app, lecturer, llm):
+    app.state.attendance.start_class()
+    llm.reply = "A recap.\n\nTopic <b>one</b>\nThe <i>paragraph</i>."
+    upload(lecturer)
+    page = lecturer.get("/summary").text
+    assert '<h3 class="topic" dir="auto">Topic &lt;b&gt;one&lt;/b&gt;</h3>' in page
+    assert "The &lt;i&gt;paragraph&lt;/i&gt;." in page and "<i>" not in page

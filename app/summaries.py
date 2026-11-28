@@ -9,6 +9,8 @@ HINT = "Upload a VTT or txt transcript."
 BAD_FILE = "The file must be a VTT or txt transcript of at most {} MB."
 EMPTY = "The transcript is empty or damaged."
 RUNNING = "A summary is already running."
+# A line of the summary is shown as a title when it is this short and has no end punctuation.
+TITLE_MAX_CHARS = 80
 INSTRUCTIONS = (
     "Summarize the lecture transcript in the language of the transcript, in at most {} words. "
     "Start with a recap of 2-3 sentences. "
@@ -51,6 +53,27 @@ def _vtt_lines(text):
         elif "-->" in line:
             inside_cue = True
     return "\n".join(spoken)
+
+
+def summary_parts(text):
+    """The summary for the page, as a list of (is_title, text). The stored text is not changed."""
+    parts, body = [], []
+
+    def end_body():
+        block = "\n".join(body).strip()
+        if block:
+            parts.append((False, block))
+        body.clear()
+
+    for line in text.splitlines():
+        title = line.strip()
+        if title and len(title) <= TITLE_MAX_CHARS and not title.endswith((".", "?", "!", ":")):
+            end_body()
+            parts.append((True, title))
+        else:
+            body.append(line)
+    end_body()
+    return parts
 
 
 class SummaryService:

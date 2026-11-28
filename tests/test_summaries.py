@@ -11,7 +11,7 @@ from app.jobs import JobRunner
 from app.llm import LlmError, LlmGateway
 from app.qr_tokens import QrTokens
 from app.settings import Settings
-from app.summaries import SummaryService, transcript_text
+from app.summaries import SummaryService, summary_parts, transcript_text
 
 SAMPLES = Path(__file__).parent.parent / "sample_data"
 BAD_FILE = "The file must be a VTT or txt transcript of at most 2 MB."
@@ -219,3 +219,17 @@ def test_gateway_key_and_limits_tc77(env):
     llm = LlmGateway(Settings.from_env(env))
     assert llm.configured
     assert llm._client.timeout == 120 and llm._client.max_retries == 2
+
+
+# TC-82: a short line without end punctuation is a title; the rest is body text.
+def test_titles_tc82():
+    text = ("Recap sentence one. Sentence two.\n\nתקצור הרצאות\nפסקה ראשונה.\n\n"
+            "Short question?\nA list:\nDone!\n\nTasks\n" + "x" * 81)
+    assert summary_parts(text) == [
+        (False, "Recap sentence one. Sentence two."),
+        (True, "תקצור הרצאות"),
+        (False, "פסקה ראשונה.\n\nShort question?\nA list:\nDone!"),
+        (True, "Tasks"),
+        (False, "x" * 81),
+    ]
+    assert summary_parts("y" * 80) == [(True, "y" * 80)]
