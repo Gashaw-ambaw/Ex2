@@ -89,7 +89,7 @@ Entities and retention follow SRS 3.5 and D21; the owner is the component in sec
 
 ## 6. Deployment
 
-Railway Hobby, an always-on host with SQLite on a Volume, with a usage limit (S1 done, D23).
+Railway Trial, an always-on host with SQLite on a Volume (S1 done, D23).
 
 ```mermaid
 flowchart LR
@@ -126,7 +126,7 @@ Every FR-01 to FR-20 appears in section 3. FR-16 to FR-20 are cross-cutting or s
 ## 8. Open items
 
 Details are in `project_plan.md`.
-- S1: done (`test_log.md`, D23); Railway Hobby.
+- S1: done (`test_log.md`, D23); Railway Trial.
 - S2: QR timing; up to 100 simultaneous marks (database write load).
 - S3: block or flag (FR-04); no structural impact.
 - S4: done (`test_log.md`, D37): an open-source detector on our server (option A); no hosted service.

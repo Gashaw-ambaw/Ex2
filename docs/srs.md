@@ -46,7 +46,7 @@ A web application for in-class teaching. Students use an Android phone browser w
 | Student (F5) | none | D13; UC-11 |
 
 ### 2c Operating environment
-Android phone browsers for students (iPhone is not tested and not guaranteed); any browser for the lecturer, mainly a laptop. The system runs on Railway, an always-on host, Hobby plan with a usage limit (S1 done, D23).
+Android phone browsers for students (iPhone is not tested and not guaranteed); any browser for the lecturer, mainly a laptop. The system runs on Railway, an always-on host, Trial plan while it is enough (S1 done, D23).
 
 ### 2d Constraints (not requirements)
 
@@ -60,7 +60,7 @@ Android phone browsers for students (iPhone is not tested and not guaranteed); a
 | No network (IP) check for presence | D9 |
 | F5 gives no grade; no code-similarity check; others' code is not run | D13 |
 | Prefer existing tools and libraries | D17 |
-| Built for the live demo; runs on Railway Hobby (D23); no production hosting, uptime or load guarantee | sow.md:22, 33 |
+| Built for the live demo; runs on Railway Trial (D23); no production hosting, uptime or load guarantee | sow.md:22, 33 |
 
 ### 2e Assumptions
 The assumptions are in `sow.md` section 6 (line 60) and are not copied here. One more: a class takes place on its date and is not postponed (D19).
@@ -240,7 +240,7 @@ The Test column is filled in the STP. Several test cases verify each FR. NFR-01 
 | B12 | "Device" means a browser (cookie); D16 and UC-09 use both words. |
 | B13 | The F5 comparison with class counts is Must (FR-13), consistent with the assignment text (feature 5: "including comparisons to other students' work"), D13, `sow.md:19`, `sow.md:31` and `README.md:42`. It is limited to counts: the lecturer rejected a rubric (D13), and a similarity check needs a sandbox. |
 | B14 | Decided 18/11, now D22: the user interface is in English; summaries and reports are written in the language of the input (NFR-11). |
-| B15 | Decided 21/11 (D23): the demo runs on Railway, an always-on host (S1 done); Hobby plan with a usage limit (decided 22/11). |
+| B15 | Decided 21/11 (D23): the demo runs on Railway, an always-on host (S1 done); Trial plan while it is enough, else Hobby (changed 28/11; before: Hobby, 22/11). |
 | B16 | Decided 20/11: the lecturer may use any device with a browser; a laptop is the main assumption (2a, 2c). |
 | B17 | Decided 20/11 (said by the lecturer): students use Android phone browsers. iPhone is not tested and not guaranteed (2a, 2c, 3.1, NFR-01). |
 

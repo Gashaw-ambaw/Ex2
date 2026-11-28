@@ -1,6 +1,6 @@
 # Ex2 – Web-based Teaching Tool
 
-Status: F1-F3 built and live-checked (26-27/11); photo head count (S4) built (27/11) and live-checked (28/11) without a real class photo. Deadline: Monday 30/11/2026, 23:59.
+Status: F1-F3 built and live-checked (26-27/11); photo head count (S4) built (27/11) and live-checked (28/11). Deadline: Monday 30/11/2026, 23:59.
 
 ## What it is
 

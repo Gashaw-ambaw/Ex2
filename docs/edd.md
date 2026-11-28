@@ -6,7 +6,7 @@ Tags: [A] assignment, [SRS], [SDD], [UC] `use_cases.md`, [Dn] decision, [U21] my
 ## 1. Scope and stack
 
 - This EDD gives the low-level class and sequence diagrams [A], the schema and the session details that the SDD leaves to it (sdd.md:4). F1 (FR-01 to FR-07) is in depth; F2-F3 are short; F4-F5 are thin [D6].
-- Stack: Python 3.13, FastAPI, uvicorn with one worker, SQLite through plain `sqlite3` (no ORM), Jinja2 pages with a little JS for polling, Authlib for Google sign-in, `segno` for the QR (not verified) [U21, S1]. Host: Railway Hobby with a usage limit [U21, U22].
+- Stack: Python 3.13, FastAPI, uvicorn with one worker, SQLite through plain `sqlite3` (no ORM), Jinja2 pages with a little JS for polling, Authlib for Google sign-in, `segno` for the QR (not verified) [U21, S1]. Host: Railway Trial [U21, D23].
 - One worker is required, because the job boot-id rule and the in-memory login counter depend on it [U21, S1]. Every data-changing action is a POST, and no GET writes to the database [U21, S1].
 - C-01 is five thin controllers with routes only and no logic [U21]. Each other component is one service class with its SQL in private methods [U21]. One `app/` package with one module per component (for example `roster.py`, `attendance.py`); tests in `tests/` [U22].
 - Infrastructure classes (not components) [U21]: `Settings` (env vars and parameters), `Db` (one sqlite3 connection per call; creates the tables), `Clock` (UTC now, Israel time for display; set in tests), `JobRunner` (the S1 job design).

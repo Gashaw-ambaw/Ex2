@@ -31,7 +31,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 | 1 | Location: block or flag only | Spike S3 in the real hall |
 | 2 | QR rotation and window timing | Initial values set (SRS 3.4): `QR_ROTATE_SEC` 10, `ATT_WINDOW_SEC` 300, `SUBMIT_SEC` 60; calibrate in S2 |
 | 3 | Count method and tolerance | Resolved: YOLOX-s with tiling, tolerance 5% (D37) |
-| 4 | Language, framework, hosting | Resolved: Python, FastAPI, SQLite; Railway Hobby, usage limit $10 (D23) |
+| 4 | Language, framework, hosting | Resolved: Python, FastAPI, SQLite; Railway Trial while it is enough, else Hobby (D23) |
 | 5 | If Google sign-in fails on phones, what replaces it (SoW: the lecturer takes attendance the regular way; alternative: magic link by email, proposal, not approved) | Spike S1 |
 | 6 | Export format (file, Google Sheets) | Resolved: a file, CSV or XLSX (FR-07); Google Sheets optional |
 | 7 | F2 refresh interval and abuse handling | Resolved: `REFRESH_SEC` and `COMMENT_MIN_INTERVAL_SEC` (FR-08, FR-09) |
@@ -47,7 +47,7 @@ Read first: `decisions.md`, `use_cases.md`, `sow.md`.
 
 | # | Goal | When / status |
 |---|---|---|
-| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`test_log.md`): Railway; Hobby plan (D23) |
+| S1 | Hosting with HTTPS on Android phones, cookies, Google sign-in in the WhatsApp in-app browser, test-user cap (about 100 vs roster about 102); hosting model (serverless or a small always-on server), long jobs (ffmpeg), SQLite persistence, fixed redirect URL | Done 21/11 (`test_log.md`): Railway; Trial plan (D23) |
 | S2 | Time-based QR and up to 100 simultaneous marks | Load check done 26/11, local (`test_log.md`) |
 | S3 | Location (about 50 m) in the real hall, on a class day | On a class day (date not set). Not started |
 | S4 | Head count on class photos against manual counts | Done 27/11 (`test_log.md`, D37) |

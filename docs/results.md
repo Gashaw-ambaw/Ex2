@@ -5,13 +5,13 @@ MEASURED = seen in a real run; NOT VERIFIED = not checked. Every check with its 
 
 ## Conclusion
 
-Attendance (F1), comments (F2) and polls (F3) work end to end on real Android devices (phones and a tablet) with the deployed app. The class photo count (S4) is built: on my laptop 11 of 11 test photos were within 10% of my count; on the deployed app it was checked with a blank image, not yet with a real class photo. F4-F5: [fill on 29/11].
+Attendance (F1), comments (F2) and polls (F3) work end to end on real Android devices (phones and a tablet) with the deployed app. The class photo count (S4) is built: on my laptop 11 of 11 test photos were within 10% of my count; on the deployed app one of these photos gave the same count as on the laptop. F4-F5: [fill on 29/11].
 
 ## Against the SOW
 
 | Deliverable (`sow.md` section 2) | Status | Evidence |
 |---|---|---|
-| F1 Attendance | Met, with limits: a real class photo was not checked on the live site; location gives a flag, not a block; the hall was not tested (S3). | `test_log.md`: F1 live checks, F1 rehearsal (TC-43), S2 load check (TC-44), S4 spike, S4 live check |
+| F1 Attendance | Met, with limits: location gives a flag, not a block; the hall was not tested (S3), also for the head count. | `test_log.md`: F1 live checks, F1 rehearsal (TC-43), S2 load check (TC-44), S4 spike, S4 live check |
 | F2 Comments, F3 Polls | Met | `test_log.md`: F2 live check, F3 live check |
 | F4 Lecture summary (thin) | [fill on 29/11] | |
 | F5 Repo report (thin) | [fill on 29/11] | |
@@ -25,13 +25,14 @@ Attendance (F1), comments (F2) and polls (F3) work end to end on real Android de
 - MEASURED [TC-43, NFR-02] Rehearsal, second scan: about 10 s from scan to "Marked at" (rough, by hand).
 - MEASURED [TC-43, NFR-04] Lecturer actions per class, counting Review: 4 without the photo, as rehearsed. With the photo it is 5 (counted, not rehearsed), above the 3-4 target; kept for now.
 - MEASURED (S4 spike, laptop, 11 photos) Head count with tiling: all within 10%, mean absolute error 3.5% (without tiling: 7 of 11, 8.9%). The settings were chosen on 5 of these photos.
-- MEASURED [TC-27, TC-32] Deployed app: a blank image gave "No gap" in 1.9 s; with 1 hand mark "gap 1"; memory about 365 MB after the first count.
+- MEASURED [TC-27] Deployed app: a real photo (24 people, 30 hand marks) gave "counted 25, gap 5".
+- Approximate (read from the Railway pages, 28/11): memory about 430 MB after several counts, under the 500 MB limit of the spike and the 1 GB RAM limit of the Trial plan.
 - MEASURED [TC-25, TC-17] A phone that had already marked another student was blocked; a tester not on the roster got "Contact the lecturer".
 - MEASURED [TC-65, TC-59] While a poll was open the lecturer page showed only the number of answers; after Close the phones showed Correct or Wrong.
 
 ## Not tested
 
-NOT VERIFIED: a real class photo on the live site; a photo upload from a phone; "Counting failed" on the live site (TC-30 only); other halls and larger classes; iPhone; the WhatsApp in-app browser; location in the real hall (S3); the deployed app under load and on campus Wi-Fi; NFR-03 (95% of students marked within the window); the 100 test-user cap and the Google publishing status; the 120-day cookie; Hebrew names in the exported CSV.
+NOT VERIFIED: other halls and larger classes; a photo upload from a phone camera; "Counting failed" on the live site (TC-30 only); iPhone; the WhatsApp in-app browser; location in the real hall (S3); the deployed app under load and on campus Wi-Fi; NFR-03 (95% of students marked within the window); the 100 test-user cap and the Google publishing status; the 120-day cookie; Hebrew names in the exported CSV.
 
 ## Lessons learned
 
@@ -54,4 +55,4 @@ Full lists in `test_log.md`: "F1 known limits" and "F2-F3 known limits".
 
 ## Future
 
-S3 (location in the hall); a real class photo and the head count in the real hall; fewer lecturer actions; F4-F5 beyond the thin slice; the optional flows (D35); iPhone and WhatsApp tests; a load check on the deployed app. [fill on 29/11]
+S3 (location in the hall); the head count in the real hall; fewer lecturer actions; F4-F5 beyond the thin slice; the optional flows (D35); iPhone and WhatsApp tests; a load check on the deployed app. [fill on 29/11]

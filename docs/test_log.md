@@ -37,7 +37,7 @@ Source: my test runs. Screenshots for steps 1-6a, my report for the rest.
 
 ### Open (my decision)
 
-- Closed 26/11: Railway Trial kept for submission and demo; recorded in decisions.md in the D23 task (pending).
+- Closed 26/11: Railway Trial kept for submission and demo; recorded in decisions.md (D23).
 
 ## F1 live checks (25/11/2026)
 
@@ -170,8 +170,10 @@ Setup: the deployed app on Railway.
 - MEASURED [TC-29] A file that is not an image gave an error. An 11 MB file was rejected; the upload from the browser took about 41 s.
 - MEASURED [TC-27] A blank image was counted in 1.9 s: "No gap".
 - MEASURED [TC-32] With 1 mark added by hand: "Marks 1, counted 0, gap 1. Check the flagged marks first."
-- MEASURED Railway memory about 365 MB after the first count. Usage: $0.20 of the $5 credit; Trial stays.
-- NOT VERIFIED: a real photo on the live site; an upload from a real phone; "Counting failed" (TC-30 only).
+- Approximate (read from the Railway graph): memory about 365 MB after the first count. Usage: $0.20 of the $5 credit; Trial stays.
+- MEASURED [TC-27] A real photo (p3, my count 24 ±1; one of the tuning photos) with 30 hand marks of test roster students: "Marks 30, counted 25, gap 5. Check the flagged marks first." Same count as the spike. Time: under 1 s by my eye, not a measurement.
+- Approximate (read from the Railway pages, about 11:55): memory about 425-430 MB after several counts (Metrics graph); one short CPU spike at the time of a count, well under 0.1 vCPU; top bar "24 days or $4.79 left" (Trial); Usage page $0.20 used of $5; the Trial plan section of the Usage page shows a 1 GB RAM limit.
+- NOT VERIFIED: other halls; a photo taken and uploaded from a phone camera; "Counting failed" on the live site (TC-30 only).
 
 ## F2-F3 known limits
 
