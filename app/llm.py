@@ -17,8 +17,10 @@ class LlmError(Exception):
 class LlmGateway:
     def __init__(self, settings, client=None):
         # Tests pass a fake client. Without a key there is no client.
-        if client is None and settings.llm_api_key:
-            client = anthropic.Anthropic(api_key=settings.llm_api_key, timeout=TIMEOUT_SEC, max_retries=RETRIES)
+        # strip(): a pasted newline makes an invalid HTTP header.
+        key = (settings.llm_api_key or "").strip()
+        if client is None and key:
+            client = anthropic.Anthropic(api_key=key, timeout=TIMEOUT_SEC, max_retries=RETRIES)
         self._client = client
 
     @property

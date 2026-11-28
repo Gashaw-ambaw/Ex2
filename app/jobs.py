@@ -41,8 +41,9 @@ class JobRunner:
         try:
             work()
         except Exception as failure:
-            logging.getLogger("uvicorn.error").exception("Job %d failed", job_id)
             status, error = "failed", type(failure).__name__
+            # The class name only: the message or traceback of an HTTP error can hold the API key.
+            logging.getLogger("uvicorn.error").error("Job %d failed: %s", job_id, error)
         with closing(self._db.connect()) as conn, conn:
             conn.execute(
                 "UPDATE jobs SET status = ?, error = ?, finished_at = ? WHERE id = ? AND status = 'running'",

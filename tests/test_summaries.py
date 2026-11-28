@@ -193,6 +193,25 @@ def test_gateway_failure_tc77(settings, reply):
         llm.complete("Do this.", "text")
 
 
+def test_key_with_newline_tc77(env):
+    env["LLM_API_KEY"] = " dummy-key\n"
+    assert LlmGateway(Settings.from_env(env))._client.api_key == "dummy-key"
+
+
+# TC-73: a failed call logs the error class and the job id, never the message (it can hold the key).
+def test_failed_call_does_not_log_the_key_tc73(db, clock, settings, caplog):
+    def create(**asked):
+        raise RuntimeError("Illegal header value b'dummy-secret-key'")
+
+    caplog.set_level(logging.DEBUG)
+    llm = LlmGateway(settings, client=SimpleNamespace(messages=SimpleNamespace(create=create)))
+    service, session = make_service(db, clock, settings, llm)
+    job = service.job_status(service.start(session, "a.vtt", VTT))
+    assert job["status"] == "failed" and job["error"] == "RuntimeError"
+    assert f"Job {job['id']} failed: RuntimeError" in caplog.text
+    assert "dummy-secret-key" not in caplog.text and "Traceback" not in caplog.text
+
+
 def test_gateway_key_and_limits_tc77(env):
     assert not LlmGateway(Settings.from_env(env)).configured
     env["LLM_API_KEY"] = "dummy-key"
